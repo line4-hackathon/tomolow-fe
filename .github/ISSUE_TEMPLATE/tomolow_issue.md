@@ -1,7 +1,7 @@
 ---
 name: Tomolow_ISSUE
 about: Tomolow 이슈 템플릿
-title: "[TAG] Issue Message"
+title: "[Tag] Issue Message"
 labels: ''
 assignees: ''
 
