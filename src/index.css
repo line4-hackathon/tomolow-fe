@@ -1,8 +1,64 @@
 @font-face {
-  /*폰트 설정*/
-  font-family: 'Inter';
-  src: url('@/assets/font/InterVariable.woff2') format('woff2-variations');
-  font-weight: 100 900;
+  font-family: 'Interop';
+  font-weight: 100;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Thin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 200;
+  font-style: normal;
+  src: url('@/assets/font/Interop-ExtraLight.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 300;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Light.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 400;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 500;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Medium.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 600;
+  font-style: normal;
+  src: url('@/assets/font/Interop-SemiBold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 700;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Bold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 800;
+  font-style: normal;
+  src: url('@/assets/font/Interop-ExtraBold.woff2') format('woff2');
   font-display: swap;
 }
 
@@ -17,7 +73,7 @@
   margin: 0;
   padding: 0;
   font-family:
-    'Inter',
+    'Interop',
     system-ui,
     -apple-system,
     sans-serif;
@@ -29,6 +85,7 @@ html {
   justify-content: center;
   align-items: center;
   scroll-behavior: smooth;
+  overflow: hidden;
 }
 
 body {
