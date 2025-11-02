@@ -1,68 +1,96 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+@font-face {
+  font-family: 'Interop';
+  font-weight: 100;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Thin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 200;
+  font-style: normal;
+  src: url('@/assets/font/Interop-ExtraLight.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 300;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Light.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Regular.woff2') format('woff2');
+  font-display: swap;
 }
 
-a {
+@font-face {
+  font-family: 'Interop';
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Medium.woff2') format('woff2');
+  font-display: swap;
 }
-a:hover {
-  color: #535bf2;
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 600;
+  font-style: normal;
+  src: url('@/assets/font/Interop-SemiBold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 700;
+  font-style: normal;
+  src: url('@/assets/font/Interop-Bold.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interop';
+  font-weight: 800;
+  font-style: normal;
+  src: url('@/assets/font/Interop-ExtraBold.woff2') format('woff2');
+  font-display: swap;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100dvh;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family:
+    'Interop',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+html {
+  background-color: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  scroll-behavior: smooth;
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 375px;
+  overflow-x: hidden;
 }
