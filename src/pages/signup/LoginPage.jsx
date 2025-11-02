@@ -6,7 +6,7 @@ import Slogan from '@/components/signup/Slogan'
 import Logo from '@/assets/images/logo-login.svg'
 import InputField from '@/components/signup/InputField'
 import LargeButton from '@/components/signup/LargeButton'
-import Toast from '@/components/signup/Toast'
+import ToastMessage from '@/components/signup/ToastMessage'
 
 const LoginPage = () => {
   const [id, setId] = useState('')
@@ -61,7 +61,7 @@ const LoginPage = () => {
           </S.LoginButton>
         </S.FormContainer>
 
-        {toastMessage && <Toast msg={toastMessage} onClose={() => setToastMessage('')} />}
+        {toastMessage && <ToastMessage msg={toastMessage} onClose={() => setToastMessage('')} />}
       </S.Container>
     </>
   )
