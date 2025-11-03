@@ -1,20 +1,22 @@
-import styled from "styled-components";
-import useSelect from "@/hooks/select";
+import styled from 'styled-components'
+import useSelect from '@/hooks/select'
 
-import StockCard from "@/components/invest/stockCard";
-import SearchBar from "@/components/common/searchBar";
-import { menuTypes } from "./selectType";
-import NothingIcon from "@/assets/images/nothingIcon.svg?react";
+import StockCard from '@/components/invest/stockCard'
+import SearchBar from '@/components/common/searchBar'
+import { menuTypes } from './selectType'
+import NothingIcon from '@/assets/icons/icon-search-not.svg?react'
+import Header from '@/components/common/Header'
 
 export default function InvestSearchPage() {
-  const {selectedMenu,handleSelect}=useSelect("TRADING_AMOUNT");
-  const isStock=1;
+  const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
+  const isStock = 0;
+  const isInteres=0;
 
   return (
     <Page>
-      <Header>투자</Header>
-      <SearchBar />
+      <Header title='투자' />
       <Contents>
+        <SearchBar explain='주식명 혹은 주식코드를 입력하세요' />
         <ListBox>
           {Object.keys(menuTypes).map((key) => (
             <List
@@ -27,74 +29,44 @@ export default function InvestSearchPage() {
             </List>
           ))}
         </ListBox>
-        {isStock ? 
-        <StockCardBox>
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={false} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-          <Line />
-          <StockCard interest={true} />
-        </StockCardBox>:
-        <Nothing>
-          <NothingIcon />
-          <p>검색된 주식이 없어요</p>
-        </Nothing>}
+        {isStock ? (
+          <StockCardBox>
+            <StockCard interest={true} />
+            <Line />
+            <StockCard interest={false} />
+            <Line />
+            <StockCard interest={true} />
+            <Line />
+            <StockCard interest={true} />
+          </StockCardBox>
+        ) : (
+          <Nothing>
+            <NothingIcon />
+            <p>검색된 주식이 없어요</p>
+          </Nothing>
+        )}
       </Contents>
     </Page>
-  );
+  )
 }
 
-const Page = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-`;
-const Header = styled.header`
-  display: flex;
-  width: 375px;
-  height: 64px;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  border-bottom: 0.5px solid var(--Neutral-100, #e7e7e7);
-  background: var(--Neutral-0, #fff);
-
-  color: var(--Neutral-900, #333);
-  text-align: center;
-
-  /* Head-Medium */
-  font-family: Inter;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 28px; /* 140% */
-`;
+const Page = styled.div``
 const Contents = styled.div`
   display: flex;
   flex-direction: column;
   height: 600px;
   gap: 12px;
-`;
+  align-items: center;
+  margin-top: 32px;
+  gap: 32px;
+`
 const ListBox = styled.div`
   display: flex;
   flex-direction: row;
   gap: 24px;
-`;
+`
 const List = styled.div`
-  color: ${({ $isMenu }) => ($isMenu ? "#2B5276" : "#B0B0B0")};
+  color: ${({ $isMenu }) => ($isMenu ? '#2B5276' : '#B0B0B0')};
   text-align: center;
 
   /* Body-Medium */
@@ -103,12 +75,12 @@ const List = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: 24px; /* 150% */
-  border-bottom: ${({ $isMenu }) => ($isMenu ? "1px solid #2B5276" : "")};
+  border-bottom: ${({ $isMenu }) => ($isMenu ? '1px solid #2B5276' : '')};
   padding-bottom: var(--Spacing-S, 8px);
   &:hover {
     cursor: pointer;
   }
-`;
+`
 const StockCardBox = styled.div`
   height: 500px;
   display: flex;
@@ -117,14 +89,14 @@ const StockCardBox = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
-`;
+`
 
 const Line = styled.div`
   width: 100%;
   height: 1px;
   background: var(--Neutral-200, #d1d1d1);
   flex-shrink: 0;
-`;
+`
 const Nothing = styled.div`
   display: flex;
   flex-direction: column;
@@ -141,4 +113,4 @@ const Nothing = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 24px; /* 150% */
-`;
+`

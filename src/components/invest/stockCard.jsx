@@ -1,14 +1,17 @@
 import styled from "styled-components";
 
-import RedHeart from "@/assets/images/isInterest.svg?react";
-import GrayHeart from "@/assets/images/notInterest.svg?react";
+import RedHeart from "@/assets/icons/icon-heart-red.svg?react";
+import GrayHeart from "@/assets/icons/icon-heart-gray.svg?react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function StockCard({ interest }) {
   const [isInterest, setIsInterest] = useState(interest);
 
+  const navigate=useNavigate();
+
   return (
-    <Card>
+    <Card onClick={()=>navigate("/invest/trading")}>
       <Logo />
       <TextBox>
         <Name>삼성전자</Name>
@@ -30,7 +33,10 @@ const Card = styled.div`
   justify-content: center;
   gap: var(--Spacing-XL, 24px);
   align-self: stretch;
-  width: 100%;
+  width: 320px;
+  &:hover{
+    cursor: pointer;
+  }
 `;
 const Logo = styled.div`
   display: flex;

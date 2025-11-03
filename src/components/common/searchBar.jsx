@@ -1,15 +1,15 @@
 import styled from 'styled-components'
-import Icon from '@/assets/images/SearchIcon.svg?react'
+import Icon from '@/assets/icons/icon-search.svg?react';
 import { useState } from 'react'
 
-export default function SearchBar() {
+export default function SearchBar({explain}) {
   const [searchName, setSearchName] = useState()
   return (
     <Bar>
       <Icon />
       <Input
         type='text'
-        placeholder='주식명 혹은 주식코드를 입력하세요'
+        placeholder={explain}
         value={searchName}
         onChange={(e) => setSearchName(e.target.value)}
       />
