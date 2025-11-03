@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { EtcTypes } from "@/pages/invest/selectType";
 import useSelect from "@/hooks/select";
+import EtcMyorder from "./EtcMyorder";
 
 export default function Etc() {
   const { selectedMenu, handleSelect } = useSelect("ORDER");
@@ -18,6 +19,7 @@ export default function Etc() {
           </Menu>
         ))}
       </MenuBox>
+      <EtcMyorder/>
     </Box>
   );
 }
@@ -26,26 +28,28 @@ const Box = styled.div`
   flex-direction: column;
   background: var(--Neutral-50, #f6f6f6);
   display: flex;
-  height: 308px;
   width: 100%;
   padding-top: var(--Spacing-L, 16px);
-  align-items: flex-start;
   gap: var(--Spacing-2XL, 32px);
   flex-shrink: 0;
   align-self: stretch;
+  align-items: center;
 `;
 const MenuBox = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 24px;
+  padding-left: 16px;
+  width: 343px;
 `;
 const Menu = styled.div`
   display: flex;
   padding-bottom: var(--Spacing-S, 8px);
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid var(--Clicked-P_600, #2b5276);
+  border-bottom:${({$isSelected})=> $isSelected? "1px solid var(--Clicked-P_600, #2b5276)":""};
+  background: var(--Neutral-50, #f6f6f6);
 
-  color: var(--Clicked-P_600, #2b5276);
+  color: ${({$isSelected})=> $isSelected? "#2b5276":"#B0B0B0"};
   text-align: center;
 
   /* Body-Medium */
@@ -54,5 +58,8 @@ const Menu = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: 24px; /* 150% */
+
+  &:hover{
+    cursor: pointer;
+  }
 `;
-const MenuInfo = styled.div``;

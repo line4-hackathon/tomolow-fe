@@ -33,6 +33,8 @@ const DateBar = styled.div`
   display: flex;
   gap: 15px;
   align-items: center;
+  padding-left: 20px;
+  margin-bottom: 15px;
 `;
 const Term = styled.div`
   display: flex;
