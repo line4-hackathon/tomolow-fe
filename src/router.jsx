@@ -32,7 +32,7 @@ const router = createBrowserRouter([
   {
     path: '/group',
     element: <App />,
-    children: [{ path: '/list', element: <GroupListPage /> }],
+    children: [{ path: 'list', element: <GroupListPage /> }],
   },
 ])
 
