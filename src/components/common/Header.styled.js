@@ -8,7 +8,9 @@ export const HeaderBar = styled.header`
   border-bottom: 0.5px solid var(--Neutral-100, #e7e7e7);
 `
 
-export const Icon = styled.img``
+export const Icon = styled.img`
+  cursor: pointer;
+`
 
 export const Title = styled.p`
   font-weight: 500;
