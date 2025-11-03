@@ -14,6 +14,7 @@ export const Background = styled.div`
 export const ModalContainer = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 252px;
   padding: 24px 16px;
   gap: 24px;
   border-radius: var(--Radius-M, 12px);
@@ -27,6 +28,7 @@ export const Title = styled.p`
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
+  white-space: pre-line;
 `
 
 export const Text = styled.p`
@@ -35,6 +37,7 @@ export const Text = styled.p`
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
+  white-space: pre-line;
 `
 
 export const Input = styled.input`

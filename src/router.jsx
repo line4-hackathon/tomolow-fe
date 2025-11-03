@@ -9,7 +9,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { path: 'login', element: <LoginPage /> },
-      { path: 'group', element: <GroupListPage /> },
+      { path: 'group/list', element: <GroupListPage /> },
     ],
   },
 ])
