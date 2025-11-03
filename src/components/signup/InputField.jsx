@@ -1,21 +1,29 @@
+import React from 'react'
 import styled from 'styled-components'
 
-export const FormContainer = styled.div`
+function InputField({ label, type = 'text', placeholder, value, onChange }) {
+  return (
+    <Field>
+      <Label>{label}</Label>
+      <Input type={type} placeholder={placeholder} value={value} onChange={onChange} />
+    </Field>
+  )
+}
+
+export default InputField
+
+export const Field = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 1;
-  height: 100%;
   width: 100%;
-  gap: 24px;
 `
-
-export const Field = styled.div``
 
 export const Label = styled.p`
   color: var(--Neutral-900, #333);
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
+  padding-bottom: 4px;
 `
 
 export const Input = styled.input`
@@ -35,19 +43,4 @@ export const Input = styled.input`
   &:focus {
     border-bottom: 1px solid var(--Primary-500, #4880af);
   }
-`
-
-export const SignupButton = styled.button`
-  width: fit-content;
-  margin: 0 auto;
-  border: none;
-  background-color: #ffffff;
-  color: var(--Neutral-300, #b0b0b0);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  cursor: pointer;
-`
-export const LoginButton = styled.div`
-  margin-top: auto;
 `

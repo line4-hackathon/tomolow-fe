@@ -21,16 +21,12 @@ const Button = styled.button`
   align-self: stretch;
   cursor: pointer;
   border-radius: 12px;
-
   font-size: 16px;
-  font-style: normal;
   font-weight: 500;
   line-height: 24px;
-
   color: ${({ color }) => color || '#fff'};
   background-color: ${({ backgroundcolor }) => backgroundcolor || '#4880af'};
   border: none;
-
   transition: background-color 0.2s ease;
 
   &:hover {
