@@ -11,9 +11,9 @@ export default function StockCard({ interest }) {
   const navigate=useNavigate();
 
   return (
-    <Card onClick={()=>navigate("/invest/trading")}>
-      <Logo />
-      <TextBox>
+    <Card>
+      <Logo onClick={()=>navigate("/invest/trading")}/>
+      <TextBox onClick={()=>navigate("/invest/trading")}>
         <Name>삼성전자</Name>
         <Detail>
           <Number>005930</Number>
