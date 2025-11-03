@@ -5,7 +5,6 @@ const Slogan = () => {
   return (
     <TextContainer>
       <BigText>{`투자는 모의로\n리스크는 로우로!`}</BigText>
-
       <SmallText>자산의 내일을 책임질 TomoLow입니다.</SmallText>
     </TextContainer>
   )
