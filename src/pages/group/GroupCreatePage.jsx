@@ -24,7 +24,7 @@ const GroupCreatePage = () => {
   const [durationTouched, setDurationTouched] = useState(false)
 
   // 각 필드 유효성 검사
-  const isGroupNameValid = groupName.trim().length > 0
+  const isGroupNameValid = groupName.length > 0 && groupName.length <= 15
   const isMoneyValid = Number(money) >= 10000 && Number(money) <= 100000000
   const isMemberValid =
     Number.isInteger(Number(memberCount)) && Number(memberCount) >= 2 && Number(memberCount) <= 4
@@ -61,7 +61,7 @@ const GroupCreatePage = () => {
               onChange={(e) => setGroupName(e.target.value)}
               onBlur={() => setGroupNameTouched(true)}
             />
-            <StatusMessage status={groupNameStatus} text={'15인 이하'} />
+            <StatusMessage status={groupNameStatus} text={'15자 이하'} />
           </S.Field>
           <S.Field>
             <InputFieldWithText
