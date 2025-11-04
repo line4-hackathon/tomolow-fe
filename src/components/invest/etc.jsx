@@ -3,6 +3,7 @@ import { EtcTypes } from '@/pages/invest/selectType'
 import useSelect from '@/hooks/select'
 import EtcMyorder from './EtcMyorder'
 import EtcNews from './EtcNews'
+import EctAI from './EtcAI'
 
 export default function Etc() {
   const { selectedMenu, handleSelect } = useSelect('ORDER')
@@ -16,6 +17,7 @@ export default function Etc() {
       contents=<EtcNews />
       break
     case 'AI':
+      contents=<EctAI/>
       break
   }
   return (
