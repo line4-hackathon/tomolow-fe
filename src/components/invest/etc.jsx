@@ -1,10 +1,23 @@
-import styled from "styled-components";
-import { EtcTypes } from "@/pages/invest/selectType";
-import useSelect from "@/hooks/select";
-import EtcMyorder from "./EtcMyorder";
+import styled from 'styled-components'
+import { EtcTypes } from '@/pages/invest/selectType'
+import useSelect from '@/hooks/select'
+import EtcMyorder from './EtcMyorder'
+import EtcNews from './EtcNews'
 
 export default function Etc() {
-  const { selectedMenu, handleSelect } = useSelect("ORDER");
+  const { selectedMenu, handleSelect } = useSelect('ORDER')
+
+  let contents
+  switch (selectedMenu) {
+    case 'ORDER':
+      contents=<EtcMyorder />
+      break
+    case 'NEWS':
+      contents=<EtcNews />
+      break
+    case 'AI':
+      break
+  }
   return (
     <Box>
       <MenuBox>
@@ -19,9 +32,9 @@ export default function Etc() {
           </Menu>
         ))}
       </MenuBox>
-      <EtcMyorder/>
+      {contents}
     </Box>
-  );
+  )
 }
 const Box = styled.div`
   display: flex;
@@ -29,27 +42,28 @@ const Box = styled.div`
   background: var(--Neutral-50, #f6f6f6);
   display: flex;
   width: 100%;
-  padding-top: var(--Spacing-L, 16px);
+  padding: 16px 0px 22px 0px;
   gap: var(--Spacing-2XL, 32px);
   flex-shrink: 0;
   align-self: stretch;
   align-items: center;
-`;
+`
 const MenuBox = styled.div`
   display: flex;
   gap: 24px;
   padding-left: 16px;
   width: 343px;
-`;
+`
 const Menu = styled.div`
   display: flex;
   padding-bottom: var(--Spacing-S, 8px);
   justify-content: center;
   align-items: center;
-  border-bottom:${({$isSelected})=> $isSelected? "1px solid var(--Clicked-P_600, #2b5276)":""};
+  border-bottom: ${({ $isSelected }) =>
+    $isSelected ? '1px solid var(--Clicked-P_600, #2b5276)' : ''};
   background: var(--Neutral-50, #f6f6f6);
 
-  color: ${({$isSelected})=> $isSelected? "#2b5276":"#B0B0B0"};
+  color: ${({ $isSelected }) => ($isSelected ? '#2b5276' : '#B0B0B0')};
   text-align: center;
 
   /* Body-Medium */
@@ -59,7 +73,7 @@ const Menu = styled.div`
   font-weight: 500;
   line-height: 24px; /* 150% */
 
-  &:hover{
+  &:hover {
     cursor: pointer;
   }
-`;
+`
