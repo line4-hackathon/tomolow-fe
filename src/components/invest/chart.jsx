@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import useSelect from "@/hooks/select";
 import { DateTypes } from "@/pages/invest/selectType";
+import TestChart from "./testChart";
 
 export default function Chart() {
   const { selectedMenu, handleSelect } = useSelect("DAY");
@@ -24,7 +25,6 @@ export default function Chart() {
 }
 const ChartBox = styled.div`
   width: 100%;
-  height: 350px;
 `;
 const ChartImg = styled.div`
     height: 300px;

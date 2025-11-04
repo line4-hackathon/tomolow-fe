@@ -8,6 +8,7 @@ import RedButton from '@/components/invest/RedButton'
 import BlueButton from '@/components/invest/BlueButton'
 
 export default function InvestTradingPage() {
+  const isOrder = 1
   return (
     <Page>
       <InvestHeader />
@@ -16,9 +17,16 @@ export default function InvestTradingPage() {
         <Chart />
         <Etc />
       </Contents>
-        <Bar>
-            <RedButton width="343px" height="56px"/>
-        </Bar>
+      <Bar>
+        {isOrder ? (
+          <>
+            <BlueButton width='161px' height='56px' />
+            <RedButton width='161px' height='56px' />
+          </>
+        ) : (
+          <RedButton width='343px' height='56px' />
+        )}
+      </Bar>
     </Page>
   )
 }
@@ -38,12 +46,11 @@ const Contents = styled.div`
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
 `
-const Bar=styled.div`
-    display: flex;
-width: 375px;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-height: 88px;
-gap: 21px;
+const Bar = styled.footer`
+  display: flex;
+  width: 375px;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+  gap: 21px;
 `

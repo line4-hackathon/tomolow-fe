@@ -2,9 +2,13 @@ import styled from 'styled-components'
 
 import GrayButton from './GrayButton'
 import NavyButton from './NavyButton'
+import { useState } from 'react'
+import CancelModal from './CancelModal'
 
 export default function OrderCard({ data }) {
+  const [isModal,setIsModal]=useState(false);
   const isImg = 0
+
   return (
     <Card>
       {isImg ? <Logo /> : <></>}
@@ -12,9 +16,10 @@ export default function OrderCard({ data }) {
         <Amount>2주 매수</Amount>
         <Price>주당 111,800원</Price>
       </InfoBox>
-      <GrayButton name='취소' width='47px' height='47px' />
+      <GrayButton name='취소' width='47px' height='47px' onClick={()=>setIsModal(true)}/>
       <NavyButton name='정정' width='47px' height='47px' />
-    </Card>
+      {isModal ? <CancelModal setIsModal={setIsModal}/>:<></>}
+    </Card> 
   )
 }
 
@@ -67,3 +72,4 @@ const Price = styled.div`
   font-weight: 400;
   line-height: 16px; /* 133.333% */
 `
+

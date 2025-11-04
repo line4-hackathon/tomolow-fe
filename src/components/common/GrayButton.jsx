@@ -1,8 +1,8 @@
 import styled from 'styled-components'
 
-export default function GrayButton({ name, width, height }) {
+export default function GrayButton({ name, width, height, onClick}) {
   return (
-    <Box $width={width} $height={height}>
+    <Box $width={width} $height={height} onClick={onClick}>
       {name}
     </Box>
   )
