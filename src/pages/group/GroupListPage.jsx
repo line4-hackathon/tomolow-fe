@@ -58,7 +58,7 @@ const GroupListPage = () => {
           <GroupMiniButton
             img={pinkSquare}
             label={'그룹 생성'}
-            onClick={() => console.log('그룹 생성')}
+            onClick={() => navigate('/group/create')}
           />
           <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={handleButtonClick} />
         </S.MiniButtonContainer>

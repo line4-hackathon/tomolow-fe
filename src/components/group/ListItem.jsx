@@ -24,6 +24,7 @@ export const Container = styled.div`
   border-radius: var(--Radius-L, 16px);
   background: var(--Neutral-0, #fff);
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  cursor: pointer;
 `
 
 export const TextContainer = styled.div`

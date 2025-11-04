@@ -6,6 +6,7 @@ import SignupPage2 from './pages/signup/SignupPage2'
 import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import GroupListPage from './pages/group/GroupListPage'
+import GroupCreatePage from './pages/group/GroupCreatePage'
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,13 @@ const router = createBrowserRouter([
   {
     path: '/group',
     element: <App />,
-    children: [{ path: 'list', element: <GroupListPage /> }],
+    children: [
+      { path: 'list', element: <GroupListPage /> },
+      {
+        path: 'create',
+        element: <GroupCreatePage />,
+      },
+    ],
   },
 ])
 
