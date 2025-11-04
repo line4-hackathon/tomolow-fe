@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import Header from '@/components/common/Header'
+import { useNavigate } from 'react-router-dom'
+import useModal from '@/hooks/useModal'
 import * as S from '@/pages/group/GroupListPage.styled'
+import Header from '@/components/common/Header'
 import GroupMiniButton from '@/components/group/GroupMiniButton'
 import pinkSquare from '@/assets/images/img-pink-square.svg'
-import yellowSqaure from '@/assets/images/img-yellow-square.svg'
+import yellowSquare from '@/assets/images/img-yellow-square.svg'
 import Tab from '@/components/group/Tab'
 import GroupListNow from '@/components/group/GroupListNow'
 import GroupListFinished from '@/components/group/GroupListFinished'
 import GroupListRecruting from '@/components/group/GroupListRecruting'
 import Modal from '@/components/group/Modal'
-import { useNavigate } from 'react-router-dom'
 
 const ITEMS = [
   { key: 'now', label: '진행 중인 그룹' },
@@ -22,38 +23,32 @@ const GroupListPage = () => {
   // 활성화 탭
   const [activeTab, setActiveTab] = useState('now')
   // 모달 관리
-  const [isOpen, setIsOpen] = useState(false)
-  const [step, setStep] = useState(1) //모달 총 3단계 (코드 입력, 코드 제대로 입력, 코드 오류)
-  const [code, setCode] = useState('')
+  const modal = useModal()
 
   const handleButtonClick = () => {
-    setIsOpen(true)
-    setStep(1)
+    modal.open()
   }
 
   const handleClose = () => {
-    setIsOpen(false)
-    setCode('')
-    setStep(1)
+    modal.close()
   }
 
-  const handleNext = () => {
-    // 연동 -> 검증
-    if (code === 'aaaa') {
-      setStep(2)
+  const handleCheckCode = () => {
+    // 연동 필요
+    if (modal.code === 'aaaa') {
+      modal.goSuccess()
     } else {
-      setStep(3)
+      modal.goFail()
     }
   }
 
   const handleNavigate = () => {
-    setStep(1)
-    setIsOpen(false)
     navigate('/')
+    modal.close()
   }
 
-  const handleMove = () => {
-    setStep(1)
+  const handleRetry = () => {
+    modal.retry()
   }
   return (
     <>
@@ -65,7 +60,7 @@ const GroupListPage = () => {
             label={'그룹 생성'}
             onClick={() => console.log('그룹 생성')}
           />
-          <GroupMiniButton img={yellowSqaure} label={'그룹 참가'} onClick={handleButtonClick} />
+          <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={handleButtonClick} />
         </S.MiniButtonContainer>
 
         {/* Tab 바 */}
@@ -76,24 +71,24 @@ const GroupListPage = () => {
         {activeTab === 'recruiting' && <GroupListRecruting />}
       </S.Container>
       {/* 모달 창 */}
-      {isOpen && step === 1 && (
+      {modal.isOpen && modal.step === 1 && (
         <Modal
-          isOpen={isOpen}
+          isOpen={modal.isOpen}
           title='그룹 찾기'
           hasInput={true}
-          inputValue={code}
-          setInputValue={setCode}
+          inputValue={modal.code}
+          setInputValue={modal.setCode}
           placeholder='전달 받은 입장코드 입력'
           leftButtonLabel='닫기'
           rightButtonLabel='다음'
           onLeftClick={handleClose}
-          onRightClick={handleNext}
+          onRightClick={handleCheckCode}
         />
       )}
 
-      {isOpen && step === 2 && (
+      {modal.isOpen && modal.step === 2 && (
         <Modal
-          isOpen={isOpen}
+          isOpen={modal.isOpen}
           title='멋쟁이사자처럼투자소모임'
           text={`만든 사람: 멋쟁이사자처럼기디1\n참가비 : 1,000,000\n참가 인원 : 3명 / 4명`}
           leftButtonLabel='닫기'
@@ -102,14 +97,14 @@ const GroupListPage = () => {
           onRightClick={handleNavigate}
         />
       )}
-      {isOpen && step === 3 && (
+      {modal.isOpen && modal.step === 3 && (
         <Modal
-          isOpen={isOpen}
+          isOpen={modal.isOpen}
           title={'찾으시는 그룹이 없어요.\n입장코드를 확인해주세요.'}
           leftButtonLabel='닫기'
           rightButtonLabel='다시 입력하기'
           onLeftClick={handleClose}
-          onRightClick={handleMove}
+          onRightClick={handleRetry}
         />
       )}
     </>
