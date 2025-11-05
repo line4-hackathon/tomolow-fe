@@ -1,11 +1,17 @@
 import React from 'react'
 import styled from 'styled-components'
 
-function InputField({ label, type = 'text', placeholder, value, onChange }) {
+function InputField({ label, type = 'text', placeholder, value, onChange, onBlur }) {
   return (
     <Field>
       <Label>{label}</Label>
-      <Input type={type} placeholder={placeholder} value={value} onChange={onChange} />
+      <Input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+      />
     </Field>
   )
 }
