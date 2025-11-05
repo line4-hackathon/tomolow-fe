@@ -51,5 +51,5 @@ export const Input = styled.input`
 export const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 12px;
+  justify-content: space-between;
 `
