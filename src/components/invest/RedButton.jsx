@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
-export default function RedButton({ width, height }) {
-  return <Button $width={width} $height={height}>매수</Button>
+export default function RedButton({ width, height, onClick }) {
+  return <Button $width={width} $height={height} onClick={onClick}>매수</Button>
 }
 
 const Button = styled.button`

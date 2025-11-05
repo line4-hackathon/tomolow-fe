@@ -5,6 +5,7 @@ import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import SignupPage1 from './pages/signup/SignupPage1'
 import SignupPage2 from './pages/signup/SignupPage2'
+import InvestPurchasePage from './pages/invest/PurchasePage'
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [{ path: 'search', element: <InvestSearchPage/> },
       { path: 'trading', element: <InvestTradingPage/> },
+      { path: 'purchase', element: <InvestPurchasePage/> },
     ],
   },
 ])

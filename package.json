@@ -14,7 +14,9 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.5",
+    "react-simple-keyboard": "^3.8.132",
     "recharts": "^3.3.0",
+    "simple-keyboard": "^3.8.88",
     "styled-components": "^6.1.19",
     "vite-plugin-svgr": "^4.5.0"
   },

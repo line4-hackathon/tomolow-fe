@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export default function NavyButton({ name, width, height,onClick }) {
   return (
-    <Box $width={width} $height={height} onClick={()=>onClick}>
+    <Box $width={width} $height={height} onClick={onClick}>
       {name}
     </Box>
   )
