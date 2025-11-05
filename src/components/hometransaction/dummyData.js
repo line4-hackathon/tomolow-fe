@@ -1,0 +1,71 @@
+export const dummyData = [
+  {
+    start: '2025-01-01',
+    end: '2025-11-05',
+    summary: {
+      profit: -15000,
+      profitRate: -2.45,
+      totalBuy: 154000444,
+      totalSell: 153995444,
+    },
+    transactions: [
+      {
+        date: '2025-10-14',
+        time: '17:21',
+        stock: 'SK하이닉스',
+        price: 97000,
+        quantity: 3,
+        amount: 2464464,
+        type: '매수',
+      },
+      {
+        date: '2025-10-14',
+        time: '12:12',
+        stock: '삼성전자',
+        price: 97000,
+        quantity: 3,
+        amount: 409464,
+        type: '매도',
+      },
+      {
+        date: '2025-10-10',
+        time: '17:21',
+        stock: '삼성전자',
+        price: 97000,
+        quantity: 3,
+        amount: 2464464,
+        type: '매수',
+      },
+    ],
+  },
+  {
+    start: '2023-09-01',
+    end: '2023-09-30',
+    summary: {
+      profit: 25000,
+      profitRate: 1.63,
+      totalBuy: 102000000,
+      totalSell: 102025000,
+    },
+    transactions: [
+      {
+        date: '2025-09-18',
+        time: '09:50',
+        stock: 'LG에너지솔루션',
+        price: 350000,
+        quantity: 2,
+        amount: 7000000,
+        type: '매수',
+      },
+      {
+        date: '2025-09-21',
+        time: '13:40',
+        stock: '삼성SDI',
+        price: 520000,
+        quantity: 1,
+        amount: 520000,
+        type: '매도',
+      },
+    ],
+  },
+]

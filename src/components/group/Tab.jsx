@@ -22,6 +22,5 @@ export default Tab
 const TabContainer = styled.div`
   display: flex;
   flex-direction: row;
-  padding-top: 24px;
   gap: 24px;
 `
