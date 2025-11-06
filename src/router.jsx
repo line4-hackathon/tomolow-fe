@@ -8,6 +8,7 @@ import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
+import MyPage from './pages/my/MyPage'
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,11 @@ const router = createBrowserRouter([
     path: '/home',
     element: <App />,
     children: [{ path: 'transaction', element: <HomeTransactionPage /> }], // 홈과 합칠 예정
+  },
+  {
+    path: '/mypage',
+    element: <App />,
+    children: [{ path: '', element: <MyPage /> }],
   },
 ])
 
