@@ -5,6 +5,7 @@ export const HeaderBar = styled.header`
   grid-template-columns: 24px 1fr 24px;
   align-items: center;
   padding: 18px 16px;
+  background: var(--Neutral-0, #FFF);
   border-bottom: 0.5px solid var(--Neutral-100, #e7e7e7);
 `
 
