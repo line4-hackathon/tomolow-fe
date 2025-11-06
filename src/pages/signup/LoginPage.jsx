@@ -4,7 +4,7 @@ import * as S from '@/pages/signup/LoginPage.styled'
 import Header from '@/components/common/Header'
 import Slogan from '@/components/signup/Slogan'
 import Logo from '@/assets/images/logo-login.svg'
-import InputField from '@/components/signup/InputField'
+import InputField from '@/components/common/InputField'
 import LargeButton from '@/components/signup/LargeButton'
 import ToastMessage from '@/components/signup/ToastMessage'
 

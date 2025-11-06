@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import * as S from '@/pages/signup/SignupPage.styled'
 import Header from '@/components/common/Header'
+import * as S from '@/pages/signup/SignupPage.styled'
 import InputField from '@/components/common/InputField'
 import InputFieldWithButton from '@/components/common/InputFieldWithButton'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
 
-const SignupPage2 = () => {
+const EditInfoPage = () => {
   const navigate = useNavigate()
   const [nickname, setNickname] = useState('')
   const [nicknameStatus, setNicknameStatus] = useState({
@@ -31,7 +31,7 @@ const SignupPage2 = () => {
 
   const handleSubmit = () => {
     if (isValid) {
-      navigate('/')
+      navigate('/mypage')
     }
   }
   // 닉네임 길이 체크
@@ -59,31 +59,26 @@ const SignupPage2 = () => {
 
   return (
     <>
-      <Header title='회원가입' showIcon={true} path='/signup/1' />
+      <Header title='정보수정' showIcon={true} path='/mypage' />
       <S.Container>
-        <S.Text>{`TomoLow 이용을 위해\n 회원 정보를 입력해주세요`}</S.Text>
-        <S.Space>
-          <InputFieldWithButton
-            label='닉네임'
-            type='text'
-            placeholder='닉네임 입력'
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            buttonText='중복 확인'
-            active={nickname.length < 10 && nickname.length > 1}
-            onClick={checkNickname}
+        <InputFieldWithButton
+          label='닉네임'
+          type='text'
+          placeholder='닉네임 입력'
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          buttonText='중복 확인'
+          active={nickname.length < 10 && nickname.length > 1}
+          onClick={checkNickname}
+        />
+        <S.StatusRow>
+          <StatusMessage
+            status={nicknameStatus.duplicate ? 'success' : 'default'}
+            text='중복 여부'
           />
-          <S.StatusRow>
-            <StatusMessage
-              status={nicknameStatus.duplicate ? 'success' : 'default'}
-              text='중복 여부'
-            />
-            <StatusMessage
-              status={nicknameStatus.length ? 'success' : 'default'}
-              text='10자 이내'
-            />
-          </S.StatusRow>
-        </S.Space>
+          <StatusMessage status={nicknameStatus.length ? 'success' : 'default'} text='10자 이내' />
+        </S.StatusRow>
+        <S.FieldSpace></S.FieldSpace>
         <InputField
           label='비밀번호'
           type='password'
@@ -112,6 +107,7 @@ const SignupPage2 = () => {
           status={passwordStatus.isMatched ? 'success' : 'default'}
           text={'비밀번호 일치'}
         />
+
         <S.NextButton>
           <LargeButton
             label='완료'
@@ -125,4 +121,4 @@ const SignupPage2 = () => {
   )
 }
 
-export default SignupPage2
+export default EditInfoPage

@@ -5,8 +5,8 @@ import * as S from './SignupPage.styled'
 import Header from '@/components/common/Header'
 import LargeButton from '@/components/signup/LargeButton'
 import StatusMessage from '@/components/common/StatusMessage'
-import InputField from '@/components/signup/InputField'
-import InputFieldWithButton from '@/components/signup/InputFieldWithButton'
+import InputField from '@/components/common/InputField'
+import InputFieldWithButton from '@/components/common/InputFieldWithButton'
 
 const SignupPage = () => {
   const [name, setName] = useState('')

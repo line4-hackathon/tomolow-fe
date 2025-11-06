@@ -65,7 +65,6 @@
 #root {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   min-height: 100dvh;
 }
 
@@ -85,7 +84,6 @@ html {
   justify-content: center;
   align-items: center;
   scroll-behavior: smooth;
-  overflow: hidden;
 }
 
 body {
