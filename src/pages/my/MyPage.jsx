@@ -30,15 +30,12 @@ const MyPage = () => {
           />
           <ButtonItem
             icon={moneyIcon}
-            label={`머니 충전`}
+            label={`머니충전`}
             onClick={() => navigate('/mypage/charge')}
           />
-          <ButtonItem
-            icon={editIcon}
-            label={`정보 수정`}
-            onClick={() => navigate('/mypage/edit')}
-          />
-          <ButtonItem icon={qnaIcon} label={`문의하기`} onClick={() => navigate('/mypage/qna')} />
+          <ButtonItem icon={editIcon} label={`정보수정`} onClick={() => navigate('/mypage/edit')} />
+          {/* 모달 띄우기 */}
+          <ButtonItem icon={qnaIcon} label={`문의하기`} onClick={() => navigate('/')} />
         </S.ButtonContainer>
         <S.Logout>로그아웃</S.Logout>
       </S.Container>

@@ -41,9 +41,9 @@ export const MoneyContainer = styled.div`
 `
 export const Label = styled.p`
   color: var(--Neutral-900, #333);
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 28px;
+  line-height: 24px;
 `
 
 export const Money = styled.p`
