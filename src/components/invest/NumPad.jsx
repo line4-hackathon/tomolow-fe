@@ -15,62 +15,91 @@ const NUMPAD_LAYOUT = {
   ],
 }
 
-export default function Numpad({ isFocus, currentValue, price,count,setPrice, setCount }) {
-  const keyboardRef = useRef()
+export default function Numpad({
+  isFocus,
+  currentValue = '',
+  price,
+  count,
+  setPrice,
+  setCount,
+}) {
+  const keyboardRef = useRef(null)
+  const valueRef = useRef(currentValue)
 
-  const onChange = (newInput) => {
-    // 🚫 첫 글자가 0이고, 길이가 1보다 크면 (즉 01, 05 등)
-    if (newInput.length >= 1 && newInput.startsWith('0')) {
-      // 잘못된 입력이면 현재 키보드 상태를 되돌림
-      if (keyboardRef.current) {
-        keyboardRef.current.setInput('')
-      }
-      return
-    }
-    if (newInput.length > 1 && /^0\d+/.test(newInput)) {
-      keyboardRef.current.setInput('')
-      return
-    }
-
-    // ✅ 정상 입력만 반영
-    if (isFocus) {
-      setPrice(newInput)
-    } else {
-      setCount(newInput)
-    }
-  }
-  const onKeyPress=(button)=>{
-    if (button === '{bksp}') {
-      if (isFocus) {
-       onChange(price)
-    } else {
-      onChange(count)
-    }
-      return
-    }
-  }
-
-  // 2. currentValue가 바뀔 때마다 키보드 인스턴스를 명시적으로 초기화 (핵심)
+  // 외부값(currentValue)이 바뀌면 키보드 UI 동기화 (초기 로드 / 포커스 전환)
   useEffect(() => {
-    if (keyboardRef.current) {
-      keyboardRef.current.setInput(currentValue || '')
-    }
+    valueRef.current = currentValue
+    keyboardRef.current?.setInput(currentValue || '')
   }, [currentValue, isFocus])
+
+  // 외부 상태를 바꿔주는 헬퍼
+  const applyValue = (val) => {
+    if (isFocus) setPrice(val)
+    else setCount(val)
+  }
+
+  // 버튼 눌림 처리: currentValue(외부)를 기준으로 nextValue 계산 -> 바로 상태 적용
+  const onKeyPress = (button) => {
+    const cur = String(valueRef.current || '')
+    // 백스페이스 처리: 외부 상태에서 한 글자 삭제
+    if (button === '{bksp}') {
+      const next = cur.slice(0, -1)
+      applyValue(next)
+      // 화면 동기화
+      keyboardRef.current?.setInput(next)
+      return
+    }
+
+    // 숫자/00 입력 처리
+    let toAppend = button
+    // simple-keyboard는 버튼 문자열을 그대로 전달하므로 '00'도 그대로 처리
+    if (!/^\d+$/.test(toAppend)) {
+      // 숫자 또는 '00'이 아닌 버튼(예: 다른 커스텀키)은 무시
+      return
+    }
+
+    const next = cur + toAppend
+
+    // --- 검증 규칙 ---
+    // 1) 처음 문자로 '0' 단독 허용 금지: currentValue가 빈 문자열일 때 버튼이 '0'이면 차단
+    if (cur === '' && toAppend === '0') {
+      // 차단: 아무 동작 안 함 (원한다면 피드백 UI 추가)
+      // 화면에 잘못 보이는 걸 방지하려면 setInput(cur)로 동기화
+      keyboardRef.current?.setInput(cur)
+      return
+    }
+
+    // 2) 0으로 시작하는 다자리 숫자(예: 01, 005 등) 차단
+    // next이 '0...' 형태이면 차단
+    if (/^0\d+/.test(next)) {
+      // 차단: 외부 상태 유지, 화면 동기화
+      keyboardRef.current?.setInput(cur)
+      return
+    }
+
+    // 통과하면 외부 상태에 바로 적용하고 화면 동기화
+    applyValue(next)
+    keyboardRef.current?.setInput(next)
+  }
+
+  // onChange는 보조적으로 남겨도 되지만, 위 방식에서는 onKeyPress에서 직접 상태를 변경하므로 필수는 아님.
+  // 단, onChange를 사용하면 (예: 드래그/붙여넣기 같은 경우) 호출될 수 있으니 간단히 동기화만 해주자.
+  const onChange = (val) => {
+    // 선택: onKeyPress에서 이미 처리하므로 여기서는 필요 없을 수 있음.
+    // applyValue(val)
+  }
 
   return (
     <StyledKeyboardWrapper>
       <Keyboard
         keyboardRef={(r) => (keyboardRef.current = r)}
-        // 키보드 레이아웃 지정
         layout={NUMPAD_LAYOUT}
-        // 버튼 클릭 시 호출되는 함수
-        onChange={onChange}
         onKeyPress={onKeyPress}
-        // 키보드의 너비를 좁게 설정
-        keyboardClass={'simple-keyboard'}
-        // 특수 키에 표시되는 텍스트를 변경할 수 있습니다.
+        onChange={onChange}
+        input={String(currentValue ?? '')}
+        keyboardClass="simple-keyboard"
         display={{
-          '{bksp}': '←', // 백스페이스를 화살표로 표시
+          '{bksp}': '←',
         }}
       />
     </StyledKeyboardWrapper>
