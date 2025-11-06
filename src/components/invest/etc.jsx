@@ -1,9 +1,25 @@
-import styled from "styled-components";
-import { EtcTypes } from "@/pages/invest/selectType";
-import useSelect from "@/hooks/select";
+import styled from 'styled-components'
+import { EtcTypes } from '@/pages/invest/selectType'
+import useSelect from '@/hooks/select'
+import EtcMyorder from './EtcMyorder'
+import EtcNews from './EtcNews'
+import EctAI from './EtcAI'
 
 export default function Etc() {
-  const { selectedMenu, handleSelect } = useSelect("ORDER");
+  const { selectedMenu, handleSelect } = useSelect('ORDER')
+
+  let contents
+  switch (selectedMenu) {
+    case 'ORDER':
+      contents=<EtcMyorder />
+      break
+    case 'NEWS':
+      contents=<EtcNews />
+      break
+    case 'AI':
+      contents=<EctAI/>
+      break
+  }
   return (
     <Box>
       <MenuBox>
@@ -18,34 +34,38 @@ export default function Etc() {
           </Menu>
         ))}
       </MenuBox>
+      {contents}
     </Box>
-  );
+  )
 }
 const Box = styled.div`
   display: flex;
   flex-direction: column;
   background: var(--Neutral-50, #f6f6f6);
   display: flex;
-  height: 308px;
   width: 100%;
-  padding-top: var(--Spacing-L, 16px);
-  align-items: flex-start;
+  padding: 16px 0px 22px 0px;
   gap: var(--Spacing-2XL, 32px);
   flex-shrink: 0;
   align-self: stretch;
-`;
+  align-items: center;
+`
 const MenuBox = styled.div`
   display: flex;
-  gap: 10px;
-`;
+  gap: 24px;
+  padding-left: 16px;
+  width: 343px;
+`
 const Menu = styled.div`
   display: flex;
   padding-bottom: var(--Spacing-S, 8px);
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid var(--Clicked-P_600, #2b5276);
+  border-bottom: ${({ $isSelected }) =>
+    $isSelected ? '1px solid var(--Clicked-P_600, #2b5276)' : ''};
+  background: var(--Neutral-50, #f6f6f6);
 
-  color: var(--Clicked-P_600, #2b5276);
+  color: ${({ $isSelected }) => ($isSelected ? '#2b5276' : '#B0B0B0')};
   text-align: center;
 
   /* Body-Medium */
@@ -54,5 +74,8 @@ const Menu = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: 24px; /* 150% */
-`;
-const MenuInfo = styled.div``;
+
+  &:hover {
+    cursor: pointer;
+  }
+`

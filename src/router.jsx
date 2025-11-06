@@ -8,6 +8,7 @@ import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
+import InvestPurchasePage from './pages/invest/PurchasePage'
 
 const router = createBrowserRouter([
   {
@@ -26,9 +27,9 @@ const router = createBrowserRouter([
   {
     path: '/invest',
     element: <App />,
-    children: [
-      { path: 'search', element: <InvestSearchPage /> },
-      { path: 'trading', element: <InvestTradingPage /> },
+    children: [{ path: 'search', element: <InvestSearchPage/> },
+      { path: 'trading', element: <InvestTradingPage/> },
+      { path: 'purchase', element: <InvestPurchasePage/> },
     ],
   },
   {

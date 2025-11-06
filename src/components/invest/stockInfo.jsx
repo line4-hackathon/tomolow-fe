@@ -22,7 +22,8 @@ const Box = styled.div`
   display: flex;
   flex-direction: column;
   text-align: left;
-  width: 343px;
+  padding-left: 16px;
+  width: 359px;
 `;
 const Stock = styled.div`
   color: var(--Neutral-900, #333);
