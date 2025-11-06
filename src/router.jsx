@@ -12,7 +12,6 @@ import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyRechargePage from './pages/my/MoneyRechargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
-import QnaPage from './pages/my/QnaPage'
 
 const router = createBrowserRouter([
   {
@@ -60,7 +59,6 @@ const router = createBrowserRouter([
       { path: 'chats', element: <SavedChattingPage /> },
       { path: 'charge', element: <MoneyRechargePage /> },
       { path: 'edit', element: <EditInfoPage /> },
-      { path: 'qna', element: <QnaPage /> },
     ],
   },
 ])
