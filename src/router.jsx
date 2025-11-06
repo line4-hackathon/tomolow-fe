@@ -3,6 +3,7 @@ import App from './App'
 import LoginPage from './pages/signup/LoginPage'
 import SignupPage1 from './pages/signup/SignupPage1'
 import SignupPage2 from './pages/signup/SignupPage2'
+import HomePage from './pages/home/HomePage'
 import HomeTransactionPage from './pages/hometransaction/HomeTransactionPage'
 import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
@@ -45,7 +46,10 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: <App />,
-    children: [{ path: 'transaction', element: <HomeTransactionPage /> }], // 홈과 합칠 예정
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'transaction', element: <HomeTransactionPage /> }, 
+    ],
   },
 ])
 
