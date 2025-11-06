@@ -6,6 +6,7 @@ import HomeHeader from '@/components/home/HomeHeader.jsx'
 import MyAssets from '@/components/home/MyAssets.jsx'
 import HoldInterest from '@/components/home/HoldInterest.jsx'
 import WaitingOrder from '@/components/home/WaitingOrder.jsx'
+import MenuBar from '@/components/common/MenuBar.jsx'
 
 function HomePage() {
   return (
@@ -15,6 +16,7 @@ function HomePage() {
         <MyAssets />         {/* 내 자산 현황 */}
         <HoldInterest />     {/* 보유 관심 종목 */}
         <WaitingOrder />     {/* 대기 주문 */}
+        <MenuBar />          {/* 하단 탭바 */}
     </Container>
   )
 }
@@ -26,6 +28,5 @@ const Container = styled.div`
     flex-direction: column;
     width: 100%;
     background-color: #f9f9fb;
-    padding-bottom: 80px; /* 하단 탭바 자리 */
     overflow-y: auto; 
 `
