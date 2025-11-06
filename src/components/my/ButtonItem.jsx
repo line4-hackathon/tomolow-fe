@@ -2,9 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 import RightArrow from '@/assets/icons/icon-right-arrow.svg?react'
 
-function ButtonItem({ icon, label }) {
+function ButtonItem({ icon, label, onClick }) {
   return (
-    <Item>
+    <Item onClick={onClick}>
       <Left>
         <Icon src={icon} />
         <Text>{label}</Text>

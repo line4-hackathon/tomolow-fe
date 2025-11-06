@@ -9,6 +9,10 @@ import InvestTradingPage from './pages/invest/TradingPage'
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
 import MyPage from './pages/my/MyPage'
+import SavedChattingPage from './pages/my/SavedChattingPage'
+import MoneyRechargePage from './pages/my/MoneyRechargePage'
+import EditInfoPage from './pages/my/EditInfoPage'
+import QnaPage from './pages/my/QnaPage'
 
 const router = createBrowserRouter([
   {
@@ -51,7 +55,13 @@ const router = createBrowserRouter([
   {
     path: '/mypage',
     element: <App />,
-    children: [{ path: '', element: <MyPage /> }],
+    children: [
+      { path: '', element: <MyPage /> },
+      { path: 'chats', element: <SavedChattingPage /> },
+      { path: 'charge', element: <MoneyRechargePage /> },
+      { path: 'edit', element: <EditInfoPage /> },
+      { path: 'qna', element: <QnaPage /> },
+    ],
   },
 ])
 
