@@ -24,7 +24,9 @@ export const FormContainer = styled.div`
 export const Space = styled.div`
   margin: 36px 0 52px 0;
 `
-
+export const FieldSpace = styled.div`
+  height: 52px;
+`
 export const StatusRow = styled.div`
   display: flex;
   flex-direction: row;

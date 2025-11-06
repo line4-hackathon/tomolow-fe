@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import * as S from './SignupPage.styled'
+import * as S from '@/pages/signup/SignupPage.styled'
 import Header from '@/components/common/Header'
-import InputField from '@/components/signup/InputField'
-import InputFieldWithButton from '@/components/signup/InputFieldWithButton'
+import InputField from '@/components/common/InputField'
+import InputFieldWithButton from '@/components/common/InputFieldWithButton'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
 
