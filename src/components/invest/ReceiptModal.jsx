@@ -1,9 +1,19 @@
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
 import GrayButton from '../common/GrayButton'
 import NavyButton from '../common/NavyButton'
 import RedButton from './RedButton'
 
 export default function ReceiptModal({ setIsModal }) {
+  const navigate=useNavigate();
+
+  const purchase=()=>{
+    navigate("/invest/trading",{
+      state:{
+      toastMessage:"매수 주문이 완료됐어요",
+      }
+    })
+  }
   return (
     <BackGround>
       <Modal>
@@ -23,7 +33,7 @@ export default function ReceiptModal({ setIsModal }) {
         </RecieptBox>
         <ButtonBox>
           <GrayButton name='닫기' width='120px' height='40px' onClick={() => setIsModal(false)} />
-          <RedButton width='120px' height='40px' />
+          <RedButton width='120px' height='40px' onClick={()=>purchase()}/>
         </ButtonBox>
       </Modal>
     </BackGround>

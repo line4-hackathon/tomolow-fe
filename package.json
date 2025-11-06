@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "framer-motion": "^12.23.24",
     "lightweight-charts": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -19,6 +20,9 @@
     "simple-keyboard": "^3.8.88",
     "styled-components": "^6.1.19",
     "vite-plugin-svgr": "^4.5.0"
+  },
+  "overrides": {
+    "esbuild": "0.25.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
