@@ -15,5 +15,9 @@ export const DateTypes = {
 export const EtcTypes = {
   ORDER: "내 주문",
   NEWS: "관련 뉴스",
-  AI: "AI 주가 분석",
+  AI: "AI 차트 분석",
 };
+export const PriceTypes={
+  CUSTOM:"지정가",
+  MARKET:"시장가",
+}

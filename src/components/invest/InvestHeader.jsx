@@ -1,10 +1,12 @@
 import styled from 'styled-components'
 
-import BackButton from "@/assets/icons/icon-back.svg?react";
-import RedHeart from "@/assets/icons/icon-heart-red.svg?react";
-import GrayHeart from "@/assets/icons/icon-heart-gray.svg?react";
+import BackButton from '@/assets/icons/icon-back.svg?react'
+import RedHeart from '@/assets/icons/icon-heart-red.svg?react'
+import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
+import { useState } from 'react'
 
 export default function InvestHeader() {
+  const [isInterest, setIsInterest] = useState(false)
   return (
     <HeaderBar>
       <BackButton />
@@ -12,7 +14,11 @@ export default function InvestHeader() {
         <HeadName>삼성전자</HeadName>
         <HeadPrice>117,000원(+10.5%)</HeadPrice>
       </HeaderInfo>
-      <GrayHeart />
+      {isInterest ? (
+        <RedHeart onClick={() => setIsInterest(false)} />
+      ) : (
+        <GrayHeart onClick={() => setIsInterest(true)} />
+      )}
     </HeaderBar>
   )
 }
