@@ -17,6 +17,7 @@ import GroupCreatePage from './pages/group/GroupCreatePage'
 import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
+import EditInfoPage from './pages/my/EditInfoPage'
 
 const router = createBrowserRouter([
   {
