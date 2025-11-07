@@ -69,10 +69,13 @@ const GroupCreatePage = () => {
             <Field>
               <InputFieldWithText
                 label={'투자 시드머니 (참가비)'}
-                type='number'
+                type='text'
                 placeholder={'숫자만 입력'}
-                value={money}
-                onChange={(e) => setMoney(e.target.value)}
+                value={money ? Number(money).toLocaleString() : ''}
+                onChange={(e) => {
+                  const value = e.target.value.replaceAll(',', '')
+                  if (!isNaN(value)) setMoney(value)
+                }}
                 onBlur={() => setMoneyTouched(true)}
                 rightText='원'
               />
