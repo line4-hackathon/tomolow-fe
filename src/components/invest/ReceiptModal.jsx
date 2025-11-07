@@ -3,37 +3,52 @@ import { useNavigate } from 'react-router-dom'
 import GrayButton from '../common/GrayButton'
 import NavyButton from '../common/NavyButton'
 import RedButton from './RedButton'
+import BlueButton from './BlueButton'
 
-export default function ReceiptModal({ setIsModal }) {
-  const navigate=useNavigate();
+export default function ReceiptModal({ setIsModal, isPurchase }) {
+  const navigate = useNavigate()
 
-  const purchase=()=>{
-    navigate("/invest/trading",{
-      state:{
-      toastMessage:"매수 주문이 완료됐어요",
-      }
-    })
+  const purchaseOrsell = (p) => {
+    if (p) {
+      navigate('/invest/trading', {
+        state: {
+          toastMessage: '매수 주문이 완료됐어요',
+        },
+      })
+    } else {
+      navigate('/invest/trading', {
+        state: {
+          toastMessage: '매도 주문이 완료됐어요',
+        },
+      })
+    }
   }
   return (
     <BackGround>
       <Modal>
         <StockInfoBox>
-            <StockName>삼성전자</StockName>
-            <StockCount>43주 <a style={{color:"#FF2E4E"}}>매수</a></StockCount>
+          <StockName>삼성전자</StockName>
+          <StockCount>
+            43주 {isPurchase ?<a style={{ color: '#FF2E4E' }}>매수</a>:<a style={{ color: '#0084FE' }}>매도</a>}
+          </StockCount>
         </StockInfoBox>
         <RecieptBox>
-            <RecieptText>
-                <Title>1주 희망 가격</Title>
-                <Price>880,000원</Price>
-            </RecieptText>
-            <RecieptText>
-                <Title>총 주문 금액</Title>
-                <Price>141,000,000원</Price>
-            </RecieptText>
+          <RecieptText>
+            <Title>1주 희망 가격</Title>
+            <Price>880,000원</Price>
+          </RecieptText>
+          <RecieptText>
+            <Title>총 주문 금액</Title>
+            <Price>141,000,000원</Price>
+          </RecieptText>
         </RecieptBox>
         <ButtonBox>
           <GrayButton name='닫기' width='120px' height='40px' onClick={() => setIsModal(false)} />
-          <RedButton width='120px' height='40px' onClick={()=>purchase()}/>
+          {isPurchase ? (
+            <RedButton width='120px' height='40px' onClick={() => purchaseOrsell(true)} />
+          ) : (
+            <BlueButton width='120px' height='40px' onClick={() => purchaseOrsell(false)} />
+          )}
         </ButtonBox>
       </Modal>
     </BackGround>

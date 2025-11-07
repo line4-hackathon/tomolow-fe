@@ -4,30 +4,54 @@ import PurchasCount from '@/components/invest/PurchaseCount'
 import PurchasePrice from '@/components/invest/PurchasePrice'
 import styled from 'styled-components'
 import RedButton from '@/components/invest/RedButton'
-import { useState } from 'react'
 import CancelModal from '@/components/common/CancelModal'
 import CashLackModal from '@/components/invest/CashLackModal'
 import ReceiptModal from '@/components/invest/ReceiptModal'
-
-export default function InvestPurchasePage() {
+import BlueButton from '@/components/invest/BlueButton'
+import Toast from '@/components/invest/ToastMessage'
+import { AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+export default function InvestPurchasePage({ myCash, myStockCount }) {
   const [isFocus, setIsFocus] = useState(true)
   const [price, setPrice] = useState('')
   const [count, setCount] = useState('')
   const [isModal, setIsModal] = useState(false)
-  const myCash = 20000
-  let modal
+  const location = useLocation()
+  const { state } = location
+  myCash = 20000 //임의 지정
+  myStockCount = 30
   const purchase = () => {
-    console.log('모달')
+    if(price && count){
     if (price * count > myCash) {
-      modal = <CashLackModal />
+      setIsModal(<CashLackModal setIsModal={setIsModal}/>)
     } else {
-      modal = <ReceiptModal />
+      setIsModal(<ReceiptModal setIsModal={setIsModal} isPurchase={true}/>)
     }
+  }
+  }
+  const sell = () => {
+    if(price && count){
+    if (count > myStockCount) {
+      setToastVisible(true)
+    } else {
+      setIsModal(<ReceiptModal setIsModal={setIsModal} isPurchase={false}/>)
+    }
+  }
+  }
+  const [toastVisible, setToastVisible] = useState(false)
 
-    setIsModal(true)
+  // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
+  const handleCloseToast = () => {
+    setToastVisible(false)
   }
   const maxCount = () => {
-    setCount(parseInt(myCash / price))
+    if(state.purchase){
+      setCount(parseInt(myCash / price))
+    } else {
+      setCount(myStockCount)
+    }
+    
   }
 
   return (
@@ -41,7 +65,7 @@ export default function InvestPurchasePage() {
           price={price}
           maxCount={maxCount}
         />
-        <a>보유 현금 : 1,000,000,000원</a>
+        {state.purchase ? <a>보유 현금 : 1,000,000,000원</a> : ''}
       </PurchaseBox>
       <Numpad
         isFocus={isFocus}
@@ -52,19 +76,22 @@ export default function InvestPurchasePage() {
         count={count}
       />
       <Bar>
-        <RedButton width='343px' height='56px' onClick={() => purchase()} />
+        {state.purchase ? (
+          <RedButton width='343px' height='56px' onClick={() => purchase()} />
+        ) : (
+          <BlueButton width='343px' height='56px' onClick={() => sell()} />
+        )}
       </Bar>
-      {isModal ? (
-        <>
-          {price * count > myCash ? (
-            <CashLackModal setIsModal={setIsModal} />
-          ) : (
-            <ReceiptModal setIsModal={setIsModal} />
-          )}
-        </>
-      ) : (
-        <></>
-      )}
+      {isModal}
+      <AnimatePresence>
+        {toastVisible && (
+          <Toast
+            message="최대 판매가능 수량은 34주입니다"
+            onClose={handleCloseToast}
+            // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
+          />
+        )}
+      </AnimatePresence>
     </Page>
   )
 }

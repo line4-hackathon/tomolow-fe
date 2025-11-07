@@ -34,6 +34,14 @@ export default function InvestTradingPage() {
       window.history.replaceState({}, document.title); // state 제거 (라우터 버전에 따라 다름)
     }
   }, [state]);
+
+  const isPurchase=(p)=>{
+    navigate("/invest/purchase",{
+      state:{
+      purchase : p,     }
+    })
+  }
+
   return (
     <Page>
       <InvestHeader />
@@ -45,11 +53,11 @@ export default function InvestTradingPage() {
       <Bar>
         {isOrder ? (
           <>
-            <BlueButton width='161px' height='56px' />
-            <RedButton width='161px' height='56px' onClick={()=>navigate("/invest/purchase")}/>
+            <BlueButton width='161px' height='56px' onClick={()=>isPurchase(false)}/>
+            <RedButton width='161px' height='56px' onClick={()=>isPurchase(true)}/>
           </>
         ) : (
-          <RedButton width='343px' height='56px' onClick={()=>navigate("/invest/purchase")}/>
+          <RedButton width='343px' height='56px' onClick={()=>isPurchase(true)}/>
         )}
       </Bar>
       <AnimatePresence>
