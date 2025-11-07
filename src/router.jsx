@@ -4,9 +4,8 @@ import App from './App'
 import LoginPage from './pages/signup/LoginPage'
 import SignupPage1 from './pages/signup/SignupPage1'
 import SignupPage2 from './pages/signup/SignupPage2'
-import HomePage from './pages/home/HomePage'
 // 홈
-import HomeTransactionPage from './pages/hometransaction/HomeTransactionPage'
+import HomePage from './pages/home/HomePage'
 // 투자
 import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
@@ -29,7 +28,7 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <App />,
-    children: [{ path: '', element: <LoginPage /> }],
+    children: [{ index: true, element: <LoginPage /> }],
   },
   {
     path: '/signup',
@@ -62,16 +61,13 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: <App />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: 'transaction', element: <HomeTransactionPage /> }, 
-    ],
+    children: [{ index: true, element: <HomePage /> }],
   },
   {
     path: '/mypage',
     element: <App />,
     children: [
-      { path: '', element: <MyPage /> },
+      { index: true, element: <MyPage /> },
       { path: 'chats', element: <SavedChattingPage /> },
       { path: 'charge', element: <MoneyChargePage /> },
       { path: 'edit', element: <EditInfoPage /> },
