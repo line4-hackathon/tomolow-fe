@@ -4,9 +4,11 @@ import GrayButton from './GrayButton'
 import NavyButton from './NavyButton'
 import { useState } from 'react'
 import CancelModal from './CancelModal'
+import { useNavigate } from 'react-router-dom'
 
 export default function OrderCard({ data }) {
   const [isModal,setIsModal]=useState(false);
+  const navigate=useNavigate()
   const isImg = 0
 
   return (
@@ -17,7 +19,7 @@ export default function OrderCard({ data }) {
         <Price>주당 111,800원</Price>
       </InfoBox>
       <GrayButton name='취소' width='47px' height='47px' onClick={()=>setIsModal(true)}/>
-      <NavyButton name='정정' width='47px' height='47px' />
+      <NavyButton name='정정' width='47px' height='47px' onClick={()=>navigate("/invest/correction")}/>
       {isModal ? <CancelModal setIsModal={setIsModal}/>:<></>}
     </Card> 
   )

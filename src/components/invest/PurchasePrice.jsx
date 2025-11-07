@@ -3,13 +3,13 @@ import styled from 'styled-components'
 import useSelect from '@/hooks/select'
 import { useEffect } from 'react'
 
-export default function PurchasePrice({ onClick, price,setPrice }) {
+export default function PurchasePrice({ onClick, price, setPrice }) {
   const { selectedMenu, handleSelect } = useSelect('CUSTOM')
-  useEffect(()=>{
-    if(selectedMenu==="MARKET"){
-      setPrice("1000");
+  useEffect(() => {
+    if (selectedMenu === 'MARKET') {
+      setPrice('1000')
     }
-  },[selectedMenu])
+  }, [selectedMenu])
   return (
     <Box>
       <ButtonBox>
@@ -25,7 +25,9 @@ export default function PurchasePrice({ onClick, price,setPrice }) {
         ))}
       </ButtonBox>
       {selectedMenu === 'CUSTOM' ? (
-        <PriceInput value={price} readOnly onClick={onClick} />
+        <Price>
+          <PriceInput value={price} readOnly onClick={onClick} />원
+        </Price>
       ) : (
         <MarketPrice>최대한 빠른 가격</MarketPrice>
       )}
@@ -40,7 +42,6 @@ const Box = styled.div`
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-bottom: 19px;
 
   border-radius: var(--Radius-L, 16px);
   background: var(--Neutral-0, #fff);
@@ -71,7 +72,7 @@ const PriceButton = styled.div`
   }
 `
 const PriceInput = styled.input`
-  width: 310px;
+  max-width: 300px;
   color: var(--Neutral-900, #333);
 
   /* Title-Semi Bold */
@@ -84,6 +85,18 @@ const PriceInput = styled.input`
   &:focus {
     outline: none;
   }
+`
+const Price = styled.div`
+  display: flex;
+  color: var(--Neutral-900, #333);
+
+  /* Title-Semi Bold */
+  font-family: Inter;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 32px; /* 133.333% */
+  border: none;
 `
 const MarketPrice = styled.div`
   width: 310px;

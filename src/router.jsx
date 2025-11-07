@@ -10,6 +10,7 @@ import HomePage from './pages/home/HomePage'
 import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import InvestPurchasePage from './pages/invest/PurchasePage'
+import InvestCorrectionPage from './pages/invest/CorrectionPage'
 // 그룹
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
       { path: 'search', element: <InvestSearchPage /> },
       { path: 'trading', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
+      { path: 'correction', element: <InvestCorrectionPage /> },
     ],
   },
   {
