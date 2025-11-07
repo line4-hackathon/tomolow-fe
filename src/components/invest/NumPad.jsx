@@ -82,20 +82,12 @@ export default function Numpad({
     keyboardRef.current?.setInput(next)
   }
 
-  // onChange는 보조적으로 남겨도 되지만, 위 방식에서는 onKeyPress에서 직접 상태를 변경하므로 필수는 아님.
-  // 단, onChange를 사용하면 (예: 드래그/붙여넣기 같은 경우) 호출될 수 있으니 간단히 동기화만 해주자.
-  const onChange = (val) => {
-    // 선택: onKeyPress에서 이미 처리하므로 여기서는 필요 없을 수 있음.
-    // applyValue(val)
-  }
-
   return (
     <StyledKeyboardWrapper>
       <Keyboard
         keyboardRef={(r) => (keyboardRef.current = r)}
         layout={NUMPAD_LAYOUT}
         onKeyPress={onKeyPress}
-        onChange={onChange}
         input={String(currentValue ?? '')}
         keyboardClass="simple-keyboard"
         display={{

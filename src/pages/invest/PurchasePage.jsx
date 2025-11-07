@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 export default function InvestPurchasePage({ myCash, myStockCount }) {
   const [isFocus, setIsFocus] = useState(true)
-  const [price, setPrice] = useState('')
+  const [price, setPrice] = useState('117000')
   const [count, setCount] = useState('')
   const [isModal, setIsModal] = useState(false)
   const location = useLocation()
@@ -99,12 +99,16 @@ const Page = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 27px;
 `
 const PurchaseBox = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
+  background-color: #F6F6F6;
+  width: 375px;
+  height: 350px;
 
   color: var(--Neutral-400, #888);
   /* Caption-Regular */
