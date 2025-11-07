@@ -6,6 +6,7 @@ export const Container = styled.div`
   flex-direction: column;
   padding: 32px 16px;
   background: var(--Neutral-50, #f6f6f6);
+  overflow-y: auto;
 `
 
 export const NameContainer = styled.div`

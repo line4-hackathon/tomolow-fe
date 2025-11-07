@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '@/components/common/Header'
+import { Scrollable } from '@/styles/Scrollable.styled'
 import * as S from '@/pages/signup/SignupPage.styled'
 import InputField from '@/components/common/InputField'
 import InputFieldWithButton from '@/components/common/InputFieldWithButton'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
+import MenuBar from '@/components/common/MenuBar'
 
 const EditInfoPage = () => {
   const navigate = useNavigate()
@@ -59,64 +61,70 @@ const EditInfoPage = () => {
 
   return (
     <>
-      <Header title='정보수정' showIcon={true} path='/mypage' />
-      <S.Container>
-        <InputFieldWithButton
-          label='닉네임'
-          type='text'
-          placeholder='닉네임 입력'
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          buttonText='중복 확인'
-          active={nickname.length < 10 && nickname.length > 1}
-          onClick={checkNickname}
-        />
-        <S.StatusRow>
-          <StatusMessage
-            status={nicknameStatus.duplicate ? 'success' : 'default'}
-            text='중복 여부'
+      <Scrollable>
+        <Header title='정보수정' showIcon={true} path='/mypage' />
+        <S.Container>
+          <InputFieldWithButton
+            label='닉네임'
+            type='text'
+            placeholder='닉네임 입력'
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            buttonText='중복 확인'
+            active={nickname.length < 10 && nickname.length > 1}
+            onClick={checkNickname}
           />
-          <StatusMessage status={nicknameStatus.length ? 'success' : 'default'} text='10자 이내' />
-        </S.StatusRow>
-        <S.FieldSpace></S.FieldSpace>
-        <InputField
-          label='비밀번호'
-          type='password'
-          placeholder='비밀번호 입력'
-          value={password1}
-          onChange={(e) => setPassword1(e.target.value)}
-        />
-        <S.StatusRow>
-          <StatusMessage
-            status={passwordStatus.hasLetter ? 'success' : 'default'}
-            text='영문 포함'
+          <S.StatusRow>
+            <StatusMessage
+              status={nicknameStatus.duplicate ? 'success' : 'default'}
+              text='중복 여부'
+            />
+            <StatusMessage
+              status={nicknameStatus.length ? 'success' : 'default'}
+              text='10자 이내'
+            />
+          </S.StatusRow>
+          <S.FieldSpace></S.FieldSpace>
+          <InputField
+            label='비밀번호'
+            type='password'
+            placeholder='비밀번호 입력'
+            value={password1}
+            onChange={(e) => setPassword1(e.target.value)}
+          />
+          <S.StatusRow>
+            <StatusMessage
+              status={passwordStatus.hasLetter ? 'success' : 'default'}
+              text='영문 포함'
+            />
+            <StatusMessage
+              status={passwordStatus.hasNumber ? 'success' : 'default'}
+              text='숫자 포함'
+            />
+          </S.StatusRow>
+          <InputField
+            label=''
+            type='password'
+            placeholder='비밀번호 확인'
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
           />
           <StatusMessage
-            status={passwordStatus.hasNumber ? 'success' : 'default'}
-            text='숫자 포함'
+            status={passwordStatus.isMatched ? 'success' : 'default'}
+            text={'비밀번호 일치'}
           />
-        </S.StatusRow>
-        <InputField
-          label=''
-          type='password'
-          placeholder='비밀번호 확인'
-          value={password2}
-          onChange={(e) => setPassword2(e.target.value)}
-        />
-        <StatusMessage
-          status={passwordStatus.isMatched ? 'success' : 'default'}
-          text={'비밀번호 일치'}
-        />
 
-        <S.NextButton>
-          <LargeButton
-            label='완료'
-            color='#fff'
-            backgroundcolor={isValid ? '#4880AF' : '#D1D1D1'}
-            onClick={handleSubmit}
-          />
-        </S.NextButton>
-      </S.Container>
+          <S.NextButton>
+            <LargeButton
+              label='완료'
+              color='#fff'
+              backgroundcolor={isValid ? '#4880AF' : '#D1D1D1'}
+              onClick={handleSubmit}
+            />
+          </S.NextButton>
+        </S.Container>
+      </Scrollable>
+      <MenuBar />
     </>
   )
 }

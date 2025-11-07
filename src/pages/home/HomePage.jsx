@@ -49,29 +49,31 @@ function HomePage() {
   }, [range])
 
   return (
-    <Container>
-      <Header title='홈' />
-      <HomeHeader selectedTab={selectedTab} onChangeTab={setSelectedTab} />{' '}
-      {/* 상단 헤더 + 탭 + 배너 */}
-      {selectedTab === 'asset' ? (
-        <>
-          <MyAssets /> {/* 내 자산 현황 */}
-          <HoldInterest /> {/* 보유 관심 종목 */}
-          <WaitingOrder /> {/* 대기 주문 */}
-        </>
-      ) : (
-        <>
-          <TopContainer>
-            <DayPicker value={range} onApply={setRange} />
-            <InvestSummaryCard summary={summary} />
-          </TopContainer>
-          <BottomContainer>
-            <TransactionList transactions={transactions} />
-          </BottomContainer>
-        </>
-      )}
+    <>
+      <Container className='scrollable'>
+        <Header title='홈' />
+        <HomeHeader selectedTab={selectedTab} onChangeTab={setSelectedTab} />{' '}
+        {/* 상단 헤더 + 탭 + 배너 */}
+        {selectedTab === 'asset' ? (
+          <>
+            <MyAssets /> {/* 내 자산 현황 */}
+            <HoldInterest /> {/* 보유 관심 종목 */}
+            <WaitingOrder /> {/* 대기 주문 */}
+          </>
+        ) : (
+          <>
+            <TopContainer>
+              <DayPicker value={range} onApply={setRange} />
+              <InvestSummaryCard summary={summary} />
+            </TopContainer>
+            <BottomContainer>
+              <TransactionList transactions={transactions} />
+            </BottomContainer>
+          </>
+        )}
+      </Container>
       <MenuBar /> {/* 하단 탭바 */}
-    </Container>
+    </>
   )
 }
 
@@ -81,9 +83,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
   background-color: #f9f9fb;
   overflow-y: auto;
+  padding-bottom: 64px; /* 하단바 높이만큼 여백 추가 */
 `
 const TopContainer = styled.div`
   padding: 0 16px;
