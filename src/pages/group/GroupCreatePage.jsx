@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import * as S from './GroupCreatePage.styled'
+import { Scrollable } from '@/styles/Scrollable.styled'
+import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import InputField from '@/components/common/InputField'
 import InputFieldWithText from '@/components/group/InputFieldWithText'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
+import MenuBar from '@/components/common/MenuBar'
 
 const checkStatus = (isValid, isTouched) => (!isTouched ? 'default' : isValid ? 'success' : 'error')
 
@@ -50,67 +52,91 @@ const GroupCreatePage = () => {
 
   return (
     <>
-      <Header title='그룹 생성' showIcon={true} path='/group/list' />
-      <S.Container>
-        <S.FieldContainer>
-          <S.Field>
-            <InputField
-              label={'그룹명'}
-              placeholder={'그룹명 입력'}
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              onBlur={() => setGroupNameTouched(true)}
+      <Scrollable>
+        <Header title='그룹 생성' showIcon={true} path='/group/list' />
+        <Container>
+          <FieldContainer>
+            <Field>
+              <InputField
+                label={'그룹명'}
+                placeholder={'그룹명 입력'}
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                onBlur={() => setGroupNameTouched(true)}
+              />
+              <StatusMessage status={groupNameStatus} text={'15자 이하'} />
+            </Field>
+            <Field>
+              <InputFieldWithText
+                label={'투자 시드머니 (참가비)'}
+                type='text'
+                placeholder={'숫자만 입력'}
+                value={money ? Number(money).toLocaleString() : ''}
+                onChange={(e) => {
+                  const value = e.target.value.replaceAll(',', '')
+                  if (!isNaN(value)) setMoney(value)
+                }}
+                onBlur={() => setMoneyTouched(true)}
+                rightText='원'
+              />
+              <StatusMessage status={moneyStatus} text={'1만원 이상 1억원 이하'} />
+            </Field>
+            <Field>
+              <InputFieldWithText
+                label={'인원'}
+                type='number'
+                placeholder={'숫자만 입력'}
+                value={memberCount}
+                onChange={(e) => setMemberCount(e.target.value)}
+                onBlur={() => setMemberTouched(true)}
+                rightText='명'
+              />
+              <StatusMessage status={memberStatus} text={'2인 이상 4인 이하'} />
+            </Field>
+            <Field>
+              <InputFieldWithText
+                label={'투자 기간'}
+                type='number'
+                placeholder={'숫자만 입력'}
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                onBlur={() => setDurationTouched(true)}
+                rightText='일'
+              />
+              <StatusMessage status={durationStatus} text={'1일 이상 180일 이하'} />
+            </Field>
+          </FieldContainer>
+          <CreateButton>
+            <LargeButton
+              label='생성하기'
+              color='#fff'
+              backgroundcolor={allValid ? '#4880AF' : '#D1D1D1'}
+              onClick={handleSubmit}
             />
-            <StatusMessage status={groupNameStatus} text={'15자 이하'} />
-          </S.Field>
-          <S.Field>
-            <InputFieldWithText
-              label={'투자 시드머니 (참가비)'}
-              type='number'
-              placeholder={'숫자만 입력'}
-              value={money}
-              onChange={(e) => setMoney(e.target.value)}
-              onBlur={() => setMoneyTouched(true)}
-              rightText='원'
-            />
-            <StatusMessage status={moneyStatus} text={'1만원 이상 1억원 이하'} />
-          </S.Field>
-          <S.Field>
-            <InputFieldWithText
-              label={'인원'}
-              type='number'
-              placeholder={'숫자만 입력'}
-              value={memberCount}
-              onChange={(e) => setMemberCount(e.target.value)}
-              onBlur={() => setMemberTouched(true)}
-              rightText='명'
-            />
-            <StatusMessage status={memberStatus} text={'2인 이상 4인 이하'} />
-          </S.Field>
-          <S.Field>
-            <InputFieldWithText
-              label={'투자 기간'}
-              type='number'
-              placeholder={'숫자만 입력'}
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              onBlur={() => setDurationTouched(true)}
-              rightText='일'
-            />
-            <StatusMessage status={durationStatus} text={'1일 이상 180일 이하'} />
-          </S.Field>
-        </S.FieldContainer>
-        <S.CreateButton>
-          <LargeButton
-            label='생성하기'
-            color='#fff'
-            backgroundcolor={allValid ? '#4880AF' : '#D1D1D1'}
-            onClick={handleSubmit}
-          />
-        </S.CreateButton>
-      </S.Container>
+          </CreateButton>
+        </Container>
+      </Scrollable>
+      <MenuBar />
     </>
   )
 }
 
 export default GroupCreatePage
+
+const Container = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px 16px;
+  background: var(--Neutral-0, #fff);
+`
+const FieldContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`
+const Field = styled.div``
+
+const CreateButton = styled.div`
+  margin-top: auto;
+`

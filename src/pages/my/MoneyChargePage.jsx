@@ -1,10 +1,12 @@
 import React from 'react'
+import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import ChargeGuide from '@/components/my/ChargeGuide'
 import AdList from '@/components/my/AdList'
 import ChargeGrid from '@/components/my/ChargeGrid'
 import adGrid from '@/assets/images/img-ad-grid.svg'
+import MenuBar from '@/components/common/MenuBar'
 
 // 임시 광고 데이터
 const ads = [
@@ -50,12 +52,15 @@ const MoneyRechargePage = () => {
   }
   return (
     <>
-      <Header title='머니충전' showIcon={true} path='/mypage' />
-      <Container>
-        <ChargeGuide />
-        <AdList onClick={handleAdClick} />
-        <ChargeGrid ads={ads} onClick={handleAdGridClick} />
-      </Container>
+      <Scrollable>
+        <Header title='머니충전' showIcon={true} path='/mypage' />
+        <Container>
+          <ChargeGuide />
+          <AdList onClick={handleAdClick} />
+          <ChargeGrid ads={ads} onClick={handleAdGridClick} />
+        </Container>
+      </Scrollable>
+      <MenuBar />
     </>
   )
 }

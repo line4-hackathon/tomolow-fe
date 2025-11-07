@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import * as S from '@/pages/signup/LoginPage.styled'
+import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import Slogan from '@/components/signup/Slogan'
-import Logo from '@/assets/images/logo-login.svg'
+import Logo from '@/assets/images/logo-login.svg?react'
 import InputField from '@/components/common/InputField'
 import LargeButton from '@/components/signup/LargeButton'
 import ToastMessage from '@/components/signup/ToastMessage'
@@ -31,11 +31,11 @@ const LoginPage = () => {
   return (
     <>
       <Header title='로그인' />
-      <S.Container>
+      <Container>
         <Slogan />
-        <S.Img src={Logo} alt='Logo' />
+        <Logo />
 
-        <S.FormContainer>
+        <FormContainer>
           <InputField
             label='아이디'
             type='text'
@@ -50,21 +50,54 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <S.SignupButton onClick={handleClick}>회원가입</S.SignupButton>
-          <S.LoginButton>
+          <SignupButton onClick={handleClick}>회원가입</SignupButton>
+          <LoginButton>
             <LargeButton
               label='로그인'
               color='#fff'
               backgroundcolor='#4880AF'
               onClick={handleSubmit}
             />
-          </S.LoginButton>
-        </S.FormContainer>
+          </LoginButton>
+        </FormContainer>
 
         {toastMessage && <ToastMessage msg={toastMessage} onClose={() => setToastMessage('')} />}
-      </S.Container>
+      </Container>
     </>
   )
 }
 
 export default LoginPage
+
+const Container = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px;
+  gap: 20px;
+`
+
+const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  gap: 24px;
+`
+
+const SignupButton = styled.button`
+  width: fit-content;
+  margin: 0 auto;
+  border: none;
+  background-color: #ffffff;
+  color: var(--Neutral-300, #b0b0b0);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  cursor: pointer;
+`
+const LoginButton = styled.div`
+  margin-top: auto;
+`
