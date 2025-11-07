@@ -1,9 +1,15 @@
 import { PriceTypes } from '@/pages/invest/selectType'
 import styled from 'styled-components'
 import useSelect from '@/hooks/select'
+import { useEffect } from 'react'
 
-export default function PurchasePrice({ onClick, price }) {
+export default function PurchasePrice({ onClick, price,setPrice }) {
   const { selectedMenu, handleSelect } = useSelect('CUSTOM')
+  useEffect(()=>{
+    if(selectedMenu==="MARKET"){
+      setPrice("1000");
+    }
+  },[selectedMenu])
   return (
     <Box>
       <ButtonBox>

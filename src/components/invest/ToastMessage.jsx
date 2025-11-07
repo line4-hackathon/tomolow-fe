@@ -49,9 +49,9 @@ const BackGround = styled.div`
 `
 // 1. 스타일 정의: motion.div를 사용하여 Framer Motion과 결합
 const ToastContainer = styled(motion.div)`
-  width: 189px;
   height: 72px;
   display: flex;
+  padding: 0 16px 0 16px;
   justify-content: center;
   align-items: center;
   border-radius: var(--Radius-M, 12px);

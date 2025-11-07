@@ -7,11 +7,11 @@ import { menuTypes } from './selectType'
 import NothingIcon from '@/assets/icons/icon-search-not.svg?react'
 import NothingHeart from '@/assets/icons/icon-heart-navy.svg?react'
 import Header from '@/components/common/Header'
+import MenuBar from '@/components/common/MenuBar'
 
 export default function InvestSearchPage() {
   const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
   const isStock = 0
-  const isInteres = 0
 
   return (
     <Page>
@@ -42,7 +42,7 @@ export default function InvestSearchPage() {
           </StockCardBox>
         ) : (
           <Nothing>
-            {isInteres ? (
+            {selectedMenu==="INTEREST" ? (
               <>
                 <NothingHeart />
                 <p>관심 주식이 없어요</p>
@@ -56,6 +56,7 @@ export default function InvestSearchPage() {
           </Nothing>
         )}
       </Contents>
+      <MenuBar/>
     </Page>
   )
 }

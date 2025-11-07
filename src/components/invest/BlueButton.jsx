@@ -1,8 +1,8 @@
 import styled from 'styled-components'
 
-export default function BlueButton({ width, height }) {
+export default function BlueButton({ width, height ,onClick}) {
   return (
-    <Button $width={width} $height={height}>
+    <Button $width={width} $height={height} onClick={onClick}>
       매도
     </Button>
   )
