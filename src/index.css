@@ -88,6 +88,7 @@ html {
 
 body {
   background-color: #ffffff;
+  height: 100%;
   width: 100%;
   max-width: 375px;
   overflow-x: hidden;
