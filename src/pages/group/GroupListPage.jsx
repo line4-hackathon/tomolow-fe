@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
-import * as S from '@/pages/group/GroupListPage.styled'
+import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import GroupMiniButton from '@/components/group/GroupMiniButton'
 import pinkSquare from '@/assets/images/img-pink-square.svg'
@@ -56,15 +56,15 @@ const GroupListPage = () => {
     <>
       <Scrollable>
         <Header title='그룹' />
-        <S.Container>
-          <S.MiniButtonContainer>
+        <Container>
+          <MiniButtonContainer>
             <GroupMiniButton
               img={pinkSquare}
               label={'그룹 생성'}
               onClick={() => navigate('/group/create')}
             />
             <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={handleButtonClick} />
-          </S.MiniButtonContainer>
+          </MiniButtonContainer>
 
           {/* Tab 바 */}
           <Tab items={ITEMS} activeTab={activeTab} onChange={setActiveTab} />
@@ -72,7 +72,7 @@ const GroupListPage = () => {
           {activeTab === 'now' && <GroupListNow />}
           {activeTab === 'finished' && <GroupListFinished />}
           {activeTab === 'recruiting' && <GroupListRecruting />}
-        </S.Container>
+        </Container>
         {/* 모달 창 */}
         {modal.isOpen && modal.step === 1 && (
           <Modal
@@ -117,3 +117,19 @@ const GroupListPage = () => {
 }
 
 export default GroupListPage
+
+export const Container = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px 16px;
+  background: var(--Neutral-50, #f6f6f6);
+`
+
+export const MiniButtonContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 24px;
+`

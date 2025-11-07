@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Scrollable } from '@/styles/Scrollable.styled'
-import * as S from './GroupCreatePage.styled'
+import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import InputField from '@/components/common/InputField'
 import InputFieldWithText from '@/components/group/InputFieldWithText'
@@ -54,9 +54,9 @@ const GroupCreatePage = () => {
     <>
       <Scrollable>
         <Header title='그룹 생성' showIcon={true} path='/group/list' />
-        <S.Container>
-          <S.FieldContainer>
-            <S.Field>
+        <Container>
+          <FieldContainer>
+            <Field>
               <InputField
                 label={'그룹명'}
                 placeholder={'그룹명 입력'}
@@ -65,8 +65,8 @@ const GroupCreatePage = () => {
                 onBlur={() => setGroupNameTouched(true)}
               />
               <StatusMessage status={groupNameStatus} text={'15자 이하'} />
-            </S.Field>
-            <S.Field>
+            </Field>
+            <Field>
               <InputFieldWithText
                 label={'투자 시드머니 (참가비)'}
                 type='number'
@@ -77,8 +77,8 @@ const GroupCreatePage = () => {
                 rightText='원'
               />
               <StatusMessage status={moneyStatus} text={'1만원 이상 1억원 이하'} />
-            </S.Field>
-            <S.Field>
+            </Field>
+            <Field>
               <InputFieldWithText
                 label={'인원'}
                 type='number'
@@ -89,8 +89,8 @@ const GroupCreatePage = () => {
                 rightText='명'
               />
               <StatusMessage status={memberStatus} text={'2인 이상 4인 이하'} />
-            </S.Field>
-            <S.Field>
+            </Field>
+            <Field>
               <InputFieldWithText
                 label={'투자 기간'}
                 type='number'
@@ -101,17 +101,17 @@ const GroupCreatePage = () => {
                 rightText='일'
               />
               <StatusMessage status={durationStatus} text={'1일 이상 180일 이하'} />
-            </S.Field>
-          </S.FieldContainer>
-          <S.CreateButton>
+            </Field>
+          </FieldContainer>
+          <CreateButton>
             <LargeButton
               label='생성하기'
               color='#fff'
               backgroundcolor={allValid ? '#4880AF' : '#D1D1D1'}
               onClick={handleSubmit}
             />
-          </S.CreateButton>
-        </S.Container>
+          </CreateButton>
+        </Container>
       </Scrollable>
       <MenuBar />
     </>
@@ -119,3 +119,21 @@ const GroupCreatePage = () => {
 }
 
 export default GroupCreatePage
+
+const Container = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px 16px;
+  background: var(--Neutral-0, #fff);
+`
+const FieldContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`
+const Field = styled.div``
+
+const CreateButton = styled.div`
+  margin-top: auto;
+`
