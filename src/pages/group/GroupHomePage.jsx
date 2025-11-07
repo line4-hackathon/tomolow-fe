@@ -24,6 +24,7 @@ const GroupHomePage = () => {
           {/* 랭킹 확인 */}
           <GroupRankList />
         </Container>
+        <Space></Space>
       </Scrollable>
       <MenuBar />
     </>
@@ -38,7 +39,7 @@ const Container = styled.div`
   flex: 1;
   background: var(--Neutral-50, #f6f6f6);
 `
-
 const Space = styled.div`
   height: 24px;
+  background: var(--Neutral-50, #f6f6f6);
 `

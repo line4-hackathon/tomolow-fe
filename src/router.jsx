@@ -20,6 +20,7 @@ import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
 import GroupHomePage from './pages/group/GroupHomePage'
+import GroupTransactionPage from './pages/group/GroupTransactionPage'
 
 const router = createBrowserRouter([
   {
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: 'home',
         element: <GroupHomePage />,
+      },
+      {
+        path: 'transaction',
+        element: <GroupTransactionPage />,
       },
     ],
   },
