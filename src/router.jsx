@@ -10,6 +10,7 @@ import HomePage from './pages/home/HomePage'
 import InvestSearchPage from './pages/invest/SearchPage'
 import InvestTradingPage from './pages/invest/TradingPage'
 import InvestPurchasePage from './pages/invest/PurchasePage'
+import InvestCorrectionPage from './pages/invest/CorrectionPage'
 // 그룹
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
@@ -18,7 +19,8 @@ import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
-import InvestCorrectionPage from './pages/invest/CorrectionPage'
+import GroupHomePage from './pages/group/GroupHomePage'
+import GroupTransactionPage from './pages/group/GroupTransactionPage'
 
 const router = createBrowserRouter([
   {
@@ -46,7 +48,7 @@ const router = createBrowserRouter([
       { path: 'search', element: <InvestSearchPage /> },
       { path: 'trading', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
-      { path: 'correction', element: <InvestCorrectionPage/>},
+      { path: 'correction', element: <InvestCorrectionPage /> },
     ],
   },
   {
@@ -57,6 +59,14 @@ const router = createBrowserRouter([
       {
         path: 'create',
         element: <GroupCreatePage />,
+      },
+      {
+        path: 'home',
+        element: <GroupHomePage />,
+      },
+      {
+        path: 'transaction',
+        element: <GroupTransactionPage />,
       },
     ],
   },
