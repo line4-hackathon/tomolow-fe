@@ -18,6 +18,7 @@ import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
+import InvestCorrectionPage from './pages/invest/CorrectionPage'
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
       { path: 'search', element: <InvestSearchPage /> },
       { path: 'trading', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
+      { path: 'correction', element: <InvestCorrectionPage/>},
     ],
   },
   {
