@@ -4,12 +4,12 @@ import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
-import LogoCompany from '@/assets/images/logo-company.svg?react'
 
 // 더미 데이터
 const dummyData = [
   {
     id: 1,
+    src: '/src/assets/images/logo-company.svg',
     name: '삼성전자',
     quantity: 3,
     price: 87000,
@@ -18,6 +18,7 @@ const dummyData = [
   },
   {
     id: 2,
+    src: '/src/assets/images/logo-company.svg',
     name: '카카오',
     quantity: 2,
     price: 60000,
@@ -42,7 +43,7 @@ const GroupHoldingsPage = () => {
             {dummyData.map((item) => (
               <Item key={item.id} onClick={() => navigate('/group/invest/trading')}>
                 <Left>
-                  <LogoCompany />
+                  <Img src={item.src} />
                   <LeftText>
                     <Name>{item.name}</Name>
                     <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
@@ -90,6 +91,8 @@ const Item = styled.div`
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
   cursor: pointer;
 `
+
+const Img = styled.img``
 const Left = styled.div`
   display: flex;
   flex-direction: row;
