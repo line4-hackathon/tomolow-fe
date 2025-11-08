@@ -7,6 +7,7 @@ function InputFieldWithButton({
   placeholder,
   value,
   onChange,
+  onBlur,
   buttonText,
   onClick,
   active = false,
@@ -15,7 +16,13 @@ function InputFieldWithButton({
     <Field>
       <Label>{label}</Label>
       <FieldRow>
-        <Input type={type} placeholder={placeholder} value={value} onChange={onChange} />
+        <Input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+        />
         <SmallButton type='button' $active={active} disabled={!active} onClick={onClick}>
           {buttonText}
         </SmallButton>
