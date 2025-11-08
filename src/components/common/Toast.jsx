@@ -5,7 +5,7 @@ function Toast({ msg, onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose()
-    }, 2500)
+    }, 2000)
     return () => clearTimeout(timer)
   }, [onClose])
   return <ToastMsg>{msg}</ToastMsg>
@@ -17,10 +17,9 @@ const ToastMsg = styled.div`
   position: fixed;
   display: flex;
   white-space: nowrap;
-
   justify-content: center;
   align-items: center;
-  top: 259px;
+  top: 50%;
   left: 50%;
   padding: 24px 16px;
   transform: translate(-50%);

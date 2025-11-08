@@ -11,7 +11,7 @@ import Tab from '@/components/group/Tab'
 import GroupListNow from '@/components/group/GroupListNow'
 import GroupListFinished from '@/components/group/GroupListFinished'
 import GroupListRecruting from '@/components/group/GroupListRecruting'
-import Modal from '@/components/group/Modal'
+import Modal from '@/components/common/Modal'
 import MenuBar from '@/components/common/MenuBar'
 
 const ITEMS = [

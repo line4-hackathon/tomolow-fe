@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useModal from '@/hooks/useModal'
 import List from './List'
-import Modal from './Modal'
+import Modal from '../common/Modal'
 
 const GroupListRecruting = () => {
   const navigate = useNavigate()

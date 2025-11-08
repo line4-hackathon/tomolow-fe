@@ -2,17 +2,17 @@ import React from 'react'
 import * as S from './Modal.styled'
 import ModalButton from './ModalButton'
 function Modal({
-  isOpen = false,
-  title,
-  text,
-  hasInput = false,
+  isOpen = false, // 모달 오픈 여부
+  title, // 모달 내 진한 글씨
+  text, // 모달 연한 글씨
+  hasInput = false, // input field 존재하는지
   inputValue,
   setInputValue,
   placeholder,
-  leftButtonLabel = '다음',
-  rightButtonLabel = '닫기',
-  onLeftClick,
-  onRightClick,
+  leftButtonLabel = '다음', // 왼쪽 버튼
+  rightButtonLabel = '닫기', // 오른쪽 버튼
+  onLeftClick, // 왼쪽 버튼 클릭 이벤트
+  onRightClick, // 오른쪽 버튼 클릭 이벤트
 }) {
   if (!isOpen) return null
   return (

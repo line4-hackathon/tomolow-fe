@@ -1,5 +1,5 @@
 import React from 'react'
-import { Background, ModalContainer, Text } from '../group/Modal.styled'
+import { Background, ModalContainer, Text } from '../common/Modal.styled'
 import styled from 'styled-components'
 
 const ContactModal = ({ onClick }) => {

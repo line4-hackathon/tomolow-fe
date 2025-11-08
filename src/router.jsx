@@ -14,13 +14,15 @@ import InvestCorrectionPage from './pages/invest/CorrectionPage'
 // 그룹
 import GroupListPage from './pages/group/GroupListPage'
 import GroupCreatePage from './pages/group/GroupCreatePage'
+import GroupHomePage from './pages/group/GroupHomePage'
+import GroupTransactionPage from './pages/group/GroupTransactionPage'
+import GroupHoldingsPage from './pages/group/GroupHoldingsPage'
+import GroupWaitingOrdersPage from './pages/group/GroupWaitingOrdersPage'
 // 마이페이지
 import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
-import GroupHomePage from './pages/group/GroupHomePage'
-import GroupTransactionPage from './pages/group/GroupTransactionPage'
 
 const router = createBrowserRouter([
   {
@@ -65,8 +67,32 @@ const router = createBrowserRouter([
         element: <GroupHomePage />,
       },
       {
+        path: 'invest/search',
+        element: <InvestSearchPage />,
+      },
+      {
+        path: 'invest/trading',
+        element: <InvestTradingPage />,
+      },
+      {
+        path: 'invest/purchase',
+        element: <InvestPurchasePage />,
+      },
+      {
+        path: 'invest/correction',
+        element: <InvestCorrectionPage />,
+      },
+      {
         path: 'transaction',
         element: <GroupTransactionPage />,
+      },
+      {
+        path: 'holdings',
+        element: <GroupHoldingsPage />,
+      },
+      {
+        path: 'waiting',
+        element: <GroupWaitingOrdersPage />,
       },
     ],
   },
