@@ -6,7 +6,7 @@ import Slogan from '@/components/signup/Slogan'
 import Logo from '@/assets/images/logo-login.svg?react'
 import InputField from '@/components/common/InputField'
 import LargeButton from '@/components/signup/LargeButton'
-import ToastMessage from '@/components/signup/ToastMessage'
+import ToastMessage from '@/components/common/Toast'
 
 const LoginPage = () => {
   const [id, setId] = useState('')

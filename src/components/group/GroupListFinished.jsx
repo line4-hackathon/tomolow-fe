@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import List from './List'
-import Modal from './Modal'
+import Modal from '../common/Modal'
 
 const GroupListFinished = () => {
   return (

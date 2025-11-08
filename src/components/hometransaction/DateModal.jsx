@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import * as S from '@/components/group/Modal.styled'
+import * as S from '@/components/common/Modal.styled'
 import styled from 'styled-components'
 import DateRow from './DateRow'
-import ModalButton from '../group/ModalButton'
+import ModalButton from '../common/ModalButton'
 
 function DateModal({
   isOpen = false,
