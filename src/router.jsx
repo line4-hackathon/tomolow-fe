@@ -67,6 +67,22 @@ const router = createBrowserRouter([
         element: <GroupHomePage />,
       },
       {
+        path: 'invest/search',
+        element: <InvestSearchPage />,
+      },
+      {
+        path: 'invest/trading',
+        element: <InvestTradingPage />,
+      },
+      {
+        path: 'invest/purchase',
+        element: <InvestPurchasePage />,
+      },
+      {
+        path: 'invest/correction',
+        element: <InvestCorrectionPage />,
+      },
+      {
         path: 'transaction',
         element: <GroupTransactionPage />,
       },

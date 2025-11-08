@@ -15,7 +15,11 @@ const GroupMenuButtons = () => {
             label={'보유 종목'}
             onClick={() => navigate('/group/holdings')}
           />
-          <GroupMiniButton img={pinkSquare} label={'투자하기'} onClick={() => navigate('/')} />
+          <GroupMiniButton
+            img={pinkSquare}
+            label={'투자하기'}
+            onClick={() => navigate('/group/invest/search')}
+          />
         </Row>
         <Row>
           <GroupMiniButton
