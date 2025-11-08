@@ -22,20 +22,9 @@ const SignupPage = () => {
     /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
   const isMailValid = mailRegEx.test(mail)
 
-  // 인증 코드 확인
-  const checkCode = () => {
-    if (code === '1234') {
-      setCodeStatus('success')
-      setCodeText('인증 완료')
-    } else {
-      setCodeStatus('error')
-      setCodeText('인증번호가 올바르지 않습니다')
-    }
-  }
-
   // 다음 페이지 이동
   const handleSubmit = () => {
-    if (codeStatus === 'success') {
+    if (name && isMailValid) {
       navigate('/signup/2')
     }
   }
@@ -56,34 +45,18 @@ const SignupPage = () => {
               onChange={(e) => setName(e.target.value)}
             />
           </S.Space>
-          <InputFieldWithButton
+          <InputField
             label='아이디(이메일)'
             type='email'
             placeholder='이메일 입력'
             value={mail}
             onChange={(e) => setMail(e.target.value)}
-            buttonText='인증번호 전송'
-            active={isMailValid}
-            onClick={() => console.log('이메일 인증번호 전송')}
           />
-
-          <InputFieldWithButton
-            label=''
-            type='text'
-            placeholder='인증번호 입력'
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            buttonText='확인'
-            active={code.length > 0}
-            onClick={checkCode}
-          />
-
-          <StatusMessage status={codeStatus} text={codeText} />
           <S.NextButton>
             <LargeButton
               label='다음'
               color='#fff'
-              backgroundcolor={codeStatus === 'success' ? '#4880AF' : '#D1D1D1'}
+              backgroundcolor={name && isMailValid ? '#4880AF' : '#D1D1D1'}
               onClick={handleSubmit}
             />
           </S.NextButton>
