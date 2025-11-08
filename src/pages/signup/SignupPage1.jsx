@@ -25,7 +25,7 @@ const SignupPage = () => {
   // 다음 페이지 이동
   const handleSubmit = () => {
     if (name && isMailValid) {
-      navigate('/signup/2')
+      navigate('/signup/2', { state: { name, mail } }) // name과 mail 다음 페이지로 넘기기
     }
   }
 

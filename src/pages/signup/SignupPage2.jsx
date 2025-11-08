@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import axios from 'axios'
 import * as S from '@/pages/signup/SignupPage.styled'
 import Header from '@/components/common/Header'
 import InputField from '@/components/common/InputField'
@@ -12,6 +13,9 @@ const checkStatus = (isValid, isTouched) => (!isTouched ? 'default' : isValid ? 
 
 const SignupPage2 = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { name, mail } = location.state || {}
+
   const [nickname, setNickname] = useState('')
   const [nicknameTouched, setNicknameTouched] = useState(false)
   const [isNicknameValid, setIsNicknameValid] = useState(false) // 글자수 확인
@@ -21,6 +25,8 @@ const SignupPage2 = () => {
   const [password1Touched, setPassword1Touched] = useState(false)
   const [password2, setPassword2] = useState('')
   const [password2Touched, setPassword2Touched] = useState(false)
+
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(() => {
     setIsNicknameValid(nickname.length < 10 && nickname.length > 1)
@@ -42,15 +48,32 @@ const SignupPage2 = () => {
   const isMatched = password1 && password1 === password2
   const finalCheck = isNicknameValid && isNicknameChecked && hasLetter && hasNumber && isMatched
 
-  // 필드 상태값 계산 후 전달
+  // 필드 상태값 계산 후 함수에 전달
   const nicknameStatus = checkStatus(isNicknameValid, nicknameTouched)
   const passwordStatus = checkStatus(hasLetter && hasNumber, password1Touched)
   const passwordConfirmStatus = checkStatus(isMatched, password2Touched)
 
-  const handleSubmit = () => {
-    if (finalCheck) {
-      navigate('/')
+  const signupRequest = async () => {
+    try {
+      const res = await axios.post(`${apiUrl}/api/auth/sign-up`, {
+        username: mail,
+        password: password1,
+        name,
+        nickname,
+      })
+      navigate('/login')
+    } catch (err) {
+      console.error(err)
+      console.error('회원가입 실패')
     }
+  }
+
+  const handleSubmit = () => {
+    if (!finalCheck) {
+      return
+    }
+
+    signupRequest()
   }
 
   return (
