@@ -23,6 +23,10 @@ import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
+//학습
+import LearningPage from './pages/learning/ChatbotPage'
+import InvestHoldingPage from './pages/learning/HoldingStockPage'
+import SelectDatePage from './pages/learning/SelectDatePage'
 
 const router = createBrowserRouter([
   {
@@ -57,7 +61,7 @@ const router = createBrowserRouter([
     path: '/group',
     element: <App />,
     children: [
-      { index: true, element: <GroupListPage /> },
+      { path: 'list', element: <GroupListPage /> },
       {
         path: 'create',
         element: <GroupCreatePage />,
@@ -109,6 +113,16 @@ const router = createBrowserRouter([
       { path: 'chats', element: <SavedChattingPage /> },
       { path: 'charge', element: <MoneyChargePage /> },
       { path: 'edit', element: <EditInfoPage /> },
+    ],
+  },
+  {
+    path: '/learning',
+    element: <App />,
+    children: [
+      { index: true, element: <LearningPage /> },
+      { path: 'holding', element: <InvestHoldingPage /> },
+      { path: 'select-date', element: <SelectDatePage /> },
+
     ],
   },
 ])
