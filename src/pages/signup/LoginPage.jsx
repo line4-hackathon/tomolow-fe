@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import Slogan from '@/components/signup/Slogan'
@@ -12,11 +13,22 @@ const LoginPage = () => {
   const [id, setId] = useState('')
   const [password, setPassword] = useState('')
   const [toastMessage, setToastMessage] = useState('')
-
   const navigate = useNavigate()
 
-  const handleClick = () => {
-    navigate('/signup/1')
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const loginRequest = async () => {
+    try {
+      const res = await axios.post(`${apiUrl}/api/auth/login`, { username: id, password })
+
+      const { accessToken } = res.data.data
+      localStorage.setItem('accessToken', accessToken)
+
+      navigate('/home')
+    } catch (err) {
+      console.error(err)
+      console.error('로그인 실패')
+      setToastMessage('아이디 또는 비밀번호를 확인하세요')
+    }
   }
 
   // 연동
@@ -26,6 +38,11 @@ const LoginPage = () => {
       setToastMessage('아이디 또는 비밀번호를 확인하세요')
       return
     }
+    loginRequest()
+  }
+
+  const handleClick = () => {
+    navigate('/signup/1')
   }
 
   return (

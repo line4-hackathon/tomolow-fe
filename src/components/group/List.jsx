@@ -3,12 +3,7 @@ import styled from 'styled-components'
 import ListItem from './ListItem'
 import ListEmpty from './ListEmpty'
 
-function List({ onClick = () => {} }) {
-  // 임시 데이터
-  const items = [
-    { id: 1, title: '멋쟁이 사자처럼 모임', dateTxt: '12일 6시간 남음', statusTxt: '현재 3등' },
-    { id: 2, title: 'Tomolow 모임', dateTxt: '100일 6시간 남음', statusTxt: '현재 5등' },
-  ]
+function List({ items = [], onClick = () => {} }) {
   return (
     <ListContainer>
       {items.length > 0 ? (
