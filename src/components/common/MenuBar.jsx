@@ -6,14 +6,14 @@ import { useLocation, useNavigate } from 'react-router-dom'
 // 활성 아이콘
 import HomeOn from '@/assets/icons/menubar-icon/home.svg'
 import InvestOn from '@/assets/icons/menubar-icon/invest.svg'
-import PracticeOn from '@/assets/icons/menubar-icon/practice.svg'
+import learningOn from '@/assets/icons/menubar-icon/learning.svg'
 import GroupOn from '@/assets/icons/menubar-icon/group.svg'
 import MyOn from '@/assets/icons/menubar-icon/my.svg'
 
 // 비활성 아이콘
 import HomeOff from '@/assets/icons/menubar-icon/home-off.svg'
 import InvestOff from '@/assets/icons/menubar-icon/invest-off.svg'
-import PracticeOff from '@/assets/icons/menubar-icon/practice-off.svg'
+import learningOff from '@/assets/icons/menubar-icon/learning-off.svg'
 import GroupOff from '@/assets/icons/menubar-icon/group-off.svg'
 import MyOff from '@/assets/icons/menubar-icon/my-off.svg'
 
