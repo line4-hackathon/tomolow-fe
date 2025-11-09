@@ -47,7 +47,7 @@ const MyPage = () => {
             {/* 모달 띄우기 */}
             <ButtonItem icon={qnaIcon} label={`문의하기`} onClick={open} />
           </ButtonContainer>
-          <Logout>로그아웃</Logout>
+          <Logout onClick={() => navigate('/login')}>로그아웃</Logout>
           {isOpen && <ContactModal onClick={close} />}
         </Container>
       </Scrollable>
