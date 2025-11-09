@@ -8,9 +8,7 @@ import GroupMiniButton from '@/components/group/GroupMiniButton'
 import pinkSquare from '@/assets/images/img-pink-square.svg'
 import yellowSquare from '@/assets/images/img-yellow-square.svg'
 import Tab from '@/components/group/Tab'
-import GroupListNow from '@/components/group/GroupListNow'
-import GroupListFinished from '@/components/group/GroupListFinished'
-import GroupListRecruting from '@/components/group/GroupListRecruting'
+import List from '@/components/group/List'
 import Modal from '@/components/common/Modal'
 import MenuBar from '@/components/common/MenuBar'
 
@@ -20,23 +18,47 @@ const ITEMS = [
   { key: 'recruiting', label: '모집 중인 그룹' },
 ]
 
+// 탭별 임시 데이터
+const dummyData = {
+  now: [
+    {
+      id: 1,
+      title: '멋쟁이사자처럼 투자 소모임',
+      dateTxt: '12일 6시간 남음',
+      statusTxt: '현재 3등',
+    },
+    { id: 2, title: '투모로우 소모임', dateTxt: '56분 남음', statusTxt: '현재 1등' },
+  ],
+  finished: [
+    { id: 1, title: '종료 그룹 1', dateTxt: '투자 종료', statusTxt: '최종 3등' },
+    { id: 2, title: '종료 그룹 2', dateTxt: '투자 종료', statusTxt: '최종 3등' },
+  ],
+  recruiting: [
+    { id: 1, title: '모집중 그룹 1', dateTxt: '모집 중', statusTxt: '3명 / 4명' },
+    { id: 2, title: '모집중 그룹 2', dateTxt: '모집 중', statusTxt: '2명 / 3명' },
+  ],
+}
+
 const GroupListPage = () => {
   const navigate = useNavigate()
-  // 활성화 탭
   const [activeTab, setActiveTab] = useState('now')
-  // 모달 관리
   const modal = useModal()
 
-  const handleButtonClick = () => {
-    modal.open()
+  // 특정 탭 클릭시
+  const handleItemClick = (item) => {
+    // 모집 중 탭일 때만 모달 열기
+    if (activeTab === 'recruiting') {
+      modal.open()
+    } else if (activeTab === 'now') {
+      // 해당 그룹 홈으로 이동
+      navigate('/group/home')
+    } else {
+      return
+    }
   }
 
-  const handleClose = () => {
-    modal.close()
-  }
-
+  // 인증 코드 연동 필요
   const handleCheckCode = () => {
-    // 연동 필요
     if (modal.code === 'aaaa') {
       modal.goSuccess()
     } else {
@@ -44,14 +66,12 @@ const GroupListPage = () => {
     }
   }
 
+  // 인증 코드 성공 시
   const handleNavigate = () => {
-    navigate('/')
+    navigate('/group/list')
     modal.close()
   }
 
-  const handleRetry = () => {
-    modal.retry()
-  }
   return (
     <>
       <Scrollable>
@@ -63,15 +83,13 @@ const GroupListPage = () => {
               label={'그룹 생성'}
               onClick={() => navigate('/group/create')}
             />
-            <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={handleButtonClick} />
+            <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={() => modal.open()} />
           </MiniButtonContainer>
 
           {/* Tab 바 */}
           <Tab items={ITEMS} activeTab={activeTab} onChange={setActiveTab} />
-          {/* 활성화 된 버튼에 따른 Content    */}
-          {activeTab === 'now' && <GroupListNow />}
-          {activeTab === 'finished' && <GroupListFinished />}
-          {activeTab === 'recruiting' && <GroupListRecruting />}
+          {/* 활성화 된 버튼에 따른 그룹 리스트 띄우기 */}
+          <List items={dummyData[activeTab]} onClick={handleItemClick} />
         </Container>
         {/* 모달 창 */}
         {modal.isOpen && modal.step === 1 && (
@@ -84,19 +102,20 @@ const GroupListPage = () => {
             placeholder='전달 받은 입장코드 입력'
             leftButtonLabel='닫기'
             rightButtonLabel='다음'
-            onLeftClick={handleClose}
+            onLeftClick={() => modal.close()}
             onRightClick={handleCheckCode}
           />
         )}
 
         {modal.isOpen && modal.step === 2 && (
+          // 연동 후 실제 데이터로 채워넣기
           <Modal
             isOpen={modal.isOpen}
             title='멋쟁이사자처럼투자소모임'
             text={`만든 사람: 멋쟁이사자처럼기디1\n참가비 : 1,000,000\n참가 인원 : 3명 / 4명`}
             leftButtonLabel='닫기'
             rightButtonLabel='참가하기'
-            onLeftClick={handleClose}
+            onLeftClick={() => modal.close()}
             onRightClick={handleNavigate}
           />
         )}
@@ -106,8 +125,8 @@ const GroupListPage = () => {
             title={'찾으시는 그룹이 없어요.\n입장코드를 확인해주세요.'}
             leftButtonLabel='닫기'
             rightButtonLabel='다시 입력하기'
-            onLeftClick={handleClose}
-            onRightClick={handleRetry}
+            onLeftClick={() => modal.close()}
+            onRightClick={() => modal.retry()}
           />
         )}
       </Scrollable>
