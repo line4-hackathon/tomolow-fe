@@ -48,7 +48,7 @@ const GroupCreatePage = () => {
 
   const handleSubmit = () => {
     if (allValid) {
-      navigate('/group/list')
+      navigate('/group')
     }
     return
   }
@@ -56,7 +56,7 @@ const GroupCreatePage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='그룹 생성' showIcon={true} path='/group/list' />
+        <Header title='그룹 생성' showIcon={true} path='/group' />
         <Container>
           <FieldContainer>
             <Field>

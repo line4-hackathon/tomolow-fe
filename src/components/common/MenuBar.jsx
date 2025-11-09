@@ -20,8 +20,8 @@ import MyOff from '@/assets/icons/menubar-icon/my-off.svg'
 const MENUS = [
   { key: 'home', label: '홈', onIcon: HomeOn, offIcon: HomeOff, path: '/home' },
   { key: 'invest', label: '투자', onIcon: InvestOn, offIcon: InvestOff, path: '/invest/search' },
-  { key: 'practice', label: '학습', onIcon: PracticeOn, offIcon: PracticeOff, path: '/learning' },
-  { key: 'group', label: '그룹', onIcon: GroupOn, offIcon: GroupOff, path: '/group/list' },
+  { key: 'learning', label: '학습', onIcon: learningOn, offIcon: learningOff, path: '/learning' },
+  { key: 'group', label: '그룹', onIcon: GroupOn, offIcon: GroupOff, path: '/group' },
   { key: 'my', label: 'MY', onIcon: MyOn, offIcon: MyOff, path: '/mypage' },
 ]
 
