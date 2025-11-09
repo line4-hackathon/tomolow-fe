@@ -18,7 +18,7 @@ const GroupHomePage = () => {
           <GroupInfoCard />
           <Space></Space>
           {/* 그룹 내 자산 현황 */}
-          <MyAssets />
+          <MyAssets mode='group' title='그룹의 내 자산 현황' />
           {/* 메뉴 버튼 */}
           <GroupMenu />
           {/* 랭킹 확인 */}
