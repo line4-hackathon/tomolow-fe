@@ -47,7 +47,10 @@ const GroupCreatePage = () => {
     durationStatus === 'success'
 
   const handleSubmit = () => {
-    navigate('/group/list')
+    if (allValid) {
+      navigate('/group/list')
+    }
+    return
   }
 
   return (
