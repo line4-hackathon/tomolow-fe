@@ -12,13 +12,13 @@ const GroupHomePage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='멋쟁이사자처럼 투자 소모임' showIcon={true} path='/group/list' />
+        <Header title='멋쟁이사자처럼 투자 소모임' showIcon={true} path='/group' />
         {/* 그룹 정보 */}
         <Container>
           <GroupInfoCard />
           <Space></Space>
           {/* 그룹 내 자산 현황 */}
-          <MyAssets />
+          <MyAssets mode='group' title='그룹의 내 자산 현황' />
           {/* 메뉴 버튼 */}
           <GroupMenu />
           {/* 랭킹 확인 */}

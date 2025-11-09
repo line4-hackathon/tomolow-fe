@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import * as S from './SignupPage.styled'
+import * as S from '../../components/common/Form.styled'
 import Header from '@/components/common/Header'
 import LargeButton from '@/components/signup/LargeButton'
 import StatusMessage from '@/components/common/StatusMessage'
@@ -36,7 +36,7 @@ const SignupPage = () => {
         <S.Text>{`TomoLow 이용을 위해\n회원 정보를 입력해주세요`}</S.Text>
 
         <S.FormContainer>
-          <S.Space>
+          <S.NameSpace>
             <InputField
               label='이름'
               type='text'
@@ -44,7 +44,7 @@ const SignupPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-          </S.Space>
+          </S.NameSpace>
           <InputField
             label='아이디(이메일)'
             type='email'

@@ -21,8 +21,12 @@ export const FormContainer = styled.div`
   height: 100%;
   width: 100%;
 `
-export const Space = styled.div`
-  margin: 36px 0 52px 0;
+export const NicknameSpace = styled.div`
+  margin: ${({ mode }) => (mode === 'edit' ? '0 0 52px 0' : '36px 0 52px 0')};
+`
+
+export const NameSpace = styled.div`
+  margin: 52px 0 36px 0;
 `
 export const FieldSpace = styled.div`
   height: 52px;
