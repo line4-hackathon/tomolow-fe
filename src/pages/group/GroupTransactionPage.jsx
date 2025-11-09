@@ -5,9 +5,8 @@ import Header from '@/components/common/Header'
 import DayPicker from '@/components/hometransaction/DayPicker'
 import InvestSummaryCard from '@/components/hometransaction/InvestSummaryCard'
 import TransactionList from '@/components/hometransaction/TransactionList'
-
-import { dummyData } from '@/components/hometransaction/dummyData' //더미데이터
 import MenuBar from '@/components/common/MenuBar'
+import { dummyData } from '@/components/hometransaction/dummyData' //더미데이터
 
 const formatting = (n) => String(n).padStart(2, '0')
 const getTodayDate = () => {

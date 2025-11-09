@@ -50,7 +50,7 @@ function HomePage() {
 
   return (
     <>
-      <Container className='scrollable'>
+      <Container>
         <Header title='홈' />
         <HomeHeader selectedTab={selectedTab} onChangeTab={setSelectedTab} />{' '}
         {/* 상단 헤더 + 탭 + 배너 */}
@@ -81,6 +81,7 @@ export default HomePage
 
 const Container = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   width: 100%;
   background-color: #f9f9fb;
