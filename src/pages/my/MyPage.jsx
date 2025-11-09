@@ -122,6 +122,8 @@ export const ButtonContainer = styled.div`
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 `
 export const Logout = styled.p`
+  display: inline-block;
+  align-self: flex-start;
   color: var(--Neutral-900, #333);
   font-size: 12px;
   font-weight: 400;
