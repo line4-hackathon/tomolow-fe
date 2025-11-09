@@ -2,19 +2,18 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import StockCard from '@/components/invest/stockCard'
+import HoldingStock from '@/components/learning/HoldingStock'
 import SearchBar from '@/components/common/searchBar'
 import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
 import NothingHeart from '@/assets/icons/icon-heart-navy.svg?react'
 
-// ✅ 환경변수에서 서버 주소
+// 환경변수에서 서버 주소
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-// ✅ (임시) 챗봇과 같은 토큰 사용
+// (임시) 챗봇과 같은 토큰 사용
 const TEMP_FAKE_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2MjcwNTQ4NiwiZXhwIjoxNzYyNzA3Mjg2fQ.mLiPKqbwgeoUANtnA6jKsx_D5m4d9RtUjjS2OydGY64"
-
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2MjcwNzg5NSwiZXhwIjoxNzYyNzA5Njk1fQ.REWihJTjUHWwc3n2YZ-5CkV_WXl0r81qUDIlgFNe1Xc"
 const getAuthHeader = () => ({
   Authorization: `Bearer ${TEMP_FAKE_TOKEN}`,
 })
@@ -52,7 +51,7 @@ export default function HoldingStockPage() {
           return
         }
 
-        // 응답의 data: [{ symbol, name, imageUrl, price, changeRate, interested }, ... ]
+        // data: [{ symbol, name, imageUrl, price, changeRate, interested }, ... ]
         setStocks(json.data || [])
       } catch (err) {
         console.error('holding error:', err)
@@ -83,17 +82,7 @@ export default function HoldingStockPage() {
           <StockCardBox>
             {stocks.map((stock, idx) => (
               <React.Fragment key={stock.symbol ?? idx}>
-                {/* StockCard 가 받을 수 있는 형태로 data 정리 */}
-                <StockCard
-                  data={{
-                    name: stock.name,
-                    symbol: stock.symbol,
-                    imageUrl: stock.imageUrl,
-                    price: stock.price,
-                    changeRate: stock.changeRate,
-                    interested: stock.interested,
-                  }}
-                />
+                <HoldingStock stock={stock} />
                 {idx !== stocks.length - 1 && <Line />}
               </React.Fragment>
             ))}

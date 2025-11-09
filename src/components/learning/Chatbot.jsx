@@ -1,4 +1,3 @@
-// src/pages/learning/Chatbot.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import * as S from './Chatbot.styled'
 import { useNavigate } from 'react-router-dom'
@@ -17,89 +16,88 @@ const API_BASE_URL = RAW_BASE_URL
 console.log('API_BASE_URL >>>', API_BASE_URL)
 
 // (임시) 로그인 없이 테스트할 실제 토큰
-// 나중에 로그인 붙이면 여기 지우고 localStorage.getItem('accessToken') 쓰면 됨
 const TEMP_FAKE_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2MjcwNTQ4NiwiZXhwIjoxNzYyNzA3Mjg2fQ.mLiPKqbwgeoUANtnA6jKsx_D5m4d9RtUjjS2OydGY64"
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2MjcwNzg5NSwiZXhwIjoxNzYyNzA5Njk1fQ.REWihJTjUHWwc3n2YZ-5CkV_WXl0r81qUDIlgFNe1Xc"
 
 // Authorization 헤더 생성
 const getAuthHeader = () => {
-  const token = TEMP_FAKE_TOKEN
-  return { Authorization: `Bearer ${token}` }
+    const token = TEMP_FAKE_TOKEN
+    return { Authorization: `Bearer ${token}` }
 }
 
 const Chatbot = () => {
     const navigate = useNavigate()
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      role: 'bot',
-      text:
-        "안녕하세요! 저는 ‘닉네임’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! " +
-        '본격적인 학습에 앞서 주식 하나를 가져와 공부를 시작해 볼까요?',
-    },
-  ])
+    const [messages, setMessages] = useState([
+        {
+            id: 1,
+            role: 'bot',
+            text:
+            "안녕하세요! 저는 ‘닉네임’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! " +
+            '본격적인 학습에 앞서 주식 하나를 가져와 공부를 시작해 볼까요?',
+        },
+    ])
 
-  const [input, setInput] = useState('')
-  const [isThinking, setIsThinking] = useState(false)
-  const [roomId, setRoomId] = useState(null)
-  const [lastAnswerKey, setLastAnswerKey] = useState(null)
+    const [input, setInput] = useState('')
+    const [isThinking, setIsThinking] = useState(false)
+    const [roomId, setRoomId] = useState(null)
+    const [lastAnswerKey, setLastAnswerKey] = useState(null)
 
-  const requestControllerRef = useRef(null)
+    const requestControllerRef = useRef(null)
 
-  const trimmed = input.trim()
-  const canSend = !!trimmed && !isThinking
-  const hasUserMessage = messages.some(msg => msg.role === 'user')
+    const trimmed = input.trim()
+    const canSend = !!trimmed && !isThinking
+    const hasUserMessage = messages.some(msg => msg.role === 'user')
 
   // 0) 서버 주소가 없는 경우
-  useEffect(() => {
-    if (!API_BASE_URL) {
-      console.error('VITE_API_BASE_URL 이 설정되어 있지 않습니다.')
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: 'bot',
-          text:
-            '서버 주소가 설정되어 있지 않습니다. .env.local 에 VITE_API_BASE_URL 을 설정해 주세요.',
-        },
-      ])
-    }
-  }, [])
-
-  // 1) room 불러오기
-  useEffect(() => {
-    if (!API_BASE_URL) return
-
-    const fetchRoom = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/chatbot/room`, {
-          method: 'GET',
-          headers: {
-            ...getAuthHeader(),
-          },
-        })
-
-        // HTTP 상태 코드 먼저 체크
-        if (!res.ok) {
-          const text = await res.text()
-          console.error('room error:', res.status, text)
-
-          let msg = '채팅방 정보를 불러오지 못했습니다.'
-          if (res.status === 401 || res.status === 403) {
-            msg =
-              '챗봇 서버에 접근할 권한이 없어요. 로그인/토큰 설정을 백엔드에 확인해 주세요.'
-          }
-
-          setMessages(prev => [
+    useEffect(() => {
+        if (!API_BASE_URL) {
+        console.error('VITE_API_BASE_URL 이 설정되어 있지 않습니다.')
+        setMessages(prev => [
             ...prev,
             {
-              id: Date.now(),
-              role: 'bot',
-              text: msg,
+            id: Date.now(),
+            role: 'bot',
+            text:
+                '서버 주소가 설정되어 있지 않습니다. .env.local 에 VITE_API_BASE_URL 을 설정해 주세요.',
             },
-          ])
-          return
+        ])
         }
+    }, [])
+
+    // 1) room 불러오기
+    useEffect(() => {
+        if (!API_BASE_URL) return
+
+        const fetchRoom = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/chatbot/room`, {
+            method: 'GET',
+            headers: {
+                ...getAuthHeader(),
+            },
+            })
+
+            // HTTP 상태 코드 먼저 체크
+            if (!res.ok) {
+            const text = await res.text()
+            console.error('room error:', res.status, text)
+
+            let msg = '채팅방 정보를 불러오지 못했습니다.'
+            if (res.status === 401 || res.status === 403) {
+                msg =
+                '챗봇 서버에 접근할 권한이 없어요. 로그인/토큰 설정을 백엔드에 확인해 주세요.'
+            }
+
+            setMessages(prev => [
+                ...prev,
+                {
+                id: Date.now(),
+                role: 'bot',
+                text: msg,
+                },
+            ])
+            return
+            }
 
         const json = await res.json()
         console.log('room response:', json)
