@@ -23,8 +23,6 @@ import MyPage from './pages/my/MyPage'
 import SavedChattingPage from './pages/my/SavedChattingPage'
 import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
-import GroupHomePage from './pages/group/GroupHomePage'
-import GroupTransactionPage from './pages/group/GroupTransactionPage'
 //학습
 import LearningPage from './pages/learning/ChatbotPage'
 import InvestHoldingPage from './pages/learning/HoldingStockPage'
@@ -63,7 +61,7 @@ const router = createBrowserRouter([
     path: '/group',
     element: <App />,
     children: [
-      { index: true, element: <GroupListPage /> },
+      { path: 'list', element: <GroupListPage /> },
       {
         path: 'create',
         element: <GroupCreatePage />,
