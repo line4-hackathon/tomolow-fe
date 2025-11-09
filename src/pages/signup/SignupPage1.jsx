@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import * as S from './SignupPage.styled'
+import * as S from '../../components/common/Form.styled'
 import Header from '@/components/common/Header'
 import LargeButton from '@/components/signup/LargeButton'
 import StatusMessage from '@/components/common/StatusMessage'

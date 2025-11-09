@@ -22,7 +22,7 @@ export const FormContainer = styled.div`
   width: 100%;
 `
 export const NicknameSpace = styled.div`
-  margin: 36px 0 52px 0;
+  margin: ${({ mode }) => (mode === 'edit' ? '0 0 52px 0' : '36px 0 52px 0')};
 `
 
 export const NameSpace = styled.div`
