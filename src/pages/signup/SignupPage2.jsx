@@ -18,7 +18,6 @@ const SignupPage2 = () => {
 
   const [nickname, setNickname] = useState('')
   const [nicknameTouched, setNicknameTouched] = useState(false)
-  const [isNicknameValid, setIsNicknameValid] = useState(false) // 글자수 확인
   const [isNicknameChecked, setIsNicknameChecked] = useState(false) // 중복여부 체크
 
   const [password1, setPassword1] = useState('')
@@ -28,10 +27,8 @@ const SignupPage2 = () => {
 
   const apiUrl = import.meta.env.VITE_API_BASE_URL
 
-  useEffect(() => {
-    setIsNicknameValid(nickname.length < 10 && nickname.length > 1)
-  }, [nickname])
-
+  // 닉네임 길이 체크
+  const isNicknameValid = nickname.length > 1 && nickname.length < 10
   // 닉네임 중복 확인 체크
   const checkNickname = () => {
     if (isNicknameValid) {
@@ -81,7 +78,7 @@ const SignupPage2 = () => {
       <Header title='회원가입' showIcon={true} path='/signup/1' />
       <S.Container>
         <S.Text>{`TomoLow 이용을 위해\n 회원 정보를 입력해주세요`}</S.Text>
-        <S.Space>
+        <S.NicknameSpace>
           <InputFieldWithButton
             label='닉네임'
             type='text'
@@ -100,7 +97,7 @@ const SignupPage2 = () => {
             />
             <StatusMessage status={nicknameStatus} text='10자 이내' />
           </S.StatusRow>
-        </S.Space>
+        </S.NicknameSpace>
         <InputField
           label='비밀번호'
           type='password'

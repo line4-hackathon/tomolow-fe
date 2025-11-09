@@ -9,54 +9,45 @@ import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
 import MenuBar from '@/components/common/MenuBar'
 
+const checkStatus = (isValid, isTouched) => (!isTouched ? 'default' : isValid ? 'success' : 'error')
+
 const EditInfoPage = () => {
   const navigate = useNavigate()
   const [nickname, setNickname] = useState('')
-  const [nicknameStatus, setNicknameStatus] = useState({
-    duplicate: false,
-    length: false,
-  })
+  const [nicknameTouched, setNicknameTouched] = useState(false)
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false)
+
   const [password1, setPassword1] = useState('')
+  const [password1Touched, setPassword1Touched] = useState(false)
   const [password2, setPassword2] = useState('')
-  const [passwordStatus, setPasswordStatus] = useState({
-    hasLetter: false,
-    hasNumber: false,
-    isMatched: false,
-  })
+  const [password2Touched, setPassword2Touched] = useState(false)
 
-  const isValid =
-    nicknameStatus.duplicate &&
-    nicknameStatus.length &&
-    passwordStatus.hasLetter &&
-    passwordStatus.hasNumber &&
-    passwordStatus.isMatched
-
-  const handleSubmit = () => {
-    if (isValid) {
-      navigate('/mypage')
+  // 닉네임 길이 체크
+  const isNicknameValid = nickname.length > 1 && nickname.length < 10
+  // 닉네임 중복 확인 체크
+  const checkNickname = () => {
+    if (isNicknameValid) {
+      setIsNicknameChecked(true)
+    } else {
+      setIsNicknameChecked(false)
+      console.log('닉네임을 다시 확인해주세요')
     }
   }
-  // 닉네임 길이 체크
-  useEffect(() => {
-    setNicknameStatus((prev) => ({
-      ...prev,
-      length: nickname.length > 1 && nickname.length < 10,
-    }))
-  }, [nickname])
 
-  // 비밀번호 검증
-  useEffect(() => {
-    setPasswordStatus({
-      hasLetter: /[a-zA-Z]/.test(password1),
-      hasNumber: /\d/.test(password1),
-      isMatched: password1 !== '' && password1 === password2,
-    })
-  }, [password1, password2])
+  // 패스워드 체크
+  const hasLetter = /[a-zA-Z]/.test(password1)
+  const hasNumber = /\d/.test(password1)
+  const isMatched = password1 && password1 === password2
+  const finalCheck = isNicknameValid && isNicknameChecked && hasLetter && hasNumber && isMatched
 
-  // 닉네임 중복 체크 임시 코드(연동 필요)
-  const checkNickname = () => {
-    setNicknameStatus((prev) => ({ ...prev, duplicate: true }))
-    console.log('중복되지 않은 닉네임')
+  // 필드 상태값 계산 후 함수에 전달
+  const nicknameStatus = checkStatus(isNicknameValid, nicknameTouched)
+  const passwordStatus = checkStatus(hasLetter && hasNumber, password1Touched)
+  const passwordConfirmStatus = checkStatus(isMatched, password2Touched)
+
+  const handleSubmit = () => {
+    if (!finalCheck) return
+    navigate('/mypage')
   }
 
   return (
@@ -70,19 +61,17 @@ const EditInfoPage = () => {
             placeholder='닉네임 입력'
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
+            onBlur={() => setNicknameTouched(true)}
             buttonText='중복 확인'
-            active={nickname.length < 10 && nickname.length > 1}
+            active={isNicknameValid}
             onClick={checkNickname}
           />
           <S.StatusRow>
             <StatusMessage
-              status={nicknameStatus.duplicate ? 'success' : 'default'}
+              status={checkStatus(isNicknameChecked, nicknameTouched)}
               text='중복 여부'
             />
-            <StatusMessage
-              status={nicknameStatus.length ? 'success' : 'default'}
-              text='10자 이내'
-            />
+            <StatusMessage status={nicknameStatus} text='10자 이내' />
           </S.StatusRow>
           <S.FieldSpace></S.FieldSpace>
           <InputField
@@ -91,16 +80,11 @@ const EditInfoPage = () => {
             placeholder='비밀번호 입력'
             value={password1}
             onChange={(e) => setPassword1(e.target.value)}
+            onBlur={() => setPassword1Touched(true)}
           />
           <S.StatusRow>
-            <StatusMessage
-              status={passwordStatus.hasLetter ? 'success' : 'default'}
-              text='영문 포함'
-            />
-            <StatusMessage
-              status={passwordStatus.hasNumber ? 'success' : 'default'}
-              text='숫자 포함'
-            />
+            <StatusMessage status={checkStatus(hasLetter, password1Touched)} text='영문 포함' />
+            <StatusMessage status={checkStatus(hasNumber, password1Touched)} text='숫자 포함' />
           </S.StatusRow>
           <InputField
             label=''
@@ -108,17 +92,14 @@ const EditInfoPage = () => {
             placeholder='비밀번호 확인'
             value={password2}
             onChange={(e) => setPassword2(e.target.value)}
+            onBlur={() => setPassword2Touched(true)}
           />
-          <StatusMessage
-            status={passwordStatus.isMatched ? 'success' : 'default'}
-            text={'비밀번호 일치'}
-          />
-
+          <StatusMessage status={passwordConfirmStatus} text={'비밀번호 일치'} />
           <S.NextButton>
             <LargeButton
               label='완료'
               color='#fff'
-              backgroundcolor={isValid ? '#4880AF' : '#D1D1D1'}
+              backgroundcolor={finalCheck ? '#4880AF' : '#D1D1D1'}
               onClick={handleSubmit}
             />
           </S.NextButton>

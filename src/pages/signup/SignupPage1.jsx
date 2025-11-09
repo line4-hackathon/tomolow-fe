@@ -36,7 +36,7 @@ const SignupPage = () => {
         <S.Text>{`TomoLow 이용을 위해\n회원 정보를 입력해주세요`}</S.Text>
 
         <S.FormContainer>
-          <S.Space>
+          <S.NameSpace>
             <InputField
               label='이름'
               type='text'
@@ -44,7 +44,7 @@ const SignupPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-          </S.Space>
+          </S.NameSpace>
           <InputField
             label='아이디(이메일)'
             type='email'
