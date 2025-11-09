@@ -12,7 +12,11 @@ import Toast from '@/components/invest/ToastMessage'
 import { AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useType } from '@/contexts/TypeContext'
 export default function InvestPurchasePage({ myCash, myStockCount }) {
+  //const type=useType();
+  //const { myCash, myStockCount } = getAssetsByType(type);
+
   const [isFocus, setIsFocus] = useState(true)
   const [price, setPrice] = useState('117000')
   const [count, setCount] = useState('')

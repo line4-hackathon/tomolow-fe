@@ -1,13 +1,14 @@
 import styled from "styled-components";
 import useSelect from "@/hooks/select";
 import { DateTypes } from "@/pages/invest/selectType";
-import TestChart from "./testChart";
+import CandleChart from "./CandleCharts";
+
 
 export default function Chart() {
   const { selectedMenu, handleSelect } = useSelect("DAY");
   return (
     <ChartBox>
-      <ChartImg />
+      <CandleChart/>
       <DateBar>
         {Object.keys(DateTypes).map((key) => (
           <Term
