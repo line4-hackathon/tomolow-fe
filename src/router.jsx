@@ -57,7 +57,7 @@ const router = createBrowserRouter([
     path: '/group',
     element: <App />,
     children: [
-      { path: 'list', element: <GroupListPage /> },
+      { index: true, element: <GroupListPage /> },
       {
         path: 'create',
         element: <GroupCreatePage />,

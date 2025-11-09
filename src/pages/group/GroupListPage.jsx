@@ -68,7 +68,7 @@ const GroupListPage = () => {
 
   // 인증 코드 성공 시
   const handleNavigate = () => {
-    navigate('/group/list')
+    navigate('/group')
     modal.close()
   }
 

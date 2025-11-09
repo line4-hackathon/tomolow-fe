@@ -12,7 +12,7 @@ const GroupHomePage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='멋쟁이사자처럼 투자 소모임' showIcon={true} path='/group/list' />
+        <Header title='멋쟁이사자처럼 투자 소모임' showIcon={true} path='/group' />
         {/* 그룹 정보 */}
         <Container>
           <GroupInfoCard />
