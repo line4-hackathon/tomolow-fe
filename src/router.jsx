@@ -21,6 +21,9 @@ import MoneyChargePage from './pages/my/MoneyChargePage'
 import EditInfoPage from './pages/my/EditInfoPage'
 import GroupHomePage from './pages/group/GroupHomePage'
 import GroupTransactionPage from './pages/group/GroupTransactionPage'
+//학습
+import LearningPage from './pages/learning/ChatbotPage'
+import InvestHoldingPage from './pages/learning/HoldingStockPage'
 
 const router = createBrowserRouter([
   {
@@ -83,6 +86,14 @@ const router = createBrowserRouter([
       { path: 'chats', element: <SavedChattingPage /> },
       { path: 'charge', element: <MoneyChargePage /> },
       { path: 'edit', element: <EditInfoPage /> },
+    ],
+  },
+  {
+    path: '/learning',
+    element: <App />,
+    children: [
+      { index: true, element: <LearningPage /> },
+      { path: 'holding', element: <InvestHoldingPage /> },
     ],
   },
 ])
