@@ -2,11 +2,11 @@ import React from 'react'
 import styled from 'styled-components'
 import profile from '@/assets/icons/icon-profile.svg'
 
-const ListEmpty = () => {
+const ListEmpty = ({ emptyMessage }) => {
   return (
     <Container>
       <Img src={profile} />
-      <Text>그룹이 존재하지 않습니다.</Text>
+      <Text>{emptyMessage}</Text>
     </Container>
   )
 }
@@ -15,10 +15,11 @@ export default ListEmpty
 
 const Container = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 50%;
+  gap: 12px;
 `
 const Img = styled.img``
 const Text = styled.p`
