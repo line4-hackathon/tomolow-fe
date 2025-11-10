@@ -27,16 +27,12 @@ export default function SelectDatePage() {
 
   return (
     <Page>
-      {/* 상단 제목은 "학습" */}
       <Header title="학습" />
-
       <Contents>
         {/* 종목 정보 영역 - 현재 StockInfo 가 알아서 그려준다고 가정 */}
         <StockInfo />
-
         {/* 차트 + 1D / 1W / 3M / 6M / 1Y 영역 그대로 재사용 */}
         <Chart />
-
         {/* 기간 카드 */}
         <DateCard>
           <DateRow>
@@ -50,8 +46,6 @@ export default function SelectDatePage() {
           </DateRow>
         </DateCard>
       </Contents>
-
-      {/* 하단 파란색 "불러오기" 버튼 */}
       <BottomBar>
           width="343px"
           height="56px"
@@ -62,8 +56,6 @@ export default function SelectDatePage() {
     </Page>
   )
 }
-
-/* ===== styled ===== */
 
 const Page = styled.div`
   display: flex;
