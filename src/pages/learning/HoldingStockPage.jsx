@@ -13,7 +13,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 // (임시) 챗봇과 같은 토큰 사용
 const TEMP_FAKE_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2MjcwNzg5NSwiZXhwIjoxNzYyNzA5Njk1fQ.REWihJTjUHWwc3n2YZ-5CkV_WXl0r81qUDIlgFNe1Xc"
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0NjY3MiwiZXhwIjoxNzYyNzQ4NDcyfQ.6cXNbPt59H_bQdDwZyFpBbz6gfRCEN4NUINh1ACq2Y0"
 const getAuthHeader = () => ({
   Authorization: `Bearer ${TEMP_FAKE_TOKEN}`,
 })
