@@ -61,7 +61,7 @@ const router = createBrowserRouter([
     path: '/group',
     element: <App />,
     children: [
-      { path: 'list', element: <GroupListPage /> },
+      { index: true, element: <GroupListPage /> },
       {
         path: 'create',
         element: <GroupCreatePage />,
@@ -122,7 +122,6 @@ const router = createBrowserRouter([
       { index: true, element: <LearningPage /> },
       { path: 'holding', element: <InvestHoldingPage /> },
       { path: 'select-date', element: <SelectDatePage /> },
-
     ],
   },
 ])
