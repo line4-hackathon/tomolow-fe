@@ -17,8 +17,7 @@ console.log('API_BASE_URL >>>', API_BASE_URL)
 
 // (임시) 로그인 없이 테스트할 실제 토큰
 const TEMP_FAKE_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0NjY3MiwiZXhwIjoxNzYyNzQ4NDcyfQ.6cXNbPt59H_bQdDwZyFpBbz6gfRCEN4NUINh1ACq2Y0"
-
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0OTg0MSwiZXhwIjoxNzYyNzUxNjQxfQ.78zH7ASVse7PSwrA3Jj26WiYRVyy6ExTFylTShrbALo"
 // Authorization 헤더 생성
 const getAuthHeader = () => {
     const token = TEMP_FAKE_TOKEN
@@ -270,7 +269,7 @@ const Chatbot = () => {
           )}
         </S.Messages>
 
-        {/* 🔥 유저가 아직 한 번도 말 안 했을 때만 추천 질문 노출 */}
+        {/* 유저가 대화 시작 안했을때만 추천 질문 노출 */}
         {!hasUserMessage && (
           <S.SuggestionsSection>
             <S.SuggestionsTitle>이런 질문은 어때요?</S.SuggestionsTitle>

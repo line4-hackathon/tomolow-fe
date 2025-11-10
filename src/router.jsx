@@ -27,6 +27,7 @@ import EditInfoPage from './pages/my/EditInfoPage'
 import LearningPage from './pages/learning/ChatbotPage'
 import InvestHoldingPage from './pages/learning/HoldingStockPage'
 import SelectDatePage from './pages/learning/SelectDatePage'
+import SaveChatPage from './pages/learning/SaveChatPage'
 
 const router = createBrowserRouter([
   {
@@ -122,6 +123,7 @@ const router = createBrowserRouter([
       { index: true, element: <LearningPage /> },
       { path: 'holding', element: <InvestHoldingPage /> },
       { path: 'select-date', element: <SelectDatePage /> },
+      { path: 'save', element: <SaveChatPage /> },
     ],
   },
 ])

@@ -13,7 +13,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 // (임시) 챗봇과 같은 토큰 사용
 const TEMP_FAKE_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0NjY3MiwiZXhwIjoxNzYyNzQ4NDcyfQ.6cXNbPt59H_bQdDwZyFpBbz6gfRCEN4NUINh1ACq2Y0"
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0OTg0MSwiZXhwIjoxNzYyNzUxNjQxfQ.78zH7ASVse7PSwrA3Jj26WiYRVyy6ExTFylTShrbALo"
 const getAuthHeader = () => ({
   Authorization: `Bearer ${TEMP_FAKE_TOKEN}`,
 })
@@ -99,7 +99,6 @@ export default function HoldingStockPage() {
   )
 }
 
-/* ===== styled ===== */
 
 const Page = styled.div``
 
