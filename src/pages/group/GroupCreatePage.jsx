@@ -9,6 +9,8 @@ import InputFieldWithText from '@/components/group/InputFieldWithText'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
 import MenuBar from '@/components/common/MenuBar'
+import useModal from '@/hooks/useModal'
+import Modal from '@/components/common/Modal'
 
 const checkStatus = (isValid, isTouched) => (!isTouched ? 'default' : isValid ? 'success' : 'error')
 
@@ -25,6 +27,10 @@ const GroupCreatePage = () => {
 
   const [duration, setDuration] = useState('')
   const [durationTouched, setDurationTouched] = useState(false)
+
+  // 인증코드 모달 띄우기
+  const [code, setCode] = useState('')
+  const modal = useModal()
 
   // 각 필드 유효성 검사
   const isGroupNameValid = groupName.length > 0 && groupName.length <= 15
@@ -66,8 +72,9 @@ const GroupCreatePage = () => {
         },
       )
       if (res.data.success) {
+        setCode(res.data.data.groupCode) // 서버에서 준 인증코드 세팅
+        setTimeout(() => modal.open(), 0)
         console.log('그룹 생성 성공')
-        navigate('/group')
       } else {
         alert(res.data.message)
       }
@@ -149,6 +156,22 @@ const GroupCreatePage = () => {
         </Container>
       </Scrollable>
       <MenuBar />
+      {modal.isOpen && (
+        <Modal
+          isOpen={modal.isOpen}
+          title='그룹이 생성되었습니다.'
+          text={`인증코드: ${code}`}
+          leftButtonLabel='닫기'
+          rightButtonLabel='복사하기'
+          onLeftClick={modal.close}
+          onRightClick={() => {
+            navigator.clipboard.writeText(code)
+            alert('인증코드가 복사되었습니다!')
+            modal.close()
+            navigate('/group')
+          }}
+        />
+      )}
     </>
   )
 }
