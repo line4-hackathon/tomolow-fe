@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
@@ -18,31 +19,17 @@ const ITEMS = [
   { key: 'recruiting', label: '모집 중인 그룹' },
 ]
 
-// 탭별 임시 데이터
-const dummyData = {
-  now: [
-    {
-      id: 1,
-      title: '멋쟁이사자처럼 투자 소모임',
-      dateTxt: '12일 6시간 남음',
-      statusTxt: '현재 3등',
-    },
-    { id: 2, title: '투모로우 소모임', dateTxt: '56분 남음', statusTxt: '현재 1등' },
-  ],
-  finished: [
-    { id: 1, title: '종료 그룹 1', dateTxt: '투자 종료', statusTxt: '최종 3등' },
-    { id: 2, title: '종료 그룹 2', dateTxt: '투자 종료', statusTxt: '최종 3등' },
-  ],
-  recruiting: [
-    { id: 1, title: '모집중 그룹 1', dateTxt: '모집 중', statusTxt: '3명 / 4명' },
-    { id: 2, title: '모집중 그룹 2', dateTxt: '모집 중', statusTxt: '2명 / 3명' },
-  ],
-}
-
 const GroupListPage = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('now')
+  const [groupInfo, setGroupInfo] = useState(null) // 참여하기 누르면 반환받을 그룹 정보 (그룹 아이디, 그룹명, ..)
+  const [activeList, setActiveList] = useState([]) // 진행중 그룹
+  const [expiredList, setExpiredList] = useState([]) // 종료된 그룹
+  const [joinedRecruitList, setJoinedRecruitList] = useState([]) // 내가 참여한 모집중 그룹
+  const [notJoinedRecruitList, setNotJoinedRecruitList] = useState([]) // 내가 참여하지 않은 모집중 그룹
   const modal = useModal()
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const token = localStorage.getItem('accessToken')
 
   // 특정 탭 클릭시
   const handleItemClick = (item) => {
@@ -57,19 +44,104 @@ const GroupListPage = () => {
     }
   }
 
-  // 인증 코드 연동 필요
-  const handleCheckCode = () => {
-    if (modal.code === 'aaaa') {
-      modal.goSuccess()
-    } else {
+  // activeTab에 따라 리스트 띄우기
+  useEffect(() => {
+    const getGroups = async () => {
+      try {
+        if (activeTab === 'now' || activeTab === 'finished') {
+          const res = await axios.get(`${apiUrl}/api/group`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+
+          if (res.data.success) {
+            const { activeList, expiredList } = res.data.data
+
+            const formattedActive = activeList.map((item) => ({
+              id: item.groupId,
+              title: item.groupName,
+              dateTxt: `${item.dayUntilEnd ?? 0}일 ${item.hourUntilEnd}시간 남음`,
+              statusTxt: `현재 ${item.ranking}등`,
+            }))
+
+            const formattedExpired = expiredList.map((item) => ({
+              id: item.groupId,
+              title: item.groupName,
+              dateTxt: '투자 종료',
+              statusTxt: `최종 ${item.ranking}등`,
+            }))
+
+            setActiveList(formattedActive)
+            setExpiredList(formattedExpired)
+          }
+        } else if (activeTab === 'recruiting') {
+          const res = await axios.get(`${apiUrl}/api/group/joinable`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          if (res.data.success) {
+            const { joinedGroupList, notJoinedGroupList } = res.data.data
+
+            const formattedJoined = joinedGroupList.map((item) => ({
+              id: item.groupId,
+              title: item.groupName,
+              dateTxt: '모집중',
+              statusTxt: `${item.currentMemberCount}명/${item.memberCount}명 `,
+            }))
+            const formattedNotJoined = notJoinedGroupList.map((item) => ({
+              id: item.groupId,
+              title: item.groupName,
+              dateTxt: '모집중',
+              statusTxt: `${item.currentMemberCount}명/${item.memberCount}명 `,
+            }))
+
+            setJoinedRecruitList(formattedJoined)
+            setNotJoinedRecruitList(formattedNotJoined)
+          }
+        }
+      } catch (err) {
+        console.error('그룹 리스트 불러오기 실패')
+        console.error(err)
+      }
+    }
+    getGroups()
+  }, [activeTab])
+
+  // 그룹 찾기 연동 (인증 코드 확인)
+  const handleCheckCode = async () => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/group/join?code=${modal.code}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.data.success) {
+        setGroupInfo(res.data.data)
+        modal.goSuccess()
+      } else {
+        modal.goFail()
+      }
+    } catch (err) {
       modal.goFail()
     }
   }
 
-  // 인증 코드 성공 시
-  const handleNavigate = () => {
-    navigate('/group')
-    modal.close()
+  // 그룹 참가 연동(인증 코드 성공 시)
+  const handleJoinGroup = async () => {
+    try {
+      const res = await axios.post(`${apiUrl}/api/group/join/${groupInfo.groupId}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.data.success) {
+        navigate('/group') // 특정 그룹 아이디 홈으로 이동 (수정 필요)
+        modal.close()
+      } else {
+        console.log(res.data.message)
+        modal.close()
+      }
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   return (
@@ -88,8 +160,29 @@ const GroupListPage = () => {
 
           {/* Tab 바 */}
           <Tab items={ITEMS} activeTab={activeTab} onChange={setActiveTab} />
-          {/* 활성화 된 버튼에 따른 그룹 리스트 띄우기 */}
-          <List items={dummyData[activeTab]} onClick={handleItemClick} />
+          {/* 탭별 리스트 */}
+          {activeTab === 'now' && (
+            <List
+              items={activeList}
+              onClick={handleItemClick}
+              emptyMessage='아직 그룹에 참여하지 않았어요.'
+            />
+          )}
+          {activeTab === 'finished' && (
+            <List items={expiredList} emptyMessage='종료된 그룹이 없어요.' />
+          )}
+          {activeTab === 'recruiting' && (
+            <>
+              <SectionTitle>내가 참여한 그룹</SectionTitle>
+              <List items={joinedRecruitList} emptyMessage='참여 중인 그룹이 없어요.' />
+              <SectionTitle>다른 그룹 찾기</SectionTitle>
+              <List
+                items={notJoinedRecruitList}
+                onClick={handleItemClick}
+                emptyMessage='현재 모집 중인 그룹이 없어요.'
+              />
+            </>
+          )}
         </Container>
         {/* 모달 창 */}
         {modal.isOpen && modal.step === 1 && (
@@ -107,16 +200,16 @@ const GroupListPage = () => {
           />
         )}
 
-        {modal.isOpen && modal.step === 2 && (
+        {modal.isOpen && modal.step === 2 && groupInfo && (
           // 연동 후 실제 데이터로 채워넣기
           <Modal
             isOpen={modal.isOpen}
-            title='멋쟁이사자처럼투자소모임'
-            text={`만든 사람: 멋쟁이사자처럼기디1\n참가비 : 1,000,000\n참가 인원 : 3명 / 4명`}
+            title={groupInfo.groupName}
+            text={`만든 사람: ${groupInfo.creatorNickname}\n참가비 : ${groupInfo.seedMoney.toLocaleString()}원\n참가 인원 : ${groupInfo.currentMemberCount}명 / ${groupInfo.memberCount}명`}
             leftButtonLabel='닫기'
             rightButtonLabel='참가하기'
             onLeftClick={() => modal.close()}
-            onRightClick={handleNavigate}
+            onRightClick={handleJoinGroup}
           />
         )}
         {modal.isOpen && modal.step === 3 && (
@@ -137,7 +230,7 @@ const GroupListPage = () => {
 
 export default GroupListPage
 
-export const Container = styled.div`
+const Container = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -145,10 +238,17 @@ export const Container = styled.div`
   background: var(--Neutral-50, #f6f6f6);
 `
 
-export const MiniButtonContainer = styled.div`
+const MiniButtonContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin-bottom: 24px;
+`
+const SectionTitle = styled.p`
+  color: var(--Clicked-P_600, #2b5276);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  padding-top: 24px;
 `
