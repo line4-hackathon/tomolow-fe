@@ -17,7 +17,7 @@ console.log('API_BASE_URL >>>', API_BASE_URL)
 
 // (임시) 로그인 없이 테스트할 실제 토큰
 const TEMP_FAKE_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc0OTg0MSwiZXhwIjoxNzYyNzUxNjQxfQ.78zH7ASVse7PSwrA3Jj26WiYRVyy6ExTFylTShrbALo"
+   "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc1NTQ0MiwiZXhwIjoxNzYyNzU3MjQyfQ.4XcjHOK4_YPTcCT9F9QV6SNEt3TDhokYfhHT6FVzP5U"
 // Authorization 헤더 생성
 const getAuthHeader = () => {
     const token = TEMP_FAKE_TOKEN
