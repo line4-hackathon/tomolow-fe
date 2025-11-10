@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
@@ -46,9 +47,37 @@ const GroupCreatePage = () => {
     memberStatus === 'success' &&
     durationStatus === 'success'
 
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const createRequest = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const res = await axios.post(
+        `${apiUrl}/api/group`,
+        {
+          name: groupName,
+          seedMoney: money,
+          memberCount,
+          duration,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      if (res.data.success) {
+        console.log('그룹 생성 성공')
+        navigate('/group')
+      } else {
+        alert(res.data.message)
+      }
+    } catch (err) {
+      console.error(err, '그룹 생성 실패')
+    }
+  }
   const handleSubmit = () => {
     if (allValid) {
-      navigate('/group')
+      createRequest()
     }
     return
   }
