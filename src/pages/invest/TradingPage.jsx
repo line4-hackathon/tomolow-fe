@@ -10,7 +10,8 @@ import Toast from '@/components/invest/ToastMessage'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { APIService } from './api'
+import { APIService, WS_ENDPOINT } from './api'
+import { Client } from '@stomp/stompjs'
 
 export default function InvestTradingPage() {
   const isOrder = 1
@@ -20,7 +21,7 @@ export default function InvestTradingPage() {
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [stockData, setStockData] = useState()
-  const symbol = state.symbol
+  const symbol = state?.symbol
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
 
@@ -35,8 +36,8 @@ export default function InvestTradingPage() {
       setToastMessage(state.toastMessage)
       setToastVisible(true)
 
-      // 토스트를 띄운 후 state를 제거하여 새로고침/뒤로가기 시 재실행 방지 (선택 사항)
-      window.history.replaceState({}, document.title) // state 제거 (라우터 버전에 따라 다름)
+      const { toastMessage, ...restState } = state
+      navigate(location.pathname, { replace: true, state: restState })
     }
   }, [state])
 
@@ -61,13 +62,16 @@ export default function InvestTradingPage() {
       }
 
       if (currentSymbol) {
-        const destination = `/api/rank/${currentSymbol}`
-        subscriptionRef.current = client.subscribe(
-          destination,
-          updateStockData,
-          // STOMP 헤더 (필요 시 인증 토큰 등 추가)
-          {},
-        )
+        const destination = `/api/ticker/${currentSymbol}`
+        // 1. 로컬 스토리지에서 토큰 가져오기
+        const token = localStorage.getItem('accessToken')
+        // 2. 헤더 객체 생성
+        const headers = {}
+        // 3. 토큰이 존재하면 Authorization 헤더에 추가 (예: Bearer 토큰)
+        if (token) {
+          headers.Authorization = `Bearer ${token}` // 백엔드 요구 사항에 따라 "Bearer "를 생략할 수도 있습니다.
+        }
+        subscriptionRef.current = client.subscribe(destination, updateStockData, headers)
         console.log(`✅ STOMP 구독 시작: ${destination}`)
       }
     },
@@ -82,14 +86,20 @@ export default function InvestTradingPage() {
       console.warn('Symbol not found in state, cannot connect to ticker.')
       return
     }
-
+    console.log('✅ InvestTradingPage 마운트')
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
     const wsURL = protocol + window.location.host + WS_ENDPOINT
+    const token = localStorage.getItem('accessToken')
 
     const client = new Client({
       brokerURL: wsURL,
       // SockJS를 사용하려면 webSocketFactory: () => new SockJS(wsURL)로 설정
       reconnectDelay: 5000,
+      connectHeaders: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
 
       onConnect: () => {
         console.log('✅ STOMP 연결 성공')
@@ -126,33 +136,40 @@ export default function InvestTradingPage() {
     })
   }
 
+  console.log('InvestTradingPage 렌더링 시작')
   return (
     <Page>
-      <InvestHeader />
-      <Contents>
-        <StockInfo />
-        <Chart />
-        <Etc />
-      </Contents>
-      <Bar>
-        {isOrder ? (
-          <>
-            <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
-            <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />
-          </>
-        ) : (
-          <RedButton width='343px' height='56px' onClick={() => isPurchase(true)} />
-        )}
-      </Bar>
-      <AnimatePresence>
-        {toastVisible && (
-          <Toast
-            message={toastMessage}
-            onClose={handleCloseToast}
-            // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
-          />
-        )}
-      </AnimatePresence>
+      {stockData ? (
+        <>
+          <InvestHeader data={stockData} />
+          <Contents>
+            <StockInfo data={stockData} />
+            <Chart />
+            <Etc />
+          </Contents>
+          <Bar>
+            {isOrder ? (
+              <>
+                <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
+                <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />
+              </>
+            ) : (
+              <RedButton width='343px' height='56px' onClick={() => isPurchase(true)} />
+            )}
+          </Bar>
+          <AnimatePresence>
+            {toastVisible && (
+              <Toast
+                message={toastMessage}
+                onClose={handleCloseToast}
+                // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
+              />
+            )}
+          </AnimatePresence>
+        </>
+      ) : (
+        <p>로딩 중</p>
+      )}
     </Page>
   )
 }
