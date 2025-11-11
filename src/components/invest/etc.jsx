@@ -5,13 +5,12 @@ import EtcMyorder from './EtcMyorder'
 import EtcNews from './EtcNews'
 import EctAI from './EtcAI'
 
-export default function Etc() {
-  const { selectedMenu, handleSelect } = useSelect('ORDER')
+export default function Etc({selectedMenu, handleSelect,orderData,etcData}) {
 
   let contents
   switch (selectedMenu) {
     case 'ORDER':
-      contents=<EtcMyorder />
+      contents=<EtcMyorder data={orderData}/>
       break
     case 'NEWS':
       contents=<EtcNews />

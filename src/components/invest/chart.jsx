@@ -4,7 +4,7 @@ import { DateTypes } from "@/pages/invest/selectType";
 import CandleChart from "./CandleCharts";
 
 
-export default function Chart({selectedMenu, handleSelect,symbol,chartData}) {
+export default function Chart({selectedDate, setSelectedDate,symbol,chartData}) {
   return (
     <ChartBox>
       <CandleChart chartData={chartData}/>
@@ -12,9 +12,9 @@ export default function Chart({selectedMenu, handleSelect,symbol,chartData}) {
         {Object.keys(DateTypes).map((key) => (
           <Term
             key={key}
-            onClick={() => handleSelect(key)}
+            onClick={() => setSelectedDate(key)}
             // 3. 현재 선택된 메뉴 감지 및 스타일 적용
-            $isSelected={selectedMenu === key ? true : false}
+            $isSelected={selectedDate === key ? true : false}
           >
             {DateTypes[key]} {/* 사용자에게 보이는 메뉴 이름 */}
           </Term>

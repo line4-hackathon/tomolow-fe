@@ -26,8 +26,11 @@ export default function InvestTradingPage() {
   const symbol = state?.symbol
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
-  const { selectedMenu, handleSelect } = useSelect("DAY");
+  const { selectedMenu: selectedDate, handleSelect: setSelectedDate } = useSelect("DAY");
   const [chartData,setChartData]=useState([]);
+  const { selectedMenu: selectedEtc, handleSelect: setSelectedEtc } = useSelect('ORDER');
+  const [etcData,setEtcData]=useState([]);
+  const [orderData,setOrderData]=useState([]);
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -139,21 +142,21 @@ export default function InvestTradingPage() {
     }
     const chartDataGet = async () => {
       let param
-      switch (selectedMenu){
+      switch (selectedDate){
         case "DAY":
-          param="D1"
+          param=await "D1"
           break;
         case "WEEK":
-          param="W1"
+          param=await "W1"
           break;
         case "MONTH":
-          param="M1"
+          param=await "M1"
           break;
         case "SIXMONTH":
-          param="M6"
+          param=await "M6"
           break;
         case "YEAR":
-          param="Y1"
+          param=await "Y1"
           break;
       }
       try {
@@ -165,14 +168,27 @@ export default function InvestTradingPage() {
     }
 
     chartDataGet();
-  },[selectedMenu,symbol])
+  },[selectedDate,symbol])
 
   useEffect(()=>{
     const etcGet=async ()=>{
+      let apiUrl
+      switch (selectedEtc){
+        case "ORDER":
+          apiUrl="/api/orders/pending/list"
+          break;
+        case "NEWS":
+          apiUrl=`/api/market/3/news`
+          break;
+        case "AI":
+          apiUrl="/api/orders/pending/list"
+          break;
+      }
       try{
-        
+        const res=await APIService.private.get(apiUrl)
+        setOrderData(res.data)
       }catch(error){
-
+        console.log("기타 불러오기 실패")
       }
     }
   })
@@ -190,11 +206,11 @@ export default function InvestTradingPage() {
       {stockData && <InvestHeader data={stockData} />}
       <Contents>
         {stockData && <StockInfo data={stockData} />}
-        <Chart  selectedMenu={selectedMenu} handleSelect={handleSelect} symbol={symbol} chartData={chartData}/>
-        <Etc />
+        <Chart  selectedDate={selectedDate} setSelectedDate={setSelectedDate} symbol={symbol} chartData={chartData}/>
+        <Etc selectedMenu={selectedEtc} handleSelect={setSelectedEtc} etcData={etcData} orderData={orderData}/>
       </Contents>
       <Bar>
-        {isOrder ? (
+        {orderData && orderData.length>0 ? (
           <>
             <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
             <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />
@@ -223,7 +239,7 @@ const Page = styled.div`
 `
 const Contents = styled.div`
   width: 375px;
-  height: 590px;
+  height: 640px;
   display: flex;
   flex-direction: column;
   padding-top: 32px;

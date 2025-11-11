@@ -3,18 +3,14 @@ import OrderCard from '../common/OrderCard'
 
 import Document from '@/assets/icons/icon-document.svg?react'
 
-export default function () {
-  const isOrder = 1
+export default function ({data}) {
   return (
     <Box>
       <WaitingOrder>대기 중인 주문</WaitingOrder>
       <OrderCardBox>
-        {isOrder ? (
+        {data && data.length>0 ? (
           <>
-            <OrderCard />
-            <OrderCard />
-            <OrderCard />
-            <OrderCard />
+          {data.map(()=><OrderCard />)}
           </>
         ) : (
           <NothingBox>
