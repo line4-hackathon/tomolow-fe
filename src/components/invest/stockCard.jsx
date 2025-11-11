@@ -1,30 +1,53 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
-import RedHeart from "@/assets/icons/icon-heart-red.svg?react";
-import GrayHeart from "@/assets/icons/icon-heart-gray.svg?react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import RedHeart from '@/assets/icons/icon-heart-red.svg?react'
+import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { APIService } from '@/pages/invest/api'
 
-export default function StockCard({ interest }) {
-  const [isInterest, setIsInterest] = useState(interest);
+export default function StockCard({ data }) {
+  const [isInterest, setIsInterest] = useState(data.interest)
 
-  const navigate=useNavigate();
+  const interest = async () => {
+    if (isInterest) {
+      try {
+        const res = await APIService.private.delete(`/api/stock/${data.marketId}/interest`)
+      } catch (error) {
+        console.log('관심 취소 실패')
+      }
+    } else {
+      try {
+        const res = await APIService.private.post(`/api/stock/${data.marketId}/interest`)
+      } catch (error) {
+        console.log('관심 등록 실패')
+      }
+    }
+  }
+  const navigate = useNavigate()
+  const toTrading=()=>{
+    navigate('/invest/trading', {
+        state: {
+          symbol: data.symbol,
+        },
+      })
+  }
 
   return (
     <Card>
-      <Logo onClick={()=>navigate("/invest/trading")}/>
-      <TextBox onClick={()=>navigate("/invest/trading")}>
-        <Name>삼성전자</Name>
+      <Logo onClick={()=>toTrading()} />
+      <TextBox onClick={()=>toTrading()}>
+        <Name>{data.name}</Name>
         <Detail>
-          <Number>005930</Number>
-          <Price>87000(+10.5%)</Price>
+          <Number>{data.symbol}</Number>
+          <Price $color={data.changeRate>0? true:false}>{data.price}({(data.changeRate*100).toFixed(2)}%)</Price>
         </Detail>
       </TextBox>
       <Interest onClick={() => setIsInterest(!isInterest)}>
         {isInterest ? <RedHeart /> : <GrayHeart />}
       </Interest>
     </Card>
-  );
+  )
 }
 const Card = styled.div`
   display: flex;
@@ -34,10 +57,10 @@ const Card = styled.div`
   gap: var(--Spacing-XL, 24px);
   align-self: stretch;
   width: 320px;
-  &:hover{
+  &:hover {
     cursor: pointer;
   }
-`;
+`
 const Logo = styled.div`
   display: flex;
   justify-content: center;
@@ -46,16 +69,16 @@ const Logo = styled.div`
   height: 48px;
   border-radius: 33px;
   background: var(--Primary-900, #263c54);
-`;
+`
 const TextBox = styled.div`
   display: flex;
   flex-direction: column;
   text-align: left;
-`;
+`
 const Detail = styled.div`
   display: flex;
   gap: 12px;
-`;
+`
 const Name = styled.div`
   color: var(--Neutral-900, #333);
 
@@ -67,7 +90,7 @@ const Name = styled.div`
   line-height: 24px; /* 150% */
   align-self: stretch;
   margin-bottom: 8px;
-`;
+`
 const Number = styled.div`
   color: var(--Neutral-300, #b0b0b0);
 
@@ -77,9 +100,9 @@ const Number = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 16px; /* 133.333% */
-`;
+`
 const Price = styled.div`
-  color: var(--Alert-Red, #ff2e4e);
+  color: ${({$color})=> $color ? "#ff2e4e":"#0084FE"};
 
   /* Caption-Regular */
   font-family: Inter;
@@ -87,8 +110,8 @@ const Price = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 16px; /* 133.333% */
-`;
+`
 const Interest = styled.div`
   display: flex;
   margin-left: auto;
-`;
+`

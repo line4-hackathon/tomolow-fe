@@ -8,41 +8,109 @@ import NothingIcon from '@/assets/icons/icon-search-not.svg?react'
 import NothingHeart from '@/assets/icons/icon-heart-navy.svg?react'
 import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
+import { useEffect, useState } from 'react'
+import { APIService } from './api'
 
 export default function InvestSearchPage() {
   const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
-  const isStock = 0
+  const [stockData, setStockData] = useState()
+  const [searchName, setSearchName] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState(searchName)
+  useEffect(() => {
+    let param = false
+    switch (selectedMenu) {
+      case 'TRADING_AMOUNT':
+        param = 'turnover'
+        break
+      case 'TRADING_VOLUME':
+        param = 'volume'
+        break
+      case 'SOARING':
+        param = 'gainers'
+        break
+      case 'PLUMMETING':
+        param = 'losers'
+        break
+    }
+    if (searchName) {
+      const Search = async () => {
+        try {
+          const res = await APIService.private.get(`/api/stock/search?keyword=${debouncedSearch}`)
+          setStockData(res.data)
+        } catch (error) {
+          console.log('검색어 조회 실패')
+        }
+      }
+      Search()
+    } else if (param) {
+      const DataCheck = async () => {
+        try {
+          const res = await APIService.private.get(`/api/rank/${param}?limit=50`)
+          setStockData(res.data)
+        } catch (error) {
+          console.log('주식 조회 실패')
+        }
+      }
+      DataCheck()
+    } else {
+      const InteresSearch = async () => {
+        try {
+          const res = await APIService.private.get(`/api/interests/markets`)
+          setStockData(res.data.items)
+        } catch (error) {
+          console.log('관심 주식 조회 실패')
+        }
+      }
+      InteresSearch()
+    }
+  }, [selectedMenu, debouncedSearch])
+
+  useEffect(() => {
+    //디바운싱 검색어 변환 및 적용
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchName)
+    }, 1000) // 0.5초 동안 입력 없을 때만 반영
+
+    return () => {
+      clearTimeout(handler) // 입력이 계속되면 이전 타이머 취소
+    }
+  }, [searchName])
 
   return (
     <Page>
       <Header title='투자' />
       <Contents>
-        <SearchBar explain='주식명 혹은 주식코드를 입력하세요' />
-        <ListBox>
-          {Object.keys(menuTypes).map((key) => (
-            <List
-              key={key}
-              onClick={() => handleSelect(key)}
-              // 3. 현재 선택된 메뉴 감지 및 스타일 적용
-              $isMenu={selectedMenu === key ? true : false}
-            >
-              {menuTypes[key]} {/* 사용자에게 보이는 메뉴 이름 */}
-            </List>
-          ))}
-        </ListBox>
-        {isStock ? (
+        <SearchBar
+          explain='주식명 혹은 주식코드를 입력하세요'
+          searchName={searchName}
+          setSearchName={setSearchName}
+        />
+        {!debouncedSearch && (
+          <ListBox>
+            {Object.keys(menuTypes).map((key) => (
+              <List
+                key={key}
+                onClick={() => handleSelect(key)}
+                // 3. 현재 선택된 메뉴 감지 및 스타일 적용
+                $isMenu={selectedMenu === key ? true : false}
+              >
+                {menuTypes[key]} {/* 사용자에게 보이는 메뉴 이름 */}
+              </List>
+            ))}
+          </ListBox>
+        )}
+        {stockData && stockData.length > 0 ? (
           <StockCardBox>
-            <StockCard interest={true} />
-            <Line />
-            <StockCard interest={false} />
-            <Line />
-            <StockCard interest={true} />
-            <Line />
-            <StockCard interest={true} />
+            {stockData.map((data, index) => (
+              <div style={{display:"flex", flexDirection:"column", gap:"10px"}} key={index}>
+                <StockCard key={data.name} data={data} />
+                {index < stockData.length - 1 && <Line />}
+              </div>
+            ))}
           </StockCardBox>
         ) : (
           <Nothing>
-            {selectedMenu==="INTEREST" ? (
+            {selectedMenu === 'INTEREST' ? (
               <>
                 <NothingHeart />
                 <p>관심 주식이 없어요</p>
@@ -56,7 +124,7 @@ export default function InvestSearchPage() {
           </Nothing>
         )}
       </Contents>
-      <MenuBar/>
+      <MenuBar />
     </Page>
   )
 }
@@ -97,6 +165,7 @@ const StockCardBox = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 15px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */

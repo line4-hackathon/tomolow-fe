@@ -5,14 +5,14 @@ import RedHeart from '@/assets/icons/icon-heart-red.svg?react'
 import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
 import { useState } from 'react'
 
-export default function InvestHeader() {
+export default function InvestHeader({data}) {
   const [isInterest, setIsInterest] = useState(false)
   return (
     <HeaderBar>
       <BackButton />
       <HeaderInfo>
-        <HeadName>삼성전자</HeadName>
-        <HeadPrice>117,000원(+10.5%)</HeadPrice>
+        <HeadName>{data.marketName}</HeadName>
+        <HeadPrice>{data.tradePrice}원({data.changeRate}%)</HeadPrice>
       </HeaderInfo>
       {isInterest ? (
         <RedHeart onClick={() => setIsInterest(false)} />
