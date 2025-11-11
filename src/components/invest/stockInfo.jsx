@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export default function StockInfo() {
+export default function StockInfo({data}) {
   return (
     <Box>
       <Stock $fontSize="20px">삼성전자</Stock>

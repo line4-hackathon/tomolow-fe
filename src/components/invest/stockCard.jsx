@@ -10,19 +10,13 @@ export default function StockCard({ data }) {
   const [isInterest, setIsInterest] = useState(data.interest)
 
   const interest = async () => {
-    if (isInterest) {
       try {
-        const res = await APIService.private.delete(`/api/stock/${data.marketId}/interest`)
+        const res = await APIService.private.post(`/api/interests/markets/${data.marketId}/toggle`)
+        setIsInterest(!isInterest)
       } catch (error) {
-        console.log('관심 취소 실패')
+        console.log('관심 등록/취소 실패')
       }
-    } else {
-      try {
-        const res = await APIService.private.post(`/api/stock/${data.marketId}/interest`)
-      } catch (error) {
-        console.log('관심 등록 실패')
-      }
-    }
+    
   }
   const navigate = useNavigate()
   const toTrading=()=>{
@@ -43,7 +37,7 @@ export default function StockCard({ data }) {
           <Price $color={data.changeRate>0? true:false}>{data.price}({(data.changeRate*100).toFixed(2)}%)</Price>
         </Detail>
       </TextBox>
-      <Interest onClick={() => setIsInterest(!isInterest)}>
+      <Interest onClick={() => interest()}>
         {isInterest ? <RedHeart /> : <GrayHeart />}
       </Interest>
     </Card>
