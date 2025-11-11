@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import Logo from '@/assets/images/logo-login.svg?react'
+import Logo from '@/assets/images/img-ad-guide.svg?react'
 
 const ChargeGuide = () => {
   return (
