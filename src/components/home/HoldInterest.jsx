@@ -12,7 +12,6 @@ const TABS = [
   { key: 'interest', label: '관심' },
 ]
 
-
 function HoldInterest() {
   const { selectedMenu, handleSelect } = useSelect('hold') // 기본 탭: 보유
   const navigate = useNavigate()
@@ -58,9 +57,8 @@ function HoldInterest() {
 
   const isHoldTab = selectedMenu === 'hold'
   const rawList = isHoldTab ? holdingStocks : interestList
-  const list = rawList || [] // undefined/null 방어
+  const list = rawList || []
   const hasItems = Array.isArray(list) && list.length > 0
-
 
   const handleTabClick = (key) => {
     handleSelect(key)
@@ -68,6 +66,10 @@ function HoldInterest() {
 
   const handleInvestClick = () => {
     navigate('/invest')
+  }
+
+  const handleMoneyChargeClick = () => {
+    navigate('/mypage/charge')
   }
 
   const toggleLike = (id) => {
@@ -81,7 +83,7 @@ function HoldInterest() {
   return (
     <Container>
       {/* 머니 충전 영역 */}
-      <MoneyCharge>
+      <MoneyCharge onClick={handleMoneyChargeClick}>
         <LeftBox>
           <IconBox />
           <Label>머니 충전</Label>
@@ -162,7 +164,6 @@ function HoldInterest() {
 
 export default HoldInterest
 
-
 const Container = styled.section`
   padding: 24px 16px 32px;
   background-color: #f6f6f6;
@@ -179,6 +180,7 @@ const MoneyCharge = styled.div`
   background: #fff;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
+  cursor: pointer;
 `
 
 const LeftBox = styled.div`
@@ -265,9 +267,8 @@ const LeftText = styled.div`
 const StockName = styled.div`
   color: var(--Neutral-900, #333);
   font-size: 16px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
 `
 
 const StockSub = styled.div`
@@ -284,9 +285,8 @@ const Price = styled.div`
   color: var(--Neutral-900, #333);
   text-align: right;
   font-size: 16px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
   gap: 8px;
   display: flex;
   flex-direction: column;
@@ -295,10 +295,8 @@ const Price = styled.div`
 const Diff = styled.div`
   font-size: 12px;
   text-align: right;
-  font-size: 12px;
-  font-style: normal;
   font-weight: 400;
-  line-height: 16px; /* 133.333% */
+  line-height: 16px;
   color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
 `
 
@@ -327,11 +325,9 @@ const EmptyState = styled.div`
 const EmptyText = styled.div`
   color: var(--Neutral-300, #B0B0B0);
   text-align: center;
-  font-family: Inter;
   font-size: 16px;
-  font-style: normal;
   font-weight: 400;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
 `
 
 const HeartEmpty = styled.img`
@@ -350,7 +346,3 @@ const InvestButton = styled.button`
   border-radius: var(--Radius-S, 8px);
   background: var(--Primary-500, #4880AF);
 `
-
-
-
-
