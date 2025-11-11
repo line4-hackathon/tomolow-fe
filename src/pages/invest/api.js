@@ -1,0 +1,100 @@
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const WS_ENDPOINT = '/ws';
+
+// 공용 API 인스턴스 (토큰이 필요 없는 경우)
+const publicAPI = axios.create({
+  baseURL: BASE_URL,
+});
+
+// 인증 API 인스턴스 (토큰이 필요한 경우)
+const privateAPI = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: false,
+});
+
+// accessToken을 자동으로 Authorization 헤더에 삽입
+privateAPI.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+/**
+ * API 서비스 객체
+ * 실제 API 호출을 위한 메서드들을 제공
+ * public과 private으로 구분하여 각각의 용도에 맞는 메서드 제공
+ */
+export const APIService = {
+  // 공용 API 메서드 (토큰 불필요)
+  public: {
+    get: async (url, config = {}) => {
+      const response = await publicAPI.get(url, config);
+      return response.data;
+    },
+    post: async (url, data = {}, config = {}) => {
+      const response = await publicAPI.post(url, data, config);
+      return response;
+    },
+  },
+
+  // 인증 API 메서드 (토큰 필요)
+  private: {
+    get: async (url, config = {}) => {
+      const response = await privateAPI.get(url, config);
+      return response.data;
+    },
+    post: async (url, data = {}, config = {}) => {
+      const response = await privateAPI.post(url, data, config);
+      return response.data;
+    },
+    put: async (url, data = {}, config = {}) => {
+      const response = await privateAPI.put(url, data, config);
+      return response.data;
+    },
+    delete: async (url, config = {}) => {
+      const response = await privateAPI.delete(url, config);
+      return response.data;
+    },
+    patch: async (url, data = {}, config = {}) => {
+      const response = await privateAPI.patch(url, data, config);
+      return response.data;
+    },
+  },
+};
+
+// 사용자 관련 API
+export const UserAPI = {
+  // 사용자 요약 정보 조회
+  getUserSummary: async () => {
+    return await APIService.private.get("/users/summary");
+  },
+};
+
+// 운동 추천 관련 API
+export const ExerciseAPI = {
+  // 오늘의 맞춤 운동 추천 조회 (맨몸운동)
+  getRecommendations: async (conditionData) => {
+    return await APIService.private.post("/reco/bodyweight", conditionData);
+  },
+
+  // 특정 날짜의 운동 추천 생성 및 저장
+  getRecommendationsByDate: async (date, conditionData) => {
+    return await APIService.private.post(`/reco/bodyweight/${date}`, conditionData);
+  },
+
+  // 운동 상세 정보 조회
+  getExerciseDetail: async (exerciseId) => {
+    return await APIService.private.get(`/exercise/${exerciseId}`);
+  },
+
+  // 운동 완료 기록
+  completeExercise: async (exerciseId, completionData) => {
+    return await APIService.private.post(`/exercise/${exerciseId}/complete`, completionData);
+  },
+};
+
+export { publicAPI, privateAPI };

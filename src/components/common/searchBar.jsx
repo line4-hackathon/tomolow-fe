@@ -1,9 +1,7 @@
 import styled from 'styled-components'
 import Icon from '@/assets/icons/icon-search.svg?react';
-import { useState } from 'react'
 
-export default function SearchBar({explain}) {
-  const [searchName, setSearchName] = useState()
+export default function SearchBar({explain,searchName,setSearchName}) {
   return (
     <Bar>
       <Icon />
