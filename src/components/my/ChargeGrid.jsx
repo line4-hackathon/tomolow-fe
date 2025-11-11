@@ -1,21 +1,86 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
+import axios from 'axios'
+import adGrid1 from '@/assets/images/img-ad-grid1.svg'
+import adGrid2 from '@/assets/images/img-ad-grid2.svg'
+import adGrid3 from '@/assets/images/img-ad-grid3.svg'
+import adGrid4 from '@/assets/images/img-ad-grid4.svg'
+import Toast from '../common/Toast'
+import Loading from '../common/Loading'
 
-const ChargeGrid = ({ ads, onClick }) => {
+const ads = [
+  {
+    id: 1,
+    benefit: '+1,000만원',
+    price: '1,200원',
+    src: adGrid1,
+    endpoint: '/10m',
+  },
+  {
+    id: 2,
+    benefit: '+3,000만원',
+    price: '4,900원',
+    src: adGrid2,
+    endpoint: '/30m',
+  },
+  {
+    id: 3,
+    benefit: '+5,000만원',
+    price: '7,500원',
+    src: adGrid3,
+    endpoint: '/50m',
+  },
+  {
+    id: 4,
+    benefit: '+1억원',
+    price: '12,000원',
+    src: adGrid4,
+    endpoint: '/100m',
+  },
+]
+
+const ChargeGrid = () => {
+  const [loading, setLoading] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+
+  const handleCharge = async (endpoint) => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('accessToken')
+      const res = await axios.post(
+        `${apiUrl}/api/mypage/cash${endpoint}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      setToastMsg(`머니가 충전되었어요.`)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
-    <Grid>
-      {ads.map((ad) => (
-        <Card key={ad.id} onClick={() => onClick(ad)}>
-          <Img src={ad.src} />
-          <TextContainer>
-            <Benefit>{ad.benefit}</Benefit>
-            <PriceContainer>
-              <Price>{ad.price}</Price>
-            </PriceContainer>
-          </TextContainer>
-        </Card>
-      ))}
-    </Grid>
+    <>
+      <Grid>
+        {ads.map((ad) => (
+          <Card key={ad.id} onClick={() => handleCharge(ad.endpoint)}>
+            <Img src={ad.src} />
+            <TextContainer>
+              <Benefit>{ad.benefit}</Benefit>
+              <PriceContainer>
+                <Price>{ad.price}</Price>
+              </PriceContainer>
+            </TextContainer>
+          </Card>
+        ))}
+      </Grid>
+      {toastMsg && <Toast msg={toastMsg} onClose={() => setToastMsg('')} />}
+    </>
   )
 }
 
