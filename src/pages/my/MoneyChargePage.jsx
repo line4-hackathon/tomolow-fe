@@ -5,7 +5,10 @@ import Header from '@/components/common/Header'
 import ChargeGuide from '@/components/my/ChargeGuide'
 import AdList from '@/components/my/AdList'
 import ChargeGrid from '@/components/my/ChargeGrid'
-import adGrid from '@/assets/images/img-ad-grid.svg'
+import adGrid1 from '@/assets/images/img-ad-grid1.svg'
+import adGrid2 from '@/assets/images/img-ad-grid2.svg'
+import adGrid3 from '@/assets/images/img-ad-grid3.svg'
+import adGrid4 from '@/assets/images/img-ad-grid4.svg'
 import MenuBar from '@/components/common/MenuBar'
 
 // 임시 광고 데이터
@@ -13,32 +16,26 @@ const ads = [
   {
     id: 1,
     benefit: '+1,000만원',
-    price: '1200원',
-    src: adGrid,
+    price: '1,200원',
+    src: adGrid1,
   },
   {
     id: 2,
-    benefit: '+500만원',
-    price: '800원',
-    src: adGrid,
+    benefit: '+3,000만원',
+    price: '4,900원',
+    src: adGrid2,
   },
   {
     id: 3,
-    benefit: '+700만원',
-    price: '1000원',
-    src: adGrid,
+    benefit: '+5,000만원',
+    price: '7,500원',
+    src: adGrid3,
   },
   {
     id: 4,
-    benefit: '+1,000만원',
-    price: '1200원',
-    src: adGrid,
-  },
-  {
-    id: 5,
-    benefit: '+1,000만원',
-    price: '1200원',
-    src: adGrid,
+    benefit: '+1억원',
+    price: '12,000원',
+    src: adGrid4,
   },
 ]
 
