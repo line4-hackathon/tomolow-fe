@@ -39,4 +39,5 @@ export const StatusRow = styled.div`
 
 export const NextButton = styled.div`
   margin-top: auto;
+  padding-top: 40px;
 `
