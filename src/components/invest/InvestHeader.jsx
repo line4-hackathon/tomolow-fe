@@ -12,7 +12,7 @@ export default function InvestHeader({data}) {
       <BackButton />
       <HeaderInfo>
         <HeadName>{data.marketName}</HeadName>
-        <HeadPrice>{data.tradePrice}원({data.changeRate}%)</HeadPrice>
+        <HeadPrice>{data.tradePrice}원({(data.changeRate*100).toString(2)}%)</HeadPrice>
       </HeaderInfo>
       {isInterest ? (
         <RedHeart onClick={() => setIsInterest(false)} />
