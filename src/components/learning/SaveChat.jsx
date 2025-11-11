@@ -5,14 +5,16 @@ import CheckOnIcon from '@/assets/icons/icon-save-check-blue.svg'
 import CheckOffIcon from '@/assets/icons/icon-save-check-gray.svg'
 import Toast from '@/components/invest/ToastMessage'
 
-// 서버 주소 & 임시 토큰
+// 서버 주소
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const TEMP_FAKE_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb295ZW9uIiwianRpIjoic29veWVvbiIsImlhdCI6MTc2Mjc1NTQ0MiwiZXhwIjoxNzYyNzU3MjQyfQ.4XcjHOK4_YPTcCT9F9QV6SNEt3TDhokYfhHT6FVzP5U"
 
-const getAuthHeader = () => ({
-    Authorization: `Bearer ${TEMP_FAKE_TOKEN}`,
-})
+// 로그인 토큰 사용
+const getAccessToken = () => localStorage.getItem('accessToken')
+
+const getAuthHeader = () => {
+    const token = getAccessToken()
+    return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export default function SaveChat() {
     const navigate = useNavigate()
@@ -27,11 +29,18 @@ export default function SaveChat() {
 
     const hasSelection = selectedKeys.length > 0
 
-    //  기존 대화 목록 가져오기
+  //  기존 대화 목록 가져오기
     useEffect(() => {
         const fetchRoom = async () => {
         if (!API_BASE_URL) {
             setError('서버 주소가 설정되어 있지 않습니다.')
+            setLoading(false)
+            return
+        }
+
+        const token = getAccessToken()
+        if (!token) {
+            setError('로그인 후 이용 가능한 서비스입니다.')
             setLoading(false)
             return
         }
@@ -45,19 +54,24 @@ export default function SaveChat() {
             if (!res.ok) {
             const text = await res.text()
             console.error('room error:', res.status, text)
-            setError('대화 목록을 불러오지 못했습니다.')
+
+            if (res.status === 401 || res.status === 403) {
+                setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
+            } else {
+                setError('대화 목록을 불러오지 못했습니다.')
+            }
             return
             }
 
-        const json = await res.json()
-        console.log('room (save page) response:', json)
+            const json = await res.json()
+            console.log('room (save page) response:', json)
 
-        if (!json.success) {
+            if (!json.success) {
             setError(json.message || '대화 목록을 불러오지 못했습니다.')
             return
-        }
+            }
 
-        setItems(Array.isArray(json.data) ? json.data : [])
+            setItems(Array.isArray(json.data) ? json.data : [])
         } catch (err) {
             console.error('room error:', err)
             setError('서버 통신 중 오류가 발생했습니다.')
@@ -70,9 +84,9 @@ export default function SaveChat() {
     }, [])
 
     // 체크박스 토글
-    const toggleKey = (key) => {
-        setSelectedKeys((prev) =>
-        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    const toggleKey = key => {
+        setSelectedKeys(prev =>
+        prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
         )
     }
 
@@ -84,6 +98,12 @@ export default function SaveChat() {
     // 저장 API 호출
     const handleSave = async () => {
         if (!hasSelection || saving || !API_BASE_URL) return
+
+        const token = getAccessToken()
+        if (!token) {
+        setError('로그인 후 이용 가능한 서비스입니다.')
+        return
+        }
 
         setSaving(true)
         setError('')
@@ -101,7 +121,12 @@ export default function SaveChat() {
         if (!res.ok) {
             const text = await res.text()
             console.error('save error:', res.status, text)
+
+            if (res.status === 401 || res.status === 403) {
+            setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
+            } else {
             setError('대화 저장에 실패했습니다.')
+            }
             return
         }
 
@@ -120,7 +145,7 @@ export default function SaveChat() {
         // 2초 뒤 학습(챗봇) 화면으로 이동
         setTimeout(() => {
             navigate('/learning')
-        }, 113339000)
+        }, 2000)
 
         setSelectedKeys([])
         } catch (err) {
@@ -142,7 +167,7 @@ export default function SaveChat() {
 
             {!loading && !error && items.length > 0 && (
             <List>
-                {items.map((item) => {
+                {items.map(item => {
                 const isChecked = selectedKeys.includes(item.key)
                 return (
                     <Item key={item.key} onClick={() => toggleKey(item.key)}>
@@ -178,7 +203,7 @@ export default function SaveChat() {
             </SaveButton>
         </BottomBar>
 
-        {/*토스트 메시지 */}
+        {/* 토스트 메시지 */}
         {toastVisible && (
             <Toast
             message={toastMessage}
@@ -189,7 +214,6 @@ export default function SaveChat() {
     )
     }
 
-
 const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
@@ -197,7 +221,7 @@ const Wrapper = styled.div`
     background-color: #f5f6f9;
     padding-top: 32px;
     margin-bottom: 60px;
-`
+    `
 
 const Content = styled.div`
     flex: 1;
@@ -206,47 +230,47 @@ const Content = styled.div`
     display: flex;
     flex-direction: column;
     gap: 16px;
-`
+    `
 
 const Message = styled.p`
     margin-top: 40px;
     text-align: center;
     color: #9ca3af;
     font-size: 14px;
-`
+    `
 
 const List = styled.div`
     display: flex;
     flex-direction: column;
     gap: 25px;
     margin-bottom: 16px;
-`
+    `
 
 const Item = styled.div`
     display: flex;
     align-items: flex-start;
     gap: 12px;
     cursor: pointer;
-`
+    `
 
 const CheckboxWrapper = styled.div`
     padding-top: 8px;
     flex-shrink: 0;
-`
+    `
 
 const CheckIcon = styled.img`
     width: 22px;
     height: 22px;
     cursor: pointer;
     user-select: none;
-`
+    `
 
 const ChatBlock = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 12px;
-`
+    `
 
 const QuestionBubble = styled.div`
     align-self: flex-end;
@@ -257,7 +281,7 @@ const QuestionBubble = styled.div`
     color: #111827;
     font-size: 14px;
     line-height: 1.4;
-`
+    `
 
 const AnswerBubble = styled.div`
     align-self: flex-start;
@@ -265,28 +289,32 @@ const AnswerBubble = styled.div`
     font-size: 14px;
     line-height: 1.6;
     color: #111827;
-`
+    `
 
 const BottomBar = styled.footer`
     position: sticky;
     bottom: 0;
     padding: 12px 16px 16px;
     background-color: #f5f6f9;
-`
+    `
 
 const SaveButton = styled.button`
     width: 100%;
     height: 48px;
+    max-width: 341px;
+    height: 48px;
+    position: fixed;
+    bottom: 80px;
     border-radius: var(--Radius-M, 12px);
     border: none;
     font-size: 15px;
     font-weight: 500;
     color: #ffffff;
-    background: ${({ disabled }) => (disabled ? '#D1D1D1' : '#4880AF')};
+    background: ${({ disabled }) => (disabled ? '#d1d1d1' : '#4880af')};
     cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
     transition: 0.2s ease;
 
     &:hover {
         opacity: ${({ disabled }) => (disabled ? 1 : 0.9)};
     }
-`
+    `
