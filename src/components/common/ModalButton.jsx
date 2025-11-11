@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 function ModalButton({ label, color, backgroundcolor, onClick }) {
   return (
-    <Button color={color} backgroundcolor={backgroundcolor} onClick={onClick}>
+    <Button $color={color} $backgroundcolor={backgroundcolor} onClick={onClick}>
       {label}
     </Button>
   )
@@ -25,8 +25,8 @@ const Button = styled.button`
   font-size: 14px;
   font-weight: 500;
   line-height: 24px;
-  color: ${({ color }) => color || '#fff'};
-  background-color: ${({ backgroundcolor }) => backgroundcolor || '#4880af'};
+  color: ${({ $color }) => $color || '#fff'};
+  background-color: ${({ $backgroundcolor }) => $backgroundcolor || '#4880af'};
   border: none;
   transition: background-color 0.2s ease;
 `
