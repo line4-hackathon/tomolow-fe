@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
 
 export default function StockCard({ data }) {
-  const [isInterest, setIsInterest] = useState(data.interest)
+  const [isInterest, setIsInterest] = useState(data.interested)
 
   const interest = async () => {
       try {

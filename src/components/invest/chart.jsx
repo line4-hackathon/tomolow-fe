@@ -4,11 +4,10 @@ import { DateTypes } from "@/pages/invest/selectType";
 import CandleChart from "./CandleCharts";
 
 
-export default function Chart() {
-  const { selectedMenu, handleSelect } = useSelect("DAY");
+export default function Chart({selectedMenu, handleSelect,symbol,chartData}) {
   return (
     <ChartBox>
-      <CandleChart/>
+      <CandleChart chartData={chartData}/>
       <DateBar>
         {Object.keys(DateTypes).map((key) => (
           <Term

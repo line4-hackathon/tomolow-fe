@@ -12,6 +12,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { APIService, WS_ENDPOINT } from './api'
 import { Client } from '@stomp/stompjs'
+import { DateTypes } from './selectType'
+import useSelect from '@/hooks/select'
 
 export default function InvestTradingPage() {
   const isOrder = 1
@@ -24,6 +26,8 @@ export default function InvestTradingPage() {
   const symbol = state?.symbol
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
+  const { selectedMenu, handleSelect } = useSelect("DAY");
+  const [chartData,setChartData]=useState([]);
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -86,7 +90,6 @@ export default function InvestTradingPage() {
       console.warn('Symbol not found in state, cannot connect to ticker.')
       return
     }
-    console.log('✅ InvestTradingPage 마운트')
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
     const wsURL = protocol + window.location.host + WS_ENDPOINT
     const token = localStorage.getItem('accessToken')
@@ -128,6 +131,52 @@ export default function InvestTradingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 의존성 배열이 빈 배열이므로 마운트 시 한 번만 실행
 
+
+  useEffect(() => {
+    if(!symbol){
+      console.log("심볼 없음")
+      return
+    }
+    const chartDataGet = async () => {
+      let param
+      switch (selectedMenu){
+        case "DAY":
+          param="D1"
+          break;
+        case "WEEK":
+          param="W1"
+          break;
+        case "MONTH":
+          param="M1"
+          break;
+        case "SIXMONTH":
+          param="M6"
+          break;
+        case "YEAR":
+          param="Y1"
+          break;
+      }
+      try {
+        const res = await APIService.private.get(`/api/candles/${symbol}?tf=${param}`)
+        setChartData(res.data)
+      } catch (error) {
+        console.log('차트 조회 실패')
+      }
+    }
+
+    chartDataGet();
+  },[selectedMenu,symbol])
+
+  useEffect(()=>{
+    const etcGet=async ()=>{
+      try{
+        
+      }catch(error){
+
+      }
+    }
+  })
+
   const isPurchase = (p) => {
     navigate('/invest/purchase', {
       state: {
@@ -136,40 +185,33 @@ export default function InvestTradingPage() {
     })
   }
 
-  console.log('InvestTradingPage 렌더링 시작')
   return (
     <Page>
-      {stockData ? (
-        <>
-          <InvestHeader data={stockData} />
-          <Contents>
-            <StockInfo data={stockData} />
-            <Chart />
-            <Etc />
-          </Contents>
-          <Bar>
-            {isOrder ? (
-              <>
-                <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
-                <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />
-              </>
-            ) : (
-              <RedButton width='343px' height='56px' onClick={() => isPurchase(true)} />
-            )}
-          </Bar>
-          <AnimatePresence>
-            {toastVisible && (
-              <Toast
-                message={toastMessage}
-                onClose={handleCloseToast}
-                // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
-              />
-            )}
-          </AnimatePresence>
-        </>
-      ) : (
-        <p>로딩 중</p>
-      )}
+      {stockData && <InvestHeader data={stockData} />}
+      <Contents>
+        {stockData && <StockInfo data={stockData} />}
+        <Chart  selectedMenu={selectedMenu} handleSelect={handleSelect} symbol={symbol} chartData={chartData}/>
+        <Etc />
+      </Contents>
+      <Bar>
+        {isOrder ? (
+          <>
+            <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
+            <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />
+          </>
+        ) : (
+          <RedButton width='343px' height='56px' onClick={() => isPurchase(true)} />
+        )}
+      </Bar>
+      <AnimatePresence>
+        {toastVisible && (
+          <Toast
+            message={toastMessage}
+            onClose={handleCloseToast}
+            // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
+          />
+        )}
+      </AnimatePresence>
     </Page>
   )
 }
