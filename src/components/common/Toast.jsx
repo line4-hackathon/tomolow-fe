@@ -8,27 +8,34 @@ function Toast({ msg, onClose }) {
     }, 2000)
     return () => clearTimeout(timer)
   }, [onClose])
-  return <ToastMsg>{msg}</ToastMsg>
+  return (
+    <ToastContainer>
+      <Text>{msg}</Text>
+    </ToastContainer>
+  )
 }
 
 export default Toast
 
-const ToastMsg = styled.div`
+const ToastContainer = styled.div`
   position: fixed;
-  display: flex;
-  white-space: nowrap;
-  justify-content: center;
-  align-items: center;
   top: 50%;
   left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 24px 16px;
-  transform: translate(-50%);
+  transform: translate(-50%, -50%);
   border-radius: var(--Radius-M, 12px);
   background: var(--Neutral-0, #fff);
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+`
 
+const Text = styled.p`
   color: #333;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
+  white-space: pre-line;
+  text-align: center;
 `
