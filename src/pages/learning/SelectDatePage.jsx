@@ -1,20 +1,26 @@
 // src/pages/learning/SelectDatePage.jsx
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import Header from '@/components/common/Header'
 import StockInfo from '@/components/invest/stockInfo'
 import Chart from '@/components/invest/chart'
+import useSelect from '@/hooks/select'
+import useStockStore from '@/stores/stockStores'
+import { APIService } from '../invest/api'
 
 export default function SelectDatePage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { stock } = location.state || {}   // { name, symbol, ... } 라고 가정
+  const { stock } = location.state || {} // { name, symbol, ... } 라고 가정
+  const { stockData, setStockData } = useStockStore()
+  const { selectedMenu, handleSelect } = useSelect('DAY')
 
   // 일단 더미 날짜 (나중에 date-picker 붙이면 여기만 수정)
-  const [startDate] = useState('2025년 1월 1일')
-  const [endDate] = useState('2025년 1월 6일')
+  const [startDate, setStartDate] = useState('2025년 1월 1일')
+  const [endDate, setEndDate] = useState('2025년 1월 6일')
+  const [chartData, setChartData] = useState([])
 
   const handleLoad = () => {
     const stockName = stock?.name || stock?.symbol || '선택한 종목'
@@ -29,12 +35,54 @@ export default function SelectDatePage() {
     })
   }
 
+  useEffect(() => {
+    if (!stockData.symbol) {
+      console.log('심볼 없음')
+      return
+    }
+    setStockData(stock)
+    const chartDataGet = async () => {
+      let param
+      switch (selectedMenu) {
+        case 'DAY':
+          param = await 'D1'
+          break
+        case 'WEEK':
+          param = await 'W1'
+          break
+        case 'MONTH':
+          param = await 'M1'
+          break
+        case 'THREEMONTH':
+          param = await 'M3'
+          break
+        case 'YEAR':
+          param = await 'Y1'
+          break
+      }
+      try {
+        const res = await APIService.private.get(`/api/candles/${stockData.symbol}?tf=${param}`)
+        setChartData(res.data)
+      } catch (error) {
+        console.log('차트 조회 실패')
+      }
+    }
+    chartDataGet()
+  }, [selectedMenu, stockData.symbol])
+
   return (
     <Page>
-      <Header title="학습" />
+      <Header title='학습' />
       <Contents>
         <StockInfo />
-        <Chart />
+        <Chart
+          selectedDate={selectedMenu}
+          setSelectedDate={handleSelect}
+          symbol={stockData.symbol}
+          chartData={chartData}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+        />
         <DateCard>
           <DateRow>
             <DateLabel>시작일</DateLabel>

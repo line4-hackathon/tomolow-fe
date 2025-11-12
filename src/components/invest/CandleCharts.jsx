@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { scaleLinear } from 'd3-scale' // ✅ y좌표 변환용
 import { APIService } from '@/pages/invest/api'
+import { useLocation } from 'react-router-dom'
 
 // ✅ styled-components
 const ChartContainer = styled.div`
@@ -22,28 +23,6 @@ const ChartContainer = styled.div`
   display: flex;
   flex-direction: column;
 `
-
-// ✅ 예시 데이터
-const data = [
-  { time: '09:00', open: 100, high: 104, low: 98, close: 102, volume: 300 },
-  { time: '09:30', open: 102, high: 106, low: 101, close: 104, volume: 450 },
-  { time: '10:00', open: 104, high: 108, low: 103, close: 106, volume: 500 },
-  { time: '10:30', open: 106, high: 109, low: 104, close: 105, volume: 600 },
-  { time: '11:00', open: 105, high: 106, low: 102, close: 103, volume: 700 },
-  { time: '11:30', open: 103, high: 107, low: 101, close: 106, volume: 550 },
-  { time: '12:00', open: 106, high: 111, low: 103, close: 108, volume: 620 },
-  { time: '12:30', open: 108, high: 109, low: 103, close: 105, volume: 580 },
-  { time: '13:00', open: 103, high: 107, low: 101, close: 106, volume: 500 },
-  { time: '13:30', open: 103, high: 107, low: 101, close: 106, volume: 480 },
-  { time: '14:00', open: 103, high: 107, low: 101, close: 106, volume: 520 },
-  { time: '14:30', open: 103, high: 107, low: 101, close: 106, volume: 600 },
-  { time: '15:00', open: 103, high: 107, low: 101, close: 106, volume: 650 },
-  { time: '15:30', open: 103, high: 107, low: 101, close: 106, volume: 620 },
-  { time: '16:00', open: 103, high: 107, low: 101, close: 106, volume: 550 },
-  { time: '16:30', open: 103, high: 107, low: 101, close: 106, volume: 500 },
-  { time: '17:00', open: 103, high: 107, low: 101, close: 106, volume: 460 },
-  { time: '17:30', open: 103, high: 107, low: 101, close: 106, volume: 400 },
-]
 
 // ✅ 커스텀 캔들 shape
 const CandleShape = ({ x, width, yScale, payload }) => {
@@ -77,7 +56,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   return (
     <ToolTip>
-      <a>{d.time}</a>
+      <a>{d.startTime}</a>
       <a>
         종가 <span style={{ color }}> {d.close}</span>
       </a>
@@ -94,7 +73,10 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-export default function CandleChart({ chartData }) {
+export default function CandleChart({ chartData,setStartDate="",setEndDate="" }) {
+  const location=useLocation();
+  const isLearning=location.pathname.startsWith('/learning')
+
   // ✅ y축 도메인 계산
   const allPrices = chartData.flatMap((d) => [d.high, d.low])
   const minY = Math.min(...allPrices)
@@ -127,9 +109,15 @@ export default function CandleChart({ chartData }) {
       return 12
     }
   }
-
   // 2. 컴포넌트 내에서 사용
   const fontSize = getFontSize(maxY)
+
+  const candleClick=(data)=>{
+    if(isLearning){
+      setStartDate(data.startTime)
+      setEndDate(data.endTime)
+    }
+  }
 
   return (
     <ChartContainer>
@@ -165,6 +153,7 @@ export default function CandleChart({ chartData }) {
             shape={(props) => <CandleShape {...props} yScale={yScale} />}
             isAnimationActive={false}
             yAxisId={0} // 가격 축 사용
+            onClick={(data) => candleClick(data.payload)}
           />
 
           {/* ✅ 거래량 바 (하단) */}

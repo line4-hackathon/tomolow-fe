@@ -4,10 +4,10 @@ import { DateTypes } from "@/pages/invest/selectType";
 import CandleChart from "./CandleCharts";
 
 
-export default function Chart({selectedDate, setSelectedDate,symbol,chartData}) {
+export default function Chart({selectedDate, setSelectedDate,symbol,chartData,setStartDate="",setEndDate=""}) {
   return (
     <ChartBox>
-      <CandleChart chartData={chartData}/>
+      <CandleChart chartData={chartData} setStartDate={setStartDate} setEndDate={setEndDate}/>
       <DateBar>
         {Object.keys(DateTypes).map((key) => (
           <Term
