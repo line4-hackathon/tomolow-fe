@@ -7,6 +7,7 @@ import BlueButton from './BlueButton'
 import { APIService } from '@/pages/invest/api'
 import useStockStore from '@/stores/stockStores'
 import { useType } from '@/contexts/TypeContext'
+import useGroupStore from '@/stores/groupStores'
 
 export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
   const navigate = useNavigate()
