@@ -2,16 +2,23 @@ import styled from 'styled-components'
 import GrayButton from '../common/GrayButton'
 import BlackButton from './BlackButton'
 import { useNavigate } from 'react-router-dom'
+import { APIService } from '@/pages/invest/api'
 
-export default function CorrectionModal({setIsModal}) {
+export default function CorrectionModal({setIsModal,price,orderId}) {
       const navigate = useNavigate()
 
-  const correction = () => {
+  const correction =async () => {
+    try{
+      const res=await APIService.private.put(`/api/orders/pending`,{orderId: orderId, price: price})
       navigate('/invest/trading', {
-        state: {
-          toastMessage: '주문 정정이 완료됐어요',
-        },
-      })
+              state: {
+                toastMessage: '주문 정정이 완료됐어요',
+              },
+            })
+    }catch(error){
+      console.log("주문 정정 실패");
+    }
+      
   }
 
   return (

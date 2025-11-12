@@ -4,42 +4,86 @@ import GrayButton from '../common/GrayButton'
 import NavyButton from '../common/NavyButton'
 import RedButton from './RedButton'
 import BlueButton from './BlueButton'
+import { APIService } from '@/pages/invest/api'
+import useStockStore from '@/stores/stockStores'
+import { useType } from '@/contexts/TypeContext'
 
-export default function ReceiptModal({ setIsModal, isPurchase }) {
+export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
   const navigate = useNavigate()
+  const { stockData, setStockData } = useStockStore()
+  const type = useType()
+  const { groupData } = useGroupStore()
 
   const purchaseOrsell = (p) => {
-    if (p) {
-      navigate('/invest/trading', {
-        state: {
-          toastMessage: '매수 주문이 완료됐어요',
-        },
-      })
+    let purchaseUrl
+    let sellUrl
+    if (type == 'group') {
+      purchaseUrl = `/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}`
+      sellUrl = `/api/group/${groupData.groupId}/sell/limit/${stockData.marketId}`
     } else {
-      navigate('/invest/trading', {
-        state: {
-          toastMessage: '매도 주문이 완료됐어요',
-        },
-      })
+      purchaseUrl = `/api/buy/limit/${stockData.marketId}`
+      sellUrl = `/api/sell/limit/${stockData.marketId}`
+    }
+    if (p) {
+      const purchase = async () => {
+        try {
+          const res = await APIService.private.post(purchaseUrl, {
+            quantity: parseInt(count),
+            price: parseInt(price),
+          })
+          navigate('/invest/trading', {
+            state: {
+              toastMessage: '매수 주문이 완료됐어요',
+            },
+          })
+        } catch (error) {
+          console.log('매수 실패')
+          return
+        }
+      }
+      purchase()
+    } else {
+      const sell = async () => {
+        try {
+          const res = await APIService.private.post(sellUrl, {
+            quantity: parseInt(count),
+            price: parseInt(price),
+          })
+          navigate('/invest/trading', {
+            state: {
+              toastMessage: '매도 주문이 완료됐어요',
+            },
+          })
+        } catch (error) {
+          console.log('매도 실패')
+          return
+        }
+      }
+      sell()
     }
   }
   return (
     <BackGround>
       <Modal>
         <StockInfoBox>
-          <StockName>삼성전자</StockName>
+          <StockName>{stockData.name}</StockName>
           <StockCount>
-            43주 {isPurchase ?<a style={{ color: '#FF2E4E' }}>매수</a>:<a style={{ color: '#0084FE' }}>매도</a>}
+            {count}주{' '}
+            {isPurchase ? (
+              <a style={{ color: '#FF2E4E' }}>매수</a>
+            ) : (
+              <a style={{ color: '#0084FE' }}>매도</a>
+            )}
           </StockCount>
         </StockInfoBox>
         <RecieptBox>
           <RecieptText>
             <Title>1주 희망 가격</Title>
-            <Price>880,000원</Price>
+            <Price>{parseInt(price).toLocaleString()}원</Price>
           </RecieptText>
           <RecieptText>
             <Title>총 주문 금액</Title>
-            <Price>141,000,000원</Price>
+            <Price>{(price * count).toLocaleString()}원</Price>
           </RecieptText>
         </RecieptBox>
         <ButtonBox>

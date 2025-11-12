@@ -6,26 +6,52 @@ import BlackButton from '@/components/invest/BlackButton'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import CorrectionModal from '@/components/invest/CorrectionModal'
+import useStockStore from '@/stores/stockStores'
+import useGroupStore from '@/stores/groupStores'
 
-export default function InvestCorrectionPage({ myCash }) {
-  const [price, setPrice] = useState('117000')
+export default function InvestCorrectionPage() {
   const [isModal, setIsModal] = useState(false)
-  const location = useLocation()
-  const { state } = location
-  myCash = 20000 //임의 지정
+  const { stockData } = useStockStore()
+  const { groupData } = useGroupStore()
+  const [price, setPrice] = useState(stockData.price)
+  const [myCash,setMyCash]=useState(0);
+  const location=useLocation();
+  const {state}=location
+  const orderId=sessionStorage.getItem('orderId')
+
+
+  useEffect(() => {
+    let purchaseUrl
+    if (type == 'group') {
+      purchaseUrl = `/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}?price=1000`
+    } else {
+      purchaseUrl = `/api/buy/limit/${stockData.marketId}?price=1000`
+    }
+    const purchaseGet = async () => {
+      try {
+        const res = await APIService.private.get(purchaseUrl)
+
+        setMyCash(res.data.userCashBalance)
+      } catch (error) {
+        console.log('현금 조회 실패')
+      }
+    }
+    purchaseGet()
+    sessionStorage.setItem('orderId', state.orderId)
+  }, [])
 
   return (
     <Page>
       <InvestHeader />
       <PurchaseBox>
         <PurchasePrice price={price} setPrice={setPrice} />
-        <a>보유 현금 : 1,000,000,000원</a>
+        <a>보유 현금 : {myCash.toLocaleString()}원</a>
       </PurchaseBox>
       <Numpad isFocus={true} currentValue={price} setPrice={setPrice} price={price} />
       <Bar>
-        <BlackButton name="정정하기" width="343px" height="56px" onClick={()=>setIsModal(true)}/>
+        <BlackButton name='정정하기' width='343px' height='56px' onClick={() => setIsModal(true)} />
       </Bar>
-      {isModal && <CorrectionModal setIsModal={setIsModal}/>}
+      {isModal && <CorrectionModal setIsModal={setIsModal} price={price} orderId={orderId}/>}
     </Page>
   )
 }
@@ -37,12 +63,12 @@ const Page = styled.div`
 const PurchaseBox = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 5px; 
+  gap: 5px;
   padding-top: 32px;
   padding-left: 16px;
   background-color: #f6f6f6;
   width: 359px;
-  height: 318px;    
+  height: 318px;
 
   color: var(--Neutral-400, #888);
   /* Caption-Regular */

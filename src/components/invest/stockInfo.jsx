@@ -1,12 +1,14 @@
+import useStockStore from "@/stores/stockStores";
 import styled from "styled-components";
 
-export default function StockInfo({data}) {
+export default function StockInfo() {
+  const {stockData,setStockData}=useStockStore();
   return (
     <Box>
-      <Stock $fontSize="20px">삼성전자</Stock>
-      <Stock $fontSize="24px">117,000원</Stock>
+      <Stock $fontSize="20px">{stockData.name}</Stock>
+      <Stock $fontSize="24px">{stockData.price ?  stockData.price.toLocaleString():"0"}원</Stock>
       <Yesterday>
-        어제보다 <a style={{ color: "#FF2E4E" }}>+8,7000원</a>
+        어제보다 <a style={{ color: "#FF2E4E" }}>+{stockData.prevClose}원</a>
       </Yesterday>
       <MoveAverage>
         이동평균선 <a style={{ color: "#57B789" }}>5 </a>

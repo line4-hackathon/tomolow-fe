@@ -6,6 +6,7 @@ import InputField from '@/components/common/InputField'
 import InputFieldWithButton from '@/components/common/InputFieldWithButton'
 import StatusMessage from '@/components/common/StatusMessage'
 import LargeButton from '@/components/signup/LargeButton'
+import Loading from './Loading'
 
 // Status Message 상태 업데이트
 const checkStatus = (isValid, isTouched) => (!isTouched ? 'default' : isValid ? 'success' : 'error')
@@ -21,6 +22,8 @@ function Form({ mode = 'signup', name, mail, buttonName = '완료' }) {
   const [password1Touched, setPassword1Touched] = useState(false)
   const [password2, setPassword2] = useState('')
   const [password2Touched, setPassword2Touched] = useState(false)
+
+  const [loading, setLoading] = useState(false)
 
   const apiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -52,6 +55,7 @@ function Form({ mode = 'signup', name, mail, buttonName = '완료' }) {
     if (!finalCheck) return
     try {
       if (mode === 'signup') {
+        setLoading(true)
         const res = await axios.post(`${apiUrl}/api/auth/sign-up`, {
           username: mail,
           password: password1,
@@ -66,7 +70,11 @@ function Form({ mode = 'signup', name, mail, buttonName = '완료' }) {
     } catch (err) {
       console.error(`${mode === 'signup' ? '회원가입' : '정보수정'} 실패`)
       console.error(err)
+    } finally {
+      setLoading(false)
     }
+
+    if (loading) return <Loading />
   }
   return (
     <S.Container>

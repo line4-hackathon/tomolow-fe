@@ -2,12 +2,14 @@ import { PriceTypes } from '@/pages/invest/selectType'
 import styled from 'styled-components'
 import useSelect from '@/hooks/select'
 import { useEffect } from 'react'
+import useStockStore from '@/stores/stockStores'
 
 export default function PurchasePrice({ onClick, price, setPrice }) {
   const { selectedMenu, handleSelect } = useSelect('CUSTOM')
+  const {stockData,setStockData}=useStockStore();
   useEffect(() => {
     if (selectedMenu === 'MARKET') {
-      setPrice('1000')
+      setPrice(stockData.price)
     }
   }, [selectedMenu])
   return (

@@ -22,7 +22,8 @@
     "simple-keyboard": "^3.8.88",
     "sockjs-client": "^1.6.1",
     "styled-components": "^6.1.19",
-    "vite-plugin-svgr": "^4.5.0"
+    "vite-plugin-svgr": "^4.5.0",
+    "zustand": "^5.0.8"
   },
   "overrides": {
     "esbuild": "0.25.11"

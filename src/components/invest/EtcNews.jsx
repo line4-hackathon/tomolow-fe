@@ -2,17 +2,13 @@ import styled from 'styled-components'
 import NewsCard from './NewsCard'
 import NewsIcon from '@/assets/icons/icon-news.svg?react'
 
-export default function EtcNews() {
-  const isNews = 0
+export default function EtcNews({data}) {
 
   return (
     <>
-      {isNews ? (
+      {data && data.length>0 ? (
         <NewsCardBox>
-          <NewsCard />
-          <NewsCard />
-          <NewsCard />
-          <NewsCard />
+          {data.map((data,index)=><NewsCard key={index} data={data}/>)}
         </NewsCardBox>
       ) : (
         <NothingBox>

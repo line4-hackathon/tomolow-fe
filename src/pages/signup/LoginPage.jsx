@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import axios from 'axios'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
@@ -8,26 +9,32 @@ import Logo from '@/assets/images/logo-login.svg?react'
 import InputField from '@/components/common/InputField'
 import LargeButton from '@/components/signup/LargeButton'
 import ToastMessage from '@/components/common/Toast'
+import Loading from '@/components/common/Loading'
 
 const LoginPage = () => {
   const [id, setId] = useState('')
   const [password, setPassword] = useState('')
   const [toastMessage, setToastMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const loginRequest = async () => {
     try {
+      setLoading(true)
       const res = await axios.post(`${apiUrl}/api/auth/login`, { username: id, password })
 
       const { accessToken } = res.data.data
-      localStorage.setItem('accessToken', accessToken)
+      login(accessToken)
 
       navigate('/home')
     } catch (err) {
       console.error(err)
       console.error('로그인 실패')
       setToastMessage('아이디 또는 비밀번호를 확인하세요')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -45,6 +52,8 @@ const LoginPage = () => {
     navigate('/signup/1')
   }
 
+  if (loading) return <Loading />
+
   return (
     <>
       <Header title='로그인' />
@@ -54,7 +63,7 @@ const LoginPage = () => {
 
         <FormContainer>
           <InputField
-            label='아이디'
+            label='아이디(이메일)'
             type='text'
             placeholder='아이디'
             value={id}
@@ -117,4 +126,5 @@ const SignupButton = styled.button`
 `
 const LoginButton = styled.div`
   margin-top: auto;
+  padding-top: 40px;
 `

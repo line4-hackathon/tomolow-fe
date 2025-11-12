@@ -4,20 +4,37 @@ import BackButton from '@/assets/icons/icon-back.svg?react'
 import RedHeart from '@/assets/icons/icon-heart-red.svg?react'
 import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
 import { useState } from 'react'
+import useStockStore from '@/stores/stockStores'
+import { useNavigate } from 'react-router-dom'
+import { APIService } from '@/pages/invest/api'
 
-export default function InvestHeader({data}) {
-  const [isInterest, setIsInterest] = useState(false)
+export default function InvestHeader() {
+  const { stockData, setStockData } = useStockStore()
+  const [isInterest, setIsInterest] = useState(stockData.interested)
+  const navigate=useNavigate();
+  
+  const interest = async () => {
+    try {
+      const res = await APIService.private.post(`/api/interests/markets/${stockData.marketId}/toggle`)
+      setIsInterest(!isInterest)
+    } catch (error) {
+      console.log('관심 등록/취소 실패')
+    }
+
+  }
   return (
     <HeaderBar>
-      <BackButton />
+      <BackButton onClick={()=>navigate(-1)}/>
       <HeaderInfo>
-        <HeadName>{data.marketName}</HeadName>
-        <HeadPrice>{data.tradePrice}원({(data.changeRate*100).toString(2)}%)</HeadPrice>
+        <HeadName>{stockData.name}</HeadName>
+        <HeadPrice>
+          {stockData.price ?  stockData.price.toLocaleString():"0"}원({(stockData.changeRate * 100).toFixed(2)}%)
+        </HeadPrice>
       </HeaderInfo>
       {isInterest ? (
-        <RedHeart onClick={() => setIsInterest(false)} />
+        <RedHeart onClick={() => interest()} />
       ) : (
-        <GrayHeart onClick={() => setIsInterest(true)} />
+        <GrayHeart onClick={() => interest()} />
       )}
     </HeaderBar>
   )

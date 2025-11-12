@@ -13,50 +13,104 @@ import { AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useType } from '@/contexts/TypeContext'
-export default function InvestPurchasePage({ myCash, myStockCount }) {
-  //const type=useType();
-  //const { myCash, myStockCount } = getAssetsByType(type);
-
+import { APIService } from './api'
+import useStockStore from '@/stores/stockStores'
+import useGroupStore from '@/stores/groupStores'
+export default function InvestPurchasePage() {
+  const type=useType();
+  const {stockData,setStockData}=useStockStore();
+  const {groupData}=useGroupStore();
+  const location=useLocation();
+  const {state}=location;
   const [isFocus, setIsFocus] = useState(true)
-  const [price, setPrice] = useState('117000')
+  const [price, setPrice] = useState(stockData.tradePrice)
   const [count, setCount] = useState('')
   const [isModal, setIsModal] = useState(false)
-  const location = useLocation()
-  const { state } = location
-  myCash = 20000 //임의 지정
-  myStockCount = 30
-  const purchase = () => {
-    if(price && count){
-    if (price * count > myCash) {
-      setIsModal(<CashLackModal setIsModal={setIsModal}/>)
-    } else {
-      setIsModal(<ReceiptModal setIsModal={setIsModal} isPurchase={true}/>)
+  const [myCash, setMyCash] = useState(0)
+  const [myStockCount, setStockCount] = useState(0)
+  const [toastVisible, setToastVisible] = useState(false)
+  
+  
+  const purchase = async () => {
+    if (price && count) {
+      if (price * count > myCash) {
+        setIsModal(<CashLackModal setIsModal={setIsModal} />)
+      } else {
+        setIsModal(
+          <ReceiptModal
+            setIsModal={setIsModal}
+            isPurchase={true}
+            count={count}
+            price={price}
+          />,
+        )
+      }
     }
-  }
   }
   const sell = () => {
-    if(price && count){
-    if (count > myStockCount) {
-      setToastVisible(true)
-    } else {
-      setIsModal(<ReceiptModal setIsModal={setIsModal} isPurchase={false}/>)
+    if (price && count) {
+      if (count > myStockCount) {
+        setToastVisible(true)
+      } else {
+        setIsModal(
+          <ReceiptModal
+            setIsModal={setIsModal}
+            isPurchase={false}
+            count={count}
+            price={price}
+          />,
+        )
+      }
     }
   }
-  }
-  const [toastVisible, setToastVisible] = useState(false)
+  
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
     setToastVisible(false)
   }
   const maxCount = () => {
-    if(state.purchase){
+    if (state.purchase) {
       setCount(parseInt(myCash / price))
     } else {
       setCount(myStockCount)
     }
-    
   }
+
+  useEffect(() => {
+      let purchaseUrl
+      let sellUrl
+    if(type=="group"){
+      purchaseUrl=`/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}?price=1000`
+      sellUrl=`/api/group/${groupData.groupId}/sell/${stockData.marketId}`
+    } else{
+      purchaseUrl=`/api/buy/limit/${stockData.marketId}?price=1000`
+      sellUrl=`/api/sell/${stockData.marketId}`
+    }
+    if (state.purchase) {
+      const purchaseGet = async () => {
+        try{
+          const res = await APIService.private.get(purchaseUrl)
+
+        setMyCash(res.data.userCashBalance)
+        }catch(error){
+          console.log("현금 조회 실패")
+        }
+      }
+      purchaseGet();
+    } else {
+      const sellGet = async () => {
+        try{
+          const res = await APIService.private.get(sellUrl)
+
+        setStockCount(res.data.maxQuantity)
+        }catch(error){
+          console.log("수량 조회 실패")
+        }
+      }
+      sellGet();
+    }
+  }, [])
 
   return (
     <Page>
@@ -69,7 +123,7 @@ export default function InvestPurchasePage({ myCash, myStockCount }) {
           price={price}
           maxCount={maxCount}
         />
-        {state.purchase ? <a>보유 현금 : 1,000,000,000원</a> : ''}
+        {state.purchase ? <a>보유 현금 : {myCash.toLocaleString()}원</a> : ''}
       </PurchaseBox>
       <Numpad
         isFocus={isFocus}
@@ -90,7 +144,7 @@ export default function InvestPurchasePage({ myCash, myStockCount }) {
       <AnimatePresence>
         {toastVisible && (
           <Toast
-            message="최대 판매가능 수량은 34주입니다"
+            message='최대 판매가능 수량은 34주입니다'
             onClose={handleCloseToast}
             // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
           />
@@ -110,7 +164,7 @@ const PurchaseBox = styled.div`
   align-items: center;
   justify-content: center;
   gap: 5px;
-  background-color: #F6F6F6;
+  background-color: #f6f6f6;
   width: 375px;
   height: 350px;
 
