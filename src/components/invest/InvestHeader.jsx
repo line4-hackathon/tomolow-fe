@@ -6,6 +6,7 @@ import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
 import { useState } from 'react'
 import useStockStore from '@/stores/stockStores'
 import { useNavigate } from 'react-router-dom'
+import { APIService } from '@/pages/invest/api'
 
 export default function InvestHeader() {
   const { stockData, setStockData } = useStockStore()
@@ -19,6 +20,7 @@ export default function InvestHeader() {
     } catch (error) {
       console.log('관심 등록/취소 실패')
     }
+
   }
   return (
     <HeaderBar>
@@ -26,7 +28,7 @@ export default function InvestHeader() {
       <HeaderInfo>
         <HeadName>{stockData.name}</HeadName>
         <HeadPrice>
-          {stockData.price.toLocaleString()}원({(stockData.changeRate * 100).toFixed(2)}%)
+          {stockData.price ?  stockData.price.toLocaleString():"0"}원({(stockData.changeRate * 100).toFixed(2)}%)
         </HeadPrice>
       </HeaderInfo>
       {isInterest ? (

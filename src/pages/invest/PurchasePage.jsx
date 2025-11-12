@@ -15,9 +15,11 @@ import { useLocation } from 'react-router-dom'
 import { useType } from '@/contexts/TypeContext'
 import { APIService } from './api'
 import useStockStore from '@/stores/stockStores'
+import useGroupStore from '@/stores/groupStores'
 export default function InvestPurchasePage() {
   const type=useType();
   const {stockData,setStockData}=useStockStore();
+  const {groupData}=useGroupStore();
   const location=useLocation();
   const {state}=location;
   const [isFocus, setIsFocus] = useState(true)
@@ -27,6 +29,7 @@ export default function InvestPurchasePage() {
   const [myCash, setMyCash] = useState(0)
   const [myStockCount, setStockCount] = useState(0)
   const [toastVisible, setToastVisible] = useState(false)
+  
   
   const purchase = async () => {
     if (price && count) {
@@ -78,8 +81,8 @@ export default function InvestPurchasePage() {
       let purchaseUrl
       let sellUrl
     if(type=="group"){
-      purchaseUrl=`/api/group/1/buy/limit/3?price=12`
-      sellUrl=`/api/group/1/sell/3`
+      purchaseUrl=`/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}?price=1000`
+      sellUrl=`/api/group/${groupData.groupId}/sell/${stockData.marketId}`
     } else{
       purchaseUrl=`/api/buy/limit/${stockData.marketId}?price=1000`
       sellUrl=`/api/sell/${stockData.marketId}`

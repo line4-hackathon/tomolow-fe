@@ -25,12 +25,12 @@ export default function InvestTradingPage() {
   const [toastMessage, setToastMessage] = useState('')
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
-  const { selectedMenu: selectedDate, handleSelect: setSelectedDate } = useSelect("DAY");
-  const [chartData,setChartData]=useState([]);
-  const { selectedMenu: selectedEtc, handleSelect: setSelectedEtc } = useSelect('ORDER');
-  const [etcData,setEtcData]=useState([]);
-  const [orderData,setOrderData]=useState([]);
-  const {stockData,setStockData}=useStockStore();
+  const { selectedMenu: selectedDate, handleSelect: setSelectedDate } = useSelect('DAY')
+  const [chartData, setChartData] = useState([])
+  const { selectedMenu: selectedEtc, handleSelect: setSelectedEtc } = useSelect('ORDER')
+  const [etcData, setEtcData] = useState([])
+  const [orderData, setOrderData] = useState([])
+  const { stockData, setStockData } = useStockStore()
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -90,7 +90,7 @@ export default function InvestTradingPage() {
 
     // 심볼이 없을 경우 연결 시도하지 않음
     if (!stockData.symbol) {
-      console.warn('Symbol not found in state, cannot connect to ticker.')
+      console.warn('Symbol not found in stockData, cannot connect to ticker.')
       return
     }
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
@@ -134,30 +134,29 @@ export default function InvestTradingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 의존성 배열이 빈 배열이므로 마운트 시 한 번만 실행
 
-
   useEffect(() => {
-    if(!stockData.symbol){
-      console.log("심볼 없음")
+    if (!stockData.symbol) {
+      console.log('심볼 없음')
       return
     }
     const chartDataGet = async () => {
       let param
-      switch (selectedDate){
-        case "DAY":
-          param=await "D1"
-          break;
-        case "WEEK":
-          param=await "W1"
-          break;
-        case "MONTH":
-          param=await "M1"
-          break;
-        case "SIXMONTH":
-          param=await "M6"
-          break;
-        case "YEAR":
-          param=await "Y1"
-          break;
+      switch (selectedDate) {
+        case 'DAY':
+          param = await 'D1'
+          break
+        case 'WEEK':
+          param = await 'W1'
+          break
+        case 'MONTH':
+          param = await 'M1'
+          break
+        case 'THREEMONTH':
+          param = await 'M3'
+          break
+        case 'YEAR':
+          param = await 'Y1'
+          break
       }
       try {
         const res = await APIService.private.get(`/api/candles/${stockData.symbol}?tf=${param}`)
@@ -166,35 +165,36 @@ export default function InvestTradingPage() {
         console.log('차트 조회 실패')
       }
     }
+    chartDataGet()
+  }, [selectedDate, stockData.symbol])
 
-    chartDataGet();
-  },[selectedDate,stockData.symbol])
-
-  useEffect(()=>{
-    const etcGet=async ()=>{
+  useEffect(() => {
+    const etcGet = async () => {
       let apiUrl
-      switch (selectedEtc){
-        case "ORDER":
-          apiUrl="/api/orders/pending/list"
-          break;
-        case "NEWS":
-          apiUrl=`/api/market/${stockData.marketId}/news`
-          break;
-        case "AI":
-          apiUrl="/api/orders/pending/list"
-          break;
+      switch (selectedEtc) {
+        case 'ORDER':
+          apiUrl = '/api/orders/pending/list'
+          break
+        case 'NEWS':
+          apiUrl = `/api/market/${stockData.marketId}/news`
+          break
+        case 'AI':
+          apiUrl = '/api/orders/pending/list'
+          break
       }
-      try{
-        const res=await APIService.private.get(apiUrl)
-        if(selectedEtc=="ORDER"){
-        setOrderData(res.data)
-      } else { setEtcData(res.data); console.log("뉴스 데이터 적용")}
-      }catch(error){
-        console.log("기타 불러오기 실패")
+      try {
+        const res = await APIService.private.get(apiUrl)
+        if (selectedEtc == 'ORDER') {
+          setOrderData(res.data)
+        } else {
+          setEtcData(res.data)
+        }
+      } catch (error) {
+        console.log('기타 불러오기 실패')
       }
     }
     etcGet()
-  },[selectedEtc])
+  }, [selectedEtc])
 
   const isPurchase = (p) => {
     navigate('/invest/purchase', {
@@ -206,14 +206,24 @@ export default function InvestTradingPage() {
 
   return (
     <Page>
-      {stockData && <InvestHeader  />}
+      {stockData && <InvestHeader />}
       <Contents>
         {stockData && <StockInfo />}
-        <Chart  selectedDate={selectedDate} setSelectedDate={setSelectedDate} symbol={stockData.symbol} chartData={chartData}/>
-        <Etc selectedMenu={selectedEtc} handleSelect={setSelectedEtc} etcData={etcData} orderData={orderData}/>
+        <Chart
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          symbol={stockData.symbol}
+          chartData={chartData}
+        />
+        <Etc
+          selectedMenu={selectedEtc}
+          handleSelect={setSelectedEtc}
+          etcData={etcData}
+          orderData={orderData}
+        />
       </Contents>
       <Bar>
-        {orderData && orderData.length>0 ? (
+        {orderData && orderData.length > 0 ? (
           <>
             <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
             <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />

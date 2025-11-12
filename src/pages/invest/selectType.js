@@ -9,7 +9,7 @@ export const DateTypes = {
   DAY: "1D",
   WEEK: "1W",
   MONTH: "1M",
-  SIXMONTH: "6M",
+  THREEMONTH: "3M",
   YEAR: "1Y",
 };
 export const EtcTypes = {
