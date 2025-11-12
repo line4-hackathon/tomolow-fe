@@ -11,12 +11,14 @@ import MenuBar from '@/components/common/MenuBar'
 import { useEffect, useState } from 'react'
 import { APIService } from './api'
 import LoadingImage from '@/assets/images/image-loading.svg?react'
+import { useType } from '@/contexts/TypeContext'
 
 export default function InvestSearchPage() {
   const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
   const [stockData, setStockData] = useState()
   const [searchName, setSearchName] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState(searchName)
+  const type=useType();
   useEffect(() => {
     let param = false
     switch (selectedMenu) {
@@ -113,7 +115,7 @@ export default function InvestSearchPage() {
 
   return (
     <Page>
-      <Header title='투자' />
+      <Header title='투자' showIcon={type==="group"? true :false} path={-1}/>
       <Contents>
         <SearchBar
           explain='주식명 혹은 주식코드를 입력하세요'
