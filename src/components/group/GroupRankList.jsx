@@ -1,23 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
 
-// 더미 랭킹 데이터
-import { dummyRankingData } from '@/pages/group/dummyRankingData'
-
-function GroupRankList(props) {
+function GroupRankList({ rankings = [] }) {
   return (
     <List>
       {
         /* 인원 수만큼 mapping */
-        dummyRankingData.map((item) => (
-          <Item key={item.rank}>
+        rankings.map((item) => (
+          <Item key={item.userPnl.userId}>
             <Left>
-              <Rank>{item.rank}위</Rank>
-              <Name>{item.name}</Name>
+              <Rank>{item.ranking}위</Rank>
+              <Name>{item.userPnl.nickName}</Name>
             </Left>
-            <Profit $isPositive={item.profit > 0}>
-              {item.profit > 0 ? '+' : ''}
-              {item.profit.toLocaleString()}원
+            <Profit $isPositive={item.userPnl.pnL > 0}>
+              {item.userPnl.pnL > 0 ? '+' : ''}
+              {item.userPnl.pnL.toLocaleString()}원
             </Profit>
           </Item>
         ))
