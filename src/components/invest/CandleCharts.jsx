@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import {
   ComposedChart,
@@ -11,6 +11,7 @@ import {
   Rectangle,
 } from 'recharts'
 import { scaleLinear } from 'd3-scale' // ✅ y좌표 변환용
+import { APIService } from '@/pages/invest/api'
 
 // ✅ styled-components
 const ChartContainer = styled.div`
@@ -77,36 +78,47 @@ const CustomTooltip = ({ active, payload, label }) => {
   return (
     <ToolTip>
       <a>{d.time}</a>
-      <a>종가 <span style={{ color }}> {d.close}</span></a>
-      <a>시가: <span style={{ color }}>{d.open}</span></a>
-      <a>고가: <span style={{ color }}>{d.high}</span></a>
-      <a>저가: <span style={{ color }}>{d.low}</span></a>
+      <a>
+        종가 <span style={{ color }}> {d.close}</span>
+      </a>
+      <a>
+        시가: <span style={{ color }}>{d.open}</span>
+      </a>
+      <a>
+        고가: <span style={{ color }}>{d.high}</span>
+      </a>
+      <a>
+        저가: <span style={{ color }}>{d.low}</span>
+      </a>
     </ToolTip>
   )
 }
 
-
-export default function CandleChart() {
+export default function CandleChart({ chartData }) {
   // ✅ y축 도메인 계산
-  const allPrices = data.flatMap((d) => [d.high, d.low])
-  const minY = Math.min(...allPrices)
-  const maxY = Math.max(...allPrices)
+    const allPrices = chartData.flatMap((d) => [d.high, d.low])
+    const minY = Math.min(...allPrices)
+    const maxY = Math.max(...allPrices)
 
-  // 거래량 최대값 계산 (거래량 축 도메인 설정용)
-  const maxVolume = Math.max(...data.map((d) => d.volume))
+    // 거래량 최대값 계산 (거래량 축 도메인 설정용)
+    const maxVolume = Math.max(...chartData.map((d) => d.volume))
 
-  // ✅ y좌표 변환 함수 (d3-scale 사용)
-  const yScale = useMemo(() => {
-    return scaleLinear().domain([minY, maxY]).range([300, 50])
-  }, [minY, maxY])
-  const formatYAxis = (tickValue) => {
-    return `${tickValue.toLocaleString()}원`
-  }
+    // ✅ y좌표 변환 함수 (d3-scale 사용)
+    const yScale = useMemo(() => {
+      return scaleLinear().domain([minY, maxY]).range([300, 50])
+    }, [minY, maxY])
+    const formatYAxis = (tickValue) => {
+      return `${tickValue.toLocaleString()}원`
+    }
 
   return (
     <ChartContainer>
       <ResponsiveContainer width='100%' height='100%'>
-        <ComposedChart data={data} margin={{ top: 20, bottom: 20, left: 20 }} barCategoryGap="0%">
+        <ComposedChart
+          data={chartData}
+          margin={{ top: 20, bottom: 20, left: 20 }}
+          barCategoryGap='0%'
+        >
           <CartesianGrid strokeDasharray='3 3' vertical={false} />
 
           <YAxis
@@ -162,24 +174,24 @@ export default function CandleChart() {
   )
 }
 
-const ToolTip=styled.div`
-    display: flex;
-flex-direction: column;
-justify-content: center;
-padding-left: 16px;
-border-radius: var(--Radius-M, 12px);
-background: var(--Neutral-0, #FFF);
-width: 166px;
-height: 128px;
+const ToolTip = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 16px;
+  border-radius: var(--Radius-M, 12px);
+  background: var(--Neutral-0, #fff);
+  width: 166px;
+  height: 128px;
 
-/* Bottom */
-box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
-color: var(--Neutral-900, #333);
+  /* Bottom */
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  color: var(--Neutral-900, #333);
 
-/* Caption-Regular */
-font-family: Inter;
-font-size: 12px;
-font-style: normal;
-font-weight: 400;
-line-height: 16px; /* 133.333% */
+  /* Caption-Regular */
+  font-family: Inter;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 133.333% */
 `

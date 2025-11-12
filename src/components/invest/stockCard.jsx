@@ -5,9 +5,11 @@ import GrayHeart from '@/assets/icons/icon-heart-gray.svg?react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
+import useStockStore from '@/stores/stockStores'
 
 export default function StockCard({ data }) {
-  const [isInterest, setIsInterest] = useState(data.interest)
+  const [isInterest, setIsInterest] = useState(data.interested)
+  const {stockData,setStockData}=useStockStore();
 
   const interest = async () => {
       try {
@@ -15,16 +17,13 @@ export default function StockCard({ data }) {
         setIsInterest(!isInterest)
       } catch (error) {
         console.log('관심 등록/취소 실패')
-      }
-    
+      } 
   }
+
   const navigate = useNavigate()
   const toTrading=()=>{
-    navigate('/invest/trading', {
-        state: {
-          symbol: data.symbol,
-        },
-      })
+    setStockData(data)
+    navigate('/invest/trading')
   }
 
   return (
@@ -34,7 +33,7 @@ export default function StockCard({ data }) {
         <Name>{data.name}</Name>
         <Detail>
           <Number>{data.symbol}</Number>
-          <Price $color={data.changeRate>0? true:false}>{data.price}({(data.changeRate*100).toFixed(2)}%)</Price>
+          <Price $color={data.changeRate>0? true:false}>{data.price.toLocaleString()}원({(data.changeRate*100).toFixed(2)}%)</Price>
         </Detail>
       </TextBox>
       <Interest onClick={() => interest()}>

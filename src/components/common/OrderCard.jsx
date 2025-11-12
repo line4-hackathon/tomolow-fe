@@ -9,18 +9,18 @@ import { useNavigate } from 'react-router-dom'
 export default function OrderCard({ data }) {
   const [isModal,setIsModal]=useState(false);
   const navigate=useNavigate()
-  const isImg = 0
+
 
   return (
     <Card>
-      {isImg ? <Logo /> : <></>}
+      {data.imageUrl ? <img src={data.imageUrl}/>:  <Logo />}
       <InfoBox>
-        <Amount>2주 매수</Amount>
-        <Price>주당 111,800원</Price>
+        <Amount>{data.quantity}주 {data.tradeType==="BUY" ? "매수":"매도"}</Amount>
+        <Price>주당 {data.limitPrice.toLocaleString()}원</Price>
       </InfoBox>
       <GrayButton name='취소' width='47px' height='47px' onClick={()=>setIsModal(true)}/>
       <NavyButton name='정정' width='47px' height='47px' onClick={()=>navigate("/invest/correction")}/>
-      {isModal ? <CancelModal setIsModal={setIsModal}/>:<></>}
+      {isModal ? <CancelModal setIsModal={setIsModal} orderId={data.orderId}/>:<></>}
     </Card> 
   )
 }
