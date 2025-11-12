@@ -54,6 +54,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'search', element: <InvestSearchPage /> },
       { path: 'trading', element: <InvestTradingPage /> },
+      { path: 'trading/:market', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
       { path: 'correction', element: <InvestCorrectionPage /> },
     ],

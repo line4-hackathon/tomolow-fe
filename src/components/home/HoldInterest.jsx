@@ -1,348 +1,302 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
+// src/components/home/HoldInterest.jsx
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useSelect from '@/hooks/select'
 import { useNavigate } from 'react-router-dom'
+import { Client } from '@stomp/stompjs'
+import SockJS from 'sockjs-client/dist/sockjs.js'
 import rightArrow from '@/assets/icons/icon-right-arrow.svg'
 import heartOn from '@/assets/icons/icon-heart-red.svg'
 import heartOff from '@/assets/icons/icon-heart-gray.svg'
 import heartBlue from '@/assets/icons/icon-heart-navy.svg'
+import S from '@/components/home/HoldInterest.styled'
+import useStockStore from '@/stores/stockStores'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
+
+// 유틸
+const getAccessToken = () => localStorage.getItem('accessToken')
+const getAuthHeader = () => {
+  const t = getAccessToken()
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+const fmt = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
+const safeSym = s => (s || '').trim().toUpperCase()
+
+// ws/wss → http/https 변환
+const toSockJsUrl = base => {
+  try {
+    const u = new URL(base)
+    const secure = u.protocol === 'wss:'
+    let path = u.pathname.replace(/\/ws$/, '/ws-sockjs')
+    if (!path.endsWith('/ws-sockjs')) path = (path.endsWith('/') ? path : path + '/') + 'ws-sockjs'
+    return `${secure ? 'https' : 'http'}://${u.host}${path}`
+  } catch {
+    return 'https://api.tomolow.store/ws-sockjs'
+  }
+}
+async function fetchTickerOnce(symbol) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/ticker/${encodeURIComponent(symbol)}`, {
+      headers: { Accept: 'application/json', ...getAuthHeader() },
+    })
+    const txt = await res.text()
+    const json = txt ? JSON.parse(txt) : null
+    if (!res.ok || json?.success === false) return null
+
+    const d = json.data || {}
+    return {
+      symbol: safeSym(symbol),
+      currentPrice: d.currentPrice ?? d.price ?? d.tradePrice ?? 0,
+      changeRate: d.pnlRate ?? d.changeRate ?? 0,
+    }
+  } catch {
+    return null
+  }
+}
 
 const TABS = [
   { key: 'hold', label: '보유' },
   { key: 'interest', label: '관심' },
 ]
 
-function HoldInterest() {
-  const { selectedMenu, handleSelect } = useSelect('hold') // 기본 탭: 보유
+export default function HoldInterest() {
+  const { selectedMenu, handleSelect } = useSelect('hold')
   const navigate = useNavigate()
+  const { setStockData } = useStockStore()
 
-  // --- dummy data ---
-  const holdingStocks = [
-    {
-      id: 1,
-      name: '삼성전자',
-      quantity: 3,
-      price: 87000,
-      diffText: '+10.5%',
-    },
-    {
-      id: 2,
-      name: '카카오',
-      quantity: 2,
-      price: 60000,
-      diffText: '-1.2%',
-    },
-  ]
+  const [holdingStocks, setHoldingStocks] = useState([])
+  const [interestList, setInterestList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const interestStocks = [
-    {
-      id: 1,
-      name: '삼성전자',
-      code: '005930',
-      price: 87000,
-      diffText: '+10.5%',
-      isLiked: true,
-    },
-    {
-      id: 2,
-      name: '현대차',
-      code: '005380',
-      price: 198000,
-      diffText: '+3.2%',
-      isLiked: true,
-    },
-  ]
+  // 데이터 초기 로드
+  useEffect(() => {
+    const load = async () => {
+      if (!API_BASE_URL || !getAccessToken()) {
+        setError('로그인 후 이용해주세요.')
+        setLoading(false)
+        return
+      }
 
-  const [interestList, setInterestList] = useState(interestStocks)
+      try {
+        const holdRes = await fetch(`${API_BASE_URL}/api/home/assets/my`, {
+          headers: { Accept: 'application/json', ...getAuthHeader() },
+        })
+        const holdJson = await holdRes.json()
+        if (holdRes.ok && holdJson?.success) {
+          const items = holdJson.data?.items ?? []
+          setHoldingStocks(items.map((it, i) => ({
+            id: it.marketId ?? i,
+            marketId: it.marketId,
+            name: it.name,
+            symbol: safeSym(it.symbol),
+            quantity: it.quantity ?? 0,
+            currentPrice: it.currentPrice ?? 0,
+            changeRate: it.pnlRate ?? it.changeRate ?? 0,
+            imageUrl: it.imageUrl ?? null,
+          })))
+        }
 
-  const isHoldTab = selectedMenu === 'hold'
-  const rawList = isHoldTab ? holdingStocks : interestList
-  const list = rawList || []
-  const hasItems = Array.isArray(list) && list.length > 0
+        // --- 관심 종목 불러오기 ---
+        const intRes = await fetch(`${API_BASE_URL}/api/interests/markets`, {
+          headers: { Accept: 'application/json', ...getAuthHeader() },
+        })
+        const intJson = await intRes.json()
+        if (intRes.ok && intJson?.success) {
+          const items = intJson.data?.items ?? []
+          setInterestList(items.map((it, i) => ({
+            id: it.marketId ?? i,
+            marketId: it.marketId,
+            name: it.name,
+            symbol: safeSym(it.symbol),
+            currentPrice: it.currentPrice ?? 0,
+            changeRate: it.pnlRate ?? it.changeRate ?? 0,
+            isLiked: true,
+            imageUrl: it.imageUrl ?? null,
+          })))
+        }
+      } catch {
+        setError('데이터를 불러오지 못했습니다.')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const handleTabClick = (key) => {
-    handleSelect(key)
+    load()
+  }, [])
+
+  // WebSocket 실시간 반영
+  const stompRef = useRef(null)
+  const symbols = useMemo(() => {
+    const s = new Set()
+    holdingStocks.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
+    interestList.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
+    return Array.from(s)
+  }, [holdingStocks, interestList])
+
+  useEffect(() => {
+    if (symbols.length === 0) return
+    const sock = new SockJS(toSockJsUrl(WS_BASE_URL))
+    const client = new Client({ webSocketFactory: () => sock, reconnectDelay: 3000 })
+    stompRef.current = client
+
+    client.onConnect = () => {
+      symbols.forEach(sym => {
+        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
+          try {
+            const m = JSON.parse(frame.body || '{}')
+            const ms = safeSym(m?.symbol)
+            if (!ms) return
+
+            const price = m.currentPrice ?? m.price ?? m.tradePrice ?? null
+            const rate = m.pnlRate ?? m.changeRate ?? null
+
+            setHoldingStocks(prev => prev.map(it =>
+              safeSym(it.symbol) === ms
+                ? { ...it, currentPrice: price ?? it.currentPrice, changeRate: rate ?? it.changeRate }
+                : it
+            ))
+
+            setInterestList(prev => prev.map(it =>
+              safeSym(it.symbol) === ms
+                ? { ...it, currentPrice: price ?? it.currentPrice, changeRate: rate ?? it.changeRate }
+                : it
+            ))
+          } catch {}
+        })
+      })
+    }
+
+    client.activate()
+    return () => client.deactivate()
+  }, [symbols.join('|')])
+
+  // navigate (store 기반)
+  const handleGoTrading = (stock) => {
+    setStockData(stock)
+    navigate('/invest/trading')
   }
 
-  const handleInvestClick = () => {
-    navigate('/invest')
-  }
-
-  const handleMoneyChargeClick = () => {
-    navigate('/mypage/charge')
-  }
-
-  const toggleLike = (id) => {
-    setInterestList((prev) =>
-      prev.map((stock) =>
-        stock.id === id ? { ...stock, isLiked: !stock.isLiked } : stock
+  // 관심 토글
+  const toggleLike = async (marketId) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/interests/markets/${marketId}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      })
+      setInterestList(cur =>
+        cur.map(s => (s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s))
       )
-    )
+    } catch (err) {
+      console.error('관심 토글 실패', err)
+    }
   }
+
+  // 렌더링
+  const isHoldTab = selectedMenu === 'hold'
+  const list = isHoldTab ? holdingStocks : interestList
 
   return (
-    <Container>
-      {/* 머니 충전 영역 */}
-      <MoneyCharge onClick={handleMoneyChargeClick}>
-        <LeftBox>
-          <IconBox />
-          <Label>머니 충전</Label>
-        </LeftBox>
-        <RightBox>
-          <Arrow src={rightArrow} alt="이동 아이콘" />
-        </RightBox>
-      </MoneyCharge>
+    <S.Container>
+      {/* 머니 충전 버튼 */}
+      <S.MoneyCharge onClick={() => navigate('/mypage/charge')} style={{ cursor: 'pointer' }}>
+        <S.LeftBox>
+          <S.IconBox />
+          <S.Label>머니 충전</S.Label>
+        </S.LeftBox>
+        <S.RightBox>
+          <S.Arrow src={rightArrow} alt="이동 아이콘" />
+        </S.RightBox>
+      </S.MoneyCharge>
 
-      {/* 탭 영역 */}
-      <TabRow>
-        {TABS.map((tab) => (
-          <TabButton
+      {/* 탭 선택 */}
+      <S.TabRow>
+        {TABS.map(tab => (
+          <S.TabButton
             key={tab.key}
             $active={selectedMenu === tab.key}
-            onClick={() => handleTabClick(tab.key)}
+            onClick={() => handleSelect(tab.key)}
           >
             {tab.label}
-          </TabButton>
+          </S.TabButton>
         ))}
-      </TabRow>
+      </S.TabRow>
 
-      {/* 내용 영역 */}
-      {hasItems ? (
-        <CardList>
-          {list.map((stock) => (
-            <Card key={stock.id}>
-              <Left>
-                <Thumbnail />
-                <LeftText>
-                  <StockName>{stock.name}</StockName>
-                  {isHoldTab ? (
-                    <StockSub>{stock.quantity}주</StockSub>
-                  ) : (
-                    <StockSub>{stock.code}</StockSub>
-                  )}
-                </LeftText>
-              </Left>
-
-              <Right>
-                <Price>
-                  {stock.price.toLocaleString('ko-KR')}원
-                  <Diff $positive={stock.diffText.startsWith('+')}>
-                    {stock.diffText}
-                  </Diff>
-                </Price>
-
-                {!isHoldTab && (
-                  <HeartButton onClick={() => toggleLike(stock.id)}>
-                    <HeartIcon
-                      src={stock.isLiked ? heartOn : heartOff}
-                      alt="좋아요 아이콘"
-                    />
-                  </HeartButton>
-                )}
-              </Right>
-            </Card>
-          ))}
-        </CardList>
+      {/* 데이터 렌더링 */}
+      {loading ? (
+        <S.Message>불러오는 중...</S.Message>
+      ) : error ? (
+        <S.Message style={{ color: '#ff2e4e' }}>{error}</S.Message>
+      ) : list.length ? (
+        <S.CardList>
+          {list.map(stock =>
+            isHoldTab ? (
+              <S.HoldCard
+                key={`${stock.id}-${stock.symbol}`}
+                onClick={() => handleGoTrading(stock)}
+              >
+                <S.Left>
+                  <S.Thumbnail />
+                  <S.LeftText>
+                    <S.StockName>{stock.name}</S.StockName>
+                    <S.StockSub>{stock.quantity ?? 0}주</S.StockSub>
+                  </S.LeftText>
+                </S.Left>
+                <S.HoldRight>
+                  <S.Price>
+                    {fmt(stock.currentPrice)}원
+                    <S.Diff $positive={(stock.changeRate ?? 0) >= 0}>
+                      {((stock.changeRate ?? 0) * 100).toFixed(2)}%
+                    </S.Diff>
+                  </S.Price>
+                </S.HoldRight>
+              </S.HoldCard>
+            ) : (
+              <S.InterestCard
+                key={`${stock.id}-${stock.symbol}`}
+                onClick={() => handleGoTrading(stock)}
+              >
+                <S.Left>
+                  <S.Thumbnail />
+                  <S.LeftText>
+                    <S.StockName>{stock.name}</S.StockName>
+                    <S.LeftBtnText>
+                      <S.StockSub>{stock.symbol}</S.StockSub>
+                      <S.InterestPriceRow>
+                        <S.InterestPrice $positive={(stock.changeRate ?? 0) >= 0}>
+                          {fmt(stock.currentPrice)}원 ({((stock.changeRate ?? 0) * 100).toFixed(2)}%)
+                        </S.InterestPrice>
+                      </S.InterestPriceRow>
+                    </S.LeftBtnText>
+                  </S.LeftText>
+                </S.Left>
+                <S.InterestRight onClick={(e) => e.stopPropagation()}>
+                  <S.HeartButton onClick={() => toggleLike(stock.marketId)}>
+                    <S.HeartIcon src={stock.isLiked ? heartOn : heartOff} alt="하트" />
+                  </S.HeartButton>
+                </S.InterestRight>
+              </S.InterestCard>
+            )
+          )}
+        </S.CardList>
       ) : (
-        <EmptyState>
+        <S.EmptyState>
           {isHoldTab ? (
             <>
-              <EmptyText>아직 주식에 투자하지 않으셨네요</EmptyText>
-              <InvestButton onClick={handleInvestClick}>투자하기</InvestButton>
+              <S.EmptyText>아직 보유한 주식이 없습니다</S.EmptyText>
+              <S.InvestButton onClick={() => navigate('/invest/search')}>
+                투자하기
+              </S.InvestButton>
             </>
           ) : (
             <>
-              <HeartEmpty src={heartBlue} alt="빈 하트" />
-              <EmptyText>관심 주식이 없어요</EmptyText>
+              <S.HeartEmpty src={heartBlue} alt="빈 하트" />
+              <S.EmptyText>관심 주식이 없어요</S.EmptyText>
             </>
           )}
-        </EmptyState>
+        </S.EmptyState>
       )}
-    </Container>
+    </S.Container>
   )
 }
-
-export default HoldInterest
-
-const Container = styled.section`
-  padding: 24px 16px 32px;
-  background-color: #f6f6f6;
-`
-
-const MoneyCharge = styled.div`
-  display: flex;
-  padding: 24px 7px 24px 16px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-  cursor: pointer;
-`
-
-const LeftBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`
-
-const IconBox = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: #263c54;
-`
-
-const Label = styled.div`
-  color: #333;
-  font-size: 16px;
-  font-weight: 500;
-`
-
-const RightBox = styled.div`
-  width: 24px;
-  height: 24px;
-`
-
-const Arrow = styled.img`
-  width: 16px;
-  height: 16px;
-`
-
-const TabRow = styled.div`
-  display: flex;
-  gap: 24px;
-  margin-bottom: 16px;
-`
-
-const TabButton = styled.button`
-  border: none;
-  background: transparent;
-  padding: 0 0 8px;
-  font-size: 20px;
-  font-weight: 500;
-  color: ${({ $active }) => ($active ? '#2B5276' : '#B0B0B0')};
-  border-bottom: ${({ $active }) =>
-    $active ? '1px solid #1f3b70' : '1px solid transparent'};
-`
-
-const CardList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-`
-
-const Card = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
-`
-
-const Left = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`
-
-const Thumbnail = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #263c54;
-`
-
-const LeftText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`
-
-const StockName = styled.div`
-  color: var(--Neutral-900, #333);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 24px;
-`
-
-const StockSub = styled.div`
-  font-size: 12px;
-  color: #6d6d6d;
-`
-
-const Right = styled.div`
-  display: flex;
-  gap: 24px;
-`
-
-const Price = styled.div`
-  color: var(--Neutral-900, #333);
-  text-align: right;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 24px;
-  gap: 8px;
-  display: flex;
-  flex-direction: column;
-`
-
-const Diff = styled.div`
-  font-size: 12px;
-  text-align: right;
-  font-weight: 400;
-  line-height: 16px;
-  color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
-`
-
-const HeartButton = styled.button`
-  border: none;
-  background: transparent;
-  cursor: pointer;
-`
-
-const HeartIcon = styled.img`
-  width: 22px;
-  height: 22px;
-`
-
-const EmptyState = styled.div`
-  padding: 40px 0 24px;
-  text-align: center;
-  color: #c4c4c4;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  justify-content: center;
-`
-
-const EmptyText = styled.div`
-  color: var(--Neutral-300, #B0B0B0);
-  text-align: center;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-`
-
-const HeartEmpty = styled.img`
-  width: 24px;
-  height: 24px;
-`
-
-const InvestButton = styled.button`
-  display: flex;
-  padding: 12px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  border: none;
-  color: #ffffff;
-  border-radius: var(--Radius-S, 8px);
-  background: var(--Primary-500, #4880AF);
-`
