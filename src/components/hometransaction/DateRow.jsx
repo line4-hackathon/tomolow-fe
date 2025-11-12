@@ -7,7 +7,7 @@ function DateRow({ value, onChange }) {
   const { y, m, d } = value
 
   // 연도 배열 생성
-  const startYear = 2009
+  const startYear = 2025
   const currentYear = new Date().getFullYear()
   const length = currentYear - startYear + 1
   const yearOptions = []
