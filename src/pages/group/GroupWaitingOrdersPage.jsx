@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import axios from 'axios'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
@@ -7,31 +8,37 @@ import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
 import Modal from '@/components/common/Modal'
 import Toast from '@/components/common/Toast'
-
-// 더미데이터
-const dummyData = [
-  {
-    id: 1,
-    src: '/src/assets/images/logo-company.svg',
-    name: '신한은행',
-    quantity: 3,
-    type: '매수',
-  },
-  { id: 2, src: '/src/assets/images/logo-company.svg', name: 'LG 전자', quantity: 5, type: '매수' },
-  {
-    id: 3,
-    src: '/src/assets/images/logo-company.svg',
-    name: '삼성전자',
-    quantity: 20,
-    type: '매수',
-  },
-]
+import Loading from '@/components/common/Loading'
+import ListEmpty from '@/components/group/ListEmpty'
 
 const GroupWaitingOrdersPage = () => {
   const navigate = useNavigate()
   const { groupId } = useParams()
   const modal = useModal()
   const [toastMessage, setToastMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [waitingList, setWaitingList] = useState([])
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const token = localStorage.getItem('accessToken')
+
+  useEffect(() => {
+    const getWaitingLists = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(`${apiUrl}/api/group/${groupId}/pending/list`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        setWaitingList(res.data.data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getWaitingLists()
+  }, [groupId])
 
   const handleButtonClick = () => {
     modal.open()
@@ -46,27 +53,37 @@ const GroupWaitingOrdersPage = () => {
     setToastMessage('주문이 취소됐어요')
   }
 
+  if (loading) return <Loading />
+
   return (
     <>
       <Scrollable>
         <Header title='대기주문' showIcon={true} path={`/group/home/${groupId}`} />
         <Container>
           <List>
-            {dummyData.map((item) => (
-              <Item key={item.id}>
-                <Left>
-                  <Img src={item.src} />
-                  <LeftText>
-                    <Name>{item.name}</Name>
-                    <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
-                  </LeftText>
-                </Left>
-                <Right>
-                  <CancelButton onClick={handleButtonClick}>취소</CancelButton>
-                  <EditButton onClick={() => navigate('/group/invest/correction')}>정정</EditButton>
-                </Right>
-              </Item>
-            ))}
+            {waitingList.lengh > 0 ? (
+              waitingList.map((item) => (
+                <Item key={item.orderId}>
+                  <Left>
+                    <Img src={item.imageUrl} />
+                    <LeftText>
+                      <Name>{item.marketName}</Name>
+                      <Quantity>{`${item.quantity}주`}</Quantity>
+                    </LeftText>
+                  </Left>
+                  <Right>
+                    <CancelButton onClick={handleButtonClick}>취소</CancelButton>
+                    <EditButton onClick={() => navigate('/group/invest/correction')}>
+                      정정
+                    </EditButton>
+                  </Right>
+                </Item>
+              ))
+            ) : (
+              <>
+                <ListEmpty emptyMessage={'보유한 자산이 없어요.'} />
+              </>
+            )}
           </List>
         </Container>
       </Scrollable>
@@ -96,6 +113,7 @@ const Container = styled.div`
 const List = styled.div`
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 24px;
 `
 
