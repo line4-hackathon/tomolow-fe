@@ -6,7 +6,8 @@ import { APIService } from '@/pages/invest/api'
 export default function CancelModal({setIsModal,orderId}) {
   const orderCancel=async ()=>{
     try{
-      const res=await APIService.private.delete(`/api/orders/pending`,{ orderId:{orderId}})
+      console.log(orderId)
+      const res=await APIService.private.delete(`/api/orders/pending`,{ orderId:orderId})
     }catch(error){
       console.log("주문 취소 실패");
     }

@@ -23,7 +23,7 @@ export default function InvestPurchasePage() {
   const location=useLocation();
   const {state}=location;
   const [isFocus, setIsFocus] = useState(true)
-  const [price, setPrice] = useState(stockData.tradePrice)
+  const [price, setPrice] = useState(stockData.price)
   const [count, setCount] = useState('')
   const [isModal, setIsModal] = useState(false)
   const [myCash, setMyCash] = useState(0)
@@ -123,7 +123,7 @@ export default function InvestPurchasePage() {
           price={price}
           maxCount={maxCount}
         />
-        {state.purchase ? <a>보유 현금 : {myCash.toLocaleString()}원</a> : ''}
+        {state.purchase ? <a style={{marginRight:"auto",marginLeft:"20px"}}>보유 현금 : {myCash.toLocaleString()}원</a> : ''}
       </PurchaseBox>
       <Numpad
         isFocus={isFocus}

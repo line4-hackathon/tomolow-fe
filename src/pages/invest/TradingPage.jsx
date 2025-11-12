@@ -17,7 +17,6 @@ import useSelect from '@/hooks/select'
 import useStockStore from '@/stores/stockStores'
 
 export default function InvestTradingPage() {
-  const isOrder = 1
   const navigate = useNavigate()
   const location = useLocation()
   const { state } = location
@@ -206,7 +205,7 @@ export default function InvestTradingPage() {
 
   return (
     <Page>
-      {stockData && <InvestHeader />}
+      {stockData && <InvestHeader path="/invest/search"/>}
       <Contents>
         {stockData && <StockInfo />}
         <Chart
