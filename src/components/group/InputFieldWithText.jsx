@@ -57,6 +57,7 @@ const Input = styled.input`
   font-size: 16px;
   line-height: 24px;
   transition: border-color 0.2s ease;
+  border-radius: 0;
 
   &:focus {
     border-bottom: 1px solid var(--Primary-500, #4880af);

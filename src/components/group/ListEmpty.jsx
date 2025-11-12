@@ -28,4 +28,5 @@ const Text = styled.p`
   font-size: 16px;
   font-weight: 400;
   line-height: 24px; /* 150% */
+  white-space: pre-line;
 `

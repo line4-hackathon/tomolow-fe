@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import axios from 'axios'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
@@ -15,6 +16,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [toastMessage, setToastMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   const apiUrl = import.meta.env.VITE_API_BASE_URL
@@ -24,7 +26,7 @@ const LoginPage = () => {
       const res = await axios.post(`${apiUrl}/api/auth/login`, { username: id, password })
 
       const { accessToken } = res.data.data
-      localStorage.setItem('accessToken', accessToken)
+      login(accessToken)
 
       navigate('/home')
     } catch (err) {
@@ -61,7 +63,7 @@ const LoginPage = () => {
 
         <FormContainer>
           <InputField
-            label='아이디'
+            label='아이디(이메일)'
             type='text'
             placeholder='아이디'
             value={id}

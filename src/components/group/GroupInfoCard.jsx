@@ -1,18 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 
-function GroupInfoCard({
-  money = '1,000,000원',
-  code = '3A4rs3',
-  leftDuration = '3일 12시간 14분 12초',
-  member = '4명 / 4명',
-}) {
+function GroupInfoCard({ money, code, leftDuration, member }) {
   return (
     <CardGrid>
-      <Text>시드머니: {`${money}`}</Text>
-      <RightText>입장 코드: {`${code}`}</RightText>
-      <Text>남은 기간: {`${leftDuration}`}</Text>
-      <RightText>참가 인원: {`${member}`}</RightText>
+      <Text>시드머니: {money}</Text>
+      <RightText>입장 코드: {code}</RightText>
+      <Text>남은 기간: {leftDuration || '-'}</Text>
+      <RightText>참가 인원: {member}</RightText>
     </CardGrid>
   )
 }

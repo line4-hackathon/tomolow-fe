@@ -29,7 +29,7 @@ const Container = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 24px 16px;
+  padding: 32px 16px;
   background: var(--Neutral-50, #f6f6f6);
   gap: 16px;
 `
