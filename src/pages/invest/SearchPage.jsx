@@ -10,6 +10,7 @@ import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
 import { useEffect, useState } from 'react'
 import { APIService } from './api'
+import LoadingImage from '@/assets/images/image-loading.svg?react'
 
 export default function InvestSearchPage() {
   const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
@@ -76,6 +77,40 @@ export default function InvestSearchPage() {
     }
   }, [searchName])
 
+  let stockUI
+  if (stockData) {
+    if (stockData.length) {
+      stockUI = (
+        <StockCardBox>
+          {stockData.map((data, index) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} key={index}>
+              <StockCard key={data.name} data={data} />
+              {index < stockData.length - 1 && <Line />}
+            </div>
+          ))}
+        </StockCardBox>
+      )
+    } else {
+      stockUI = (
+        <Nothing>
+          {selectedMenu === 'INTEREST' ? (
+            <>
+              <NothingHeart />
+              <p>관심 주식이 없어요</p>
+            </>
+          ) : (
+            <>
+              <NothingIcon />
+              <p>검색된 주식이 없어요</p>
+            </>
+          )}
+        </Nothing>
+      )
+    }
+  } else {
+    stockUI = <LoadingImage />
+  }
+
   return (
     <Page>
       <Header title='투자' />
@@ -99,30 +134,7 @@ export default function InvestSearchPage() {
             ))}
           </ListBox>
         )}
-        {stockData && stockData.length > 0 ? (
-          <StockCardBox>
-            {stockData.map((data, index) => (
-              <div style={{display:"flex", flexDirection:"column", gap:"10px"}} key={index}>
-                <StockCard key={data.name} data={data} />
-                {index < stockData.length - 1 && <Line />}
-              </div>
-            ))}
-          </StockCardBox>
-        ) : (
-          <Nothing>
-            {selectedMenu === 'INTEREST' ? (
-              <>
-                <NothingHeart />
-                <p>관심 주식이 없어요</p>
-              </>
-            ) : (
-              <>
-                <NothingIcon />
-                <p>검색된 주식이 없어요</p>
-              </>
-            )}
-          </Nothing>
-        )}
+        {stockUI}
       </Contents>
       <MenuBar />
     </Page>

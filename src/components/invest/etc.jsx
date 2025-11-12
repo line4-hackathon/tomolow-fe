@@ -4,19 +4,32 @@ import useSelect from '@/hooks/select'
 import EtcMyorder from './EtcMyorder'
 import EtcNews from './EtcNews'
 import EctAI from './EtcAI'
+import LoadingImage from '@/assets/images/image-loading-gray.svg?react'
 
 export default function Etc({selectedMenu, handleSelect,orderData,etcData}) {
 
   let contents
   switch (selectedMenu) {
     case 'ORDER':
+      if(orderData){
       contents=<EtcMyorder data={orderData}/>
+      } else {
+        contents=<LoadingImage/>
+      }
       break
     case 'NEWS':
-      contents=<EtcNews data={etcData}/>
+      if(etcData && etcData.length>0){
+        contents=<EtcNews data={etcData}/>
+      } else{
+        contents=<LoadingImage/>
+      }
       break
     case 'AI':
+      if(etcData && etcData.length>0){
       contents=<EctAI/>
+      } else {
+        contents=<LoadingImage/>
+      }
       break
   }
   return (
