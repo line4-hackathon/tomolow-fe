@@ -1,73 +1,70 @@
-// src/components/home/MyAssets.jsx
+window.global = window;
+
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import AssetDonut from '@/components/home/AssetDonut.jsx'
+import { Client } from '@stomp/stompjs'
+import SockJS from 'sockjs-client/dist/sockjs.js'
 
+// 환경값
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const PRICES_WS_URL = import.meta.env.VITE_PRICES_WS || '' // 없으면 실시간 비활성화
+const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
 
-// 로그인 토큰
 const getAccessToken = () => localStorage.getItem('accessToken')
 const getAuthHeader = () => {
-  const token = getAccessToken()
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  const t = getAccessToken()
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+const parseJwt = (token) => {
+  try { return JSON.parse(atob(token.split('.')[1])) } catch { return null }
 }
 
-// 숫자 포맷
-const fmt = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
+function toSockJsUrl(base) {
+  try {
+    const u = new URL(base)
+    if (u.pathname.endsWith('/ws')) u.pathname = u.pathname.replace(/\/ws$/, '/ws-sockjs')
+    if (u.protocol === 'wss:') u.protocol = 'https:'
+    if (u.protocol === 'ws:')  u.protocol = 'http:'
+    return u.toString()
+  } catch {
+    return 'https://api.tomolow.store/ws-sockjs'
+  }
+}
 
-// 퍼센트 포맷 (소수 → %)
-const pct = n =>
-  typeof n === 'number'
-    ? (n * 100).toFixed(2)
-    : '0.00'
+const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
+const pct = (n) => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
 
 export default function MyAssets({ mode = 'personal', title = '내 자산 현황' }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // 포트폴리오(합계) + 보유 종목
   const [portfolio, setPortfolio] = useState({
-    totalInvestment: 0,   // 투자자산
-    cashBalance: 0,       // 현금자산
-    totalCurrentValue: 0, // 전체자산
-    totalPnlAmount: 0,    // 총손익(실시간)
-    totalPnlRate: 0,      // 총손익률(실시간, 소수)
+    totalInvestment: 0,
+    cashBalance: 0,
+    totalCurrentValue: 0,
+    totalPnlAmount: 0,
+    totalPnlRate: 0,
   })
-  const [items, setItems] = useState([]) // 보유 종목 리스트
+  const [items, setItems] = useState([])
 
-  // 최초 로드
   useEffect(() => {
-    const fetchHome = async () => {
-      if (!API_BASE_URL) {
-        setError('서버 주소가 설정되어 있지 않습니다.')
-        setLoading(false)
-        return
-      }
-      if (!getAccessToken()) {
-        setError('로그인 후 이용 가능한 서비스입니다.')
-        setLoading(false)
-        return
-      }
+    const load = async () => {
+      if (!API_BASE_URL) { setError('서버 주소가 설정되어 있지 않습니다.'); setLoading(false); return }
+      if (!getAccessToken()) { setError('로그인 후 이용 가능한 서비스입니다.'); setLoading(false); return }
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/home/assets/my`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-          },
+          headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         })
-        // 일부 서버는 204/빈바디일 수 있어 보호
         const text = await res.text()
-        const json = text ? JSON.parse(text) : { success: false, message: '빈 응답' }
+        const json = text ? JSON.parse(text) : null
         console.log('/api/home/assets/my response >>>', json)
 
-        if (!res.ok || !json.success) {
-          setError(json.message || '자산 정보를 불러오지 못했습니다.')
+        if (!res.ok || !json?.success) {
+          setError(json?.message || '자산 정보를 불러오지 못했습니다.')
           return
         }
-
         const data = json.data || {}
         setItems(Array.isArray(data.items) ? data.items : [])
         setPortfolio({
@@ -84,97 +81,85 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
         setLoading(false)
       }
     }
-
-    fetchHome()
+    load()
   }, [])
 
-  // 실시간 WebSocket 연결
-  const wsRef = useRef(null)
+  // 2) 실시간 구독 (STOMP over SockJS)
+  const stompRef = useRef/** @type {React.MutableRefObject<Client|null>} */(null)
   const symbols = useMemo(() => items.map(i => i.symbol).filter(Boolean), [items])
+  const userId = useMemo(() => {
+    const t = getAccessToken()
+    const jwt = t ? parseJwt(t) : null
+    return jwt?.sub || jwt?.userId || null
+  }, [])
 
   useEffect(() => {
-    if (!PRICES_WS_URL || symbols.length === 0) return
+    if (symbols.length === 0) return
 
-    let alive = true
-    const ws = new WebSocket(PRICES_WS_URL)
-    wsRef.current = ws
+    const sockUrl = toSockJsUrl(WS_BASE_URL)
+    const client = new Client({
+      webSocketFactory: () => new SockJS(sockUrl),
+      reconnectDelay: 3000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      debug: () => {},
+    })
+    stompRef.current = client
 
-    ws.onopen = () => {
-      // 구독 프로토콜은 서버 정의에 맞게 조정
-      try {
-        ws.send(JSON.stringify({ action: 'subscribe', symbols }))
-      } catch {}
+    client.onConnect = () => {
+      // 각 심볼 시세
+      symbols.forEach((sym) => {
+        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
+          try {
+            const msg = JSON.parse(frame.body || '{}')
+            setItems(prev =>
+              prev.map(it =>
+                it.symbol === msg.symbol
+                  ? {
+                      ...it,
+                      currentPrice: typeof msg.currentPrice === 'number' ? msg.currentPrice : it.currentPrice,
+                      pnlAmount:    typeof msg.pnlAmount    === 'number' ? msg.pnlAmount    : it.pnlAmount,
+                      pnlRate:      typeof msg.pnlRate      === 'number' ? msg.pnlRate      : it.pnlRate,
+                      imageUrl: msg.imageUrl ?? it.imageUrl,
+                    }
+                  : it
+              )
+            )
+          } catch {}
+        })
+      })
+
+      if (userId) {
+        client.subscribe(`/topic/portfolio/${userId}`, (frame) => {
+          try {
+            const msg = JSON.parse(frame.body || '{}')
+            setPortfolio(prev => ({
+              ...prev,
+              totalPnlAmount:    typeof msg.totalPnlAmount    === 'number' ? msg.totalPnlAmount    : prev.totalPnlAmount,
+              totalPnlRate:      typeof msg.totalPnlRate      === 'number' ? msg.totalPnlRate      : prev.totalPnlRate,
+              totalCurrentValue: typeof msg.totalCurrentValue === 'number' ? msg.totalCurrentValue : prev.totalCurrentValue,
+            }))
+          } catch {}
+        })
+      }
     }
 
-    ws.onmessage = evt => {
-      if (!alive) return
-      try {
-        const msg = JSON.parse(evt.data || '{}')
+    client.onStompError = () => {}
+    client.onWebSocketError = () => {}
+    client.activate()
 
-        if (msg.type === 'price' && msg.symbol) {
-          setItems(prev =>
-            prev.map(it =>
-              it.symbol === msg.symbol
-                ? {
-                    ...it,
-                    currentPrice:
-                      typeof msg.currentPrice === 'number'
-                        ? msg.currentPrice
-                        : it.currentPrice,
-                    pnlAmount:
-                      typeof msg.pnlAmount === 'number'
-                        ? msg.pnlAmount
-                        : it.pnlAmount,
-                    pnlRate:
-                      typeof msg.pnlRate === 'number'
-                        ? msg.pnlRate
-                        : it.pnlRate,
-                  }
-                : it,
-            ),
-          )
-        } else if (msg.type === 'totals') {
-          setPortfolio(prev => ({
-            ...prev,
-            totalPnlAmount:
-              typeof msg.totalPnlAmount === 'number'
-                ? msg.totalPnlAmount
-                : prev.totalPnlAmount,
-            totalPnlRate:
-              typeof msg.totalPnlRate === 'number'
-                ? msg.totalPnlRate
-                : prev.totalPnlRate,
-            totalCurrentValue:
-              typeof msg.totalCurrentValue === 'number'
-                ? msg.totalCurrentValue
-                : prev.totalCurrentValue,
-          }))
-        }
-      } catch {}
-    }
+    return () => { try { client.deactivate() } catch {} }
+  }, [symbols.join('|'), userId])
 
-    ws.onerror = () => {}
-    ws.onclose = () => {}
-
-    return () => {
-      alive = false
-      try {
-        ws.close()
-      } catch {}
-    }
-  }, [symbols])
-
-  
+  // 파생값
   const investAmount = portfolio.totalInvestment
-  const cashAmount = portfolio.cashBalance
-  const totalAmount = investAmount + cashAmount
+  const cashAmount   = portfolio.cashBalance
+  const totalAmount  = investAmount + cashAmount
 
   const profitAmount = portfolio.totalPnlAmount
-  const profitRate = portfolio.totalPnlRate // 소수
+  const profitRate   = portfolio.totalPnlRate
   const profitPositive = profitAmount >= 0
-  const profitText = `${profitPositive ? '+' : ''}${fmt(profitAmount)}원(${
-    profitPositive ? '+' : ''
-  }${pct(profitRate)}%)`
+  const profitText = `${profitPositive ? '+' : ''}${fmt(profitAmount)}원(${profitPositive ? '+' : ''}${pct(profitRate)}%)`
 
   return (
     <Container mode={mode}>
@@ -186,7 +171,6 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
         <ErrorText>{error}</ErrorText>
       ) : (
         <>
-          {/* 도넛 + 전체 자산 */}
           <DonutBox>
             <AssetDonut investAmount={investAmount} cashAmount={cashAmount} />
             <CenterLabel>
@@ -195,7 +179,6 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
             </CenterLabel>
           </DonutBox>
 
-          {/* 투자/현금 */}
           <LegendRow>
             <LegendTop>
               <LegendItem>
@@ -216,18 +199,15 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
           <Divider />
 
-          {/* 투자 손익(실시간) */}
           <ProfitRow>
             <ProfitLabel>투자 손익</ProfitLabel>
             <ProfitValue $positive={profitPositive}>{profitText}</ProfitValue>
           </ProfitRow>
-
         </>
       )}
     </Container>
   )
 }
-
 
 const Container = styled.section`
   display: flex;
@@ -241,7 +221,6 @@ const Container = styled.section`
   gap: var(--Spacing-L, 16px);
   align-self: stretch;
 `
-
 const SectionTitle = styled.h3`
   color: var(--Neutral-900, #2b5276);
   font-size: 20px;
@@ -249,20 +228,16 @@ const SectionTitle = styled.h3`
   font-weight: 400;
   align-self: stretch;
 `
-
 const LoadingText = styled.p`
   font-size: 14px;
   color: #999;
   margin-top: 16px;
 `
-
 const ErrorText = styled.p`
   font-size: 14px;
   color: #ff2e4e;
   margin-top: 16px;
 `
-
-// 도넛
 const DonutBox = styled.div`
   position: relative;
   display: flex;
@@ -271,7 +246,6 @@ const DonutBox = styled.div`
   width: 343px;
   height: 172px;
 `
-
 const CenterLabel = styled.div`
   position: absolute;
   top: 60%;
@@ -292,8 +266,6 @@ const CenterValue = styled.div`
   font-weight: 600;
   line-height: 32px;
 `
-
-// 투자/현금
 const LegendRow = styled.div`
   display: flex;
   flex-direction: column;
@@ -334,7 +306,6 @@ const LegendValue = styled.span`
   font-weight: 600;
   color: #333333;
 `
-
 const Divider = styled.div`
   display: flex;
   width: 343px;
@@ -344,7 +315,6 @@ const Divider = styled.div`
   align-items: center;
   background-color: var(--Neutral-200, #d1d1d1);
 `
-
 const ProfitRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -363,4 +333,3 @@ const ProfitValue = styled.span`
   font-weight: 400;
   line-height: 24px;
 `
-
