@@ -9,7 +9,7 @@ const SignupPage2 = () => {
   const { name, mail } = location.state || {}
   return (
     <>
-      <Header title='회원가입' showIcon={true} path='/login' />
+      <Header title='회원가입' showIcon={true} path='/signup/1' />
       <Form mode='signup' name={name} mail={mail} />
     </>
   )

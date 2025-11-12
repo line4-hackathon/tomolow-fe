@@ -23,7 +23,7 @@ const AdList = () => {
           },
         },
       )
-      setToastMsg(`광고 보상이 지급 완료되었어요.`)
+      setToastMsg(`광고 보상이 지급 되었어요.`)
     } catch (err) {
       console.log(err)
     } finally {

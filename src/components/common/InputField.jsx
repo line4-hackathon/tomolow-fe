@@ -1,17 +1,32 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
+import eyeOn from '@/assets/icons/icon-eye-on.svg'
+import eyeOff from '@/assets/icons/icon-eye-off.svg'
 
 function InputField({ label, type = 'text', placeholder, value, onChange, onBlur }) {
+  const [seePassword, setSeePassword] = useState(false)
+  const isVisible = type === 'password'
+
+  const handlePassword = () => {
+    setSeePassword((prev) => !prev)
+  }
   return (
     <Field>
       <Label>{label}</Label>
-      <Input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-      />
+      <InputContainer>
+        <Input
+          type={isVisible && seePassword ? 'text' : type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+        />
+        {isVisible && (
+          <Button onClick={handlePassword}>
+            <Icon src={seePassword ? eyeOff : eyeOn} />
+          </Button>
+        )}
+      </InputContainer>
     </Field>
   )
 }
@@ -32,6 +47,10 @@ export const Label = styled.p`
   padding-bottom: 4px;
 `
 
+const InputContainer = styled.div`
+  position: relative;
+`
+
 export const Input = styled.input`
   width: 100%;
   padding: 8px 0;
@@ -45,8 +64,21 @@ export const Input = styled.input`
   font-weight: 400;
   line-height: 24px;
   transition: border-color 0.2s ease;
+  border-radius: 0;
 
   &:focus {
     border-bottom: 1px solid var(--Primary-500, #4880af);
   }
 `
+
+const Button = styled.button`
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  border: none;
+  background-color: #fff;
+`
+
+const Icon = styled.img``
