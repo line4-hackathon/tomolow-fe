@@ -10,95 +10,124 @@ import useSelect from '@/hooks/select'
 import useStockStore from '@/stores/stockStores'
 import { APIService } from '../invest/api'
 
+// 화면에 보여줄용 한국식 날짜 포맷터
+const formatKoreanDate = value => {
+  if (!value) return ''
+
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    // 이상한 문자열이면 그냥 원래 값 그대로 보여줌
+    return String(value)
+  }
+
+  const y = date.getFullYear()
+  const m = date.getMonth() + 1
+  const d = date.getDate()
+  return `${y}년 ${m}월 ${d}일`
+}
+
 export default function SelectDatePage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { stock } = location.state || {} // { name, symbol, ... } 라고 가정
+
+  const { stock } = location.state || {} // { name, symbol, ... }
+
   const { stockData, setStockData } = useStockStore()
   const { selectedMenu, handleSelect } = useSelect('DAY')
 
-  // 일단 더미 날짜 (나중에 date-picker 붙이면 여기만 수정)
-  const [startDate, setStartDate] = useState('2025년 1월 1일')
-  const [endDate, setEndDate] = useState('2025년 1월 6일')
+  // 오늘 날짜로 초기값 설정 (한 번만 실행됨)
+  const todayISO = new Date().toISOString()
+  const [startDate, setStartDate] = useState(todayISO)
+  const [endDate, setEndDate] = useState(todayISO)
   const [chartData, setChartData] = useState([])
 
+  useEffect(() => {
+    if (stock && stock.symbol) {
+      setStockData(stock)
+    }
+  }, [stock, setStockData])
+
+  const effectiveStock = stock || stockData
+  const symbol = effectiveStock?.symbol
+
   const handleLoad = () => {
-    const stockName = stock?.name || stock?.symbol || '선택한 종목'
+    const stockName =
+      effectiveStock?.name || effectiveStock?.symbol || '선택한 종목'
 
-    const question = `${stockName}의 ${startDate}부터 ${endDate}까지 주가를 분석하고 변동 원인을 설명해줘`
+    const metaText = `답변을 ${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 뉴스를 참고해 생성하는 중입니다.`
+    const question = `${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 주가를 분석하고 변동 원인을 설명해줘`
 
-    // 챗봇 페이지로 질문을 넘김
     navigate('/learning', {
       state: {
         autoQuestion: question,
+        autoMetaText: metaText
       },
     })
   }
 
   useEffect(() => {
-    if (!stockData.symbol) {
+    if (!symbol) {
       console.log('심볼 없음')
       return
     }
-    setStockData(stock)
-    const chartDataGet = async () => {
-      let param
-      switch (selectedMenu) {
-        case 'DAY':
-          param = await 'D1'
-          break
-        case 'WEEK':
-          param = await 'W1'
-          break
-        case 'MONTH':
-          param = await 'M1'
-          break
-        case 'THREEMONTH':
-          param = await 'M3'
-          break
-        case 'YEAR':
-          param = await 'Y1'
-          break
-      }
+
+    const tfMap = {
+      DAY: 'D1',
+      WEEK: 'W1',
+      MONTH: 'M1',
+      THREEMONTH: 'M3',
+      YEAR: 'Y1',
+    }
+
+    const tf = tfMap[selectedMenu]
+    if (!tf) return
+
+    const fetchChartData = async () => {
       try {
-        const res = await APIService.private.get(`/api/candles/${stockData.symbol}?tf=${param}`)
+        const res = await APIService.private.get(
+          `/api/candles/${symbol}?tf=${tf}`,
+        )
         setChartData(res.data)
       } catch (error) {
-        console.log('차트 조회 실패')
+        console.error('차트 조회 실패', error)
       }
     }
-    chartDataGet()
-  }, [selectedMenu, stockData.symbol])
+
+    fetchChartData()
+  }, [selectedMenu, symbol])
 
   return (
     <Page>
       <Header title='학습' />
       <Contents>
         <StockInfo />
+
         <Chart
           selectedDate={selectedMenu}
           setSelectedDate={handleSelect}
-          symbol={stockData.symbol}
+          symbol={symbol}
           chartData={chartData}
-          setStartDate={setStartDate}
+          setStartDate={setStartDate} // 이 안에서 ISO나 Date를 넣어줘도 됨
           setEndDate={setEndDate}
         />
+
         <DateCard>
           <DateRow>
             <DateLabel>시작일</DateLabel>
-            <DateValue>{startDate}</DateValue>
+            <DateValue>{formatKoreanDate(startDate)}</DateValue>
           </DateRow>
-          <Divider />
           <DateRow>
             <DateLabel>종료일</DateLabel>
-            <DateValue>{endDate}</DateValue>
+            <DateValue>{formatKoreanDate(endDate)}</DateValue>
           </DateRow>
         </DateCard>
-      </Contents>
 
-      <BottomBar>
+        <BottomBar>
         <LoadButton onClick={handleLoad}>불러오기</LoadButton>
       </BottomBar>
+      </Contents>
+
+      
     </Page>
   )
 }
@@ -123,16 +152,17 @@ const Contents = styled.div`
 
 const DateCard = styled.div`
   margin-top: 16px;
-  margin-bottom: 16px;
-  align-self: center;
-  width: 343px;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.04);
-  padding: 24px 20px;
   display: flex;
+  width: 310px;
+  padding: var(--Spacing-L, 16px) 16px;
+  margin-left: 17px;
   flex-direction: column;
-  gap: 16px;
+  align-items: flex-start;
+  gap: var(--Spacing-L, 16px);
+  align-self: stretch;
+  border-radius: var(--Radius-L, 16px);
+  background: var(--Neutral-0, #fff);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 `
 
 const DateRow = styled.div`
@@ -142,20 +172,19 @@ const DateRow = styled.div`
 `
 
 const DateLabel = styled.div`
-  color: #777;
-  font-size: 14px;
+  color: var(--Neutral-900, #333);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 150% */
 `
 
 const DateValue = styled.div`
-  color: #2b5276;
-  font-size: 18px;
-  font-weight: 600;
-`
-
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #e5e5e5;
+  color: var(--Primary-500, #4880AF);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 28px; /* 140% */
 `
 
 const BottomBar = styled.footer`
