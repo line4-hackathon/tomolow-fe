@@ -19,6 +19,8 @@ export default Toast
 
 const ToastContainer = styled.div`
   position: fixed;
+  min-width: 252px;
+  max-width: 284px;
   top: 50%;
   left: 50%;
   display: flex;
