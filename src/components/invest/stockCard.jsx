@@ -10,6 +10,14 @@ import useStockStore from '@/stores/stockStores'
 export default function StockCard({ data }) {
   const [isInterest, setIsInterest] = useState(data.interested)
   const {stockData,setStockData}=useStockStore();
+  let textColor=""
+  if(data.changeRate>0){
+    textColor="#0084FE"
+  } else if(data.changeRate==0){
+    textColor="#11111"
+  } else{
+    textColor="#ff2e4e"
+  }
 
   const interest = async () => {
       try {
@@ -33,7 +41,7 @@ export default function StockCard({ data }) {
         <Name>{data.name}</Name>
         <Detail>
           <Number>{data.symbol}</Number>
-          <Price $color={data.changeRate>0? true:false}>{data.price.toLocaleString()}원({(data.changeRate*100).toFixed(2)}%)</Price>
+          <Price $color={textColor}>{data.price.toLocaleString()}원({(data.changeRate*100).toFixed(2)}%)</Price>
         </Detail>
       </TextBox>
       <Interest onClick={() => interest()}>
@@ -95,7 +103,7 @@ const Number = styled.div`
   line-height: 16px; /* 133.333% */
 `
 const Price = styled.div`
-  color: ${({$color})=> $color ? "#ff2e4e":"#0084FE"};
+  color: ${({$color})=> $color};
 
   /* Caption-Regular */
   font-family: Inter;
