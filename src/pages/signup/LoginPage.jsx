@@ -8,16 +8,19 @@ import Logo from '@/assets/images/logo-login.svg?react'
 import InputField from '@/components/common/InputField'
 import LargeButton from '@/components/signup/LargeButton'
 import ToastMessage from '@/components/common/Toast'
+import Loading from '@/components/common/Loading'
 
 const LoginPage = () => {
   const [id, setId] = useState('')
   const [password, setPassword] = useState('')
   const [toastMessage, setToastMessage] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const loginRequest = async () => {
     try {
+      setLoading(true)
       const res = await axios.post(`${apiUrl}/api/auth/login`, { username: id, password })
 
       const { accessToken } = res.data.data
@@ -28,6 +31,8 @@ const LoginPage = () => {
       console.error(err)
       console.error('로그인 실패')
       setToastMessage('아이디 또는 비밀번호를 확인하세요')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -44,6 +49,8 @@ const LoginPage = () => {
   const handleClick = () => {
     navigate('/signup/1')
   }
+
+  if (loading) return <Loading />
 
   return (
     <>
@@ -117,4 +124,5 @@ const SignupButton = styled.button`
 `
 const LoginButton = styled.div`
   margin-top: auto;
+  padding-top: 40px;
 `

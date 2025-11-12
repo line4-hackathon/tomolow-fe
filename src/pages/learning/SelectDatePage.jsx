@@ -4,36 +4,37 @@ import styled from 'styled-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import Header from '@/components/common/Header'
-import StockInfo from '@/components/invest/stockInfo' // 투자 페이지에서 쓰던 거 그대로
+import StockInfo from '@/components/invest/stockInfo'
 import Chart from '@/components/invest/chart'
 
 export default function SelectDatePage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { stock } = location.state || {} // 보유 주식 페이지에서 넘겨줄 예정
+  const { stock } = location.state || {}   // { name, symbol, ... } 라고 가정
 
-  // 일단은 더미 날짜 (나중에 date-picker 붙이면 여기만 바꾸면 됨)
+  // 일단 더미 날짜 (나중에 date-picker 붙이면 여기만 수정)
   const [startDate] = useState('2025년 1월 1일')
   const [endDate] = useState('2025년 1월 6일')
 
   const handleLoad = () => {
-    // TODO: 여기서 챗봇으로 돌아가면서 선택한 주식/기간 전달 예정
-    // 예시:
-    // navigate('/learning', { state: { stock, startDate, endDate } })
+    const stockName = stock?.name || stock?.symbol || '선택한 종목'
 
-    console.log('선택한 종목:', stock)
-    console.log('기간:', startDate, '~', endDate)
+    const question = `${stockName}의 ${startDate}부터 ${endDate}까지 주가를 분석하고 변동 원인을 설명해줘`
+
+    // 챗봇 페이지로 질문을 넘김
+    navigate('/learning', {
+      state: {
+        autoQuestion: question,
+      },
+    })
   }
 
   return (
     <Page>
       <Header title="학습" />
       <Contents>
-        {/* 종목 정보 영역 - 현재 StockInfo 가 알아서 그려준다고 가정 */}
         <StockInfo />
-        {/* 차트 + 1D / 1W / 3M / 6M / 1Y 영역 그대로 재사용 */}
         <Chart />
-        {/* 기간 카드 */}
         <DateCard>
           <DateRow>
             <DateLabel>시작일</DateLabel>
@@ -46,12 +47,9 @@ export default function SelectDatePage() {
           </DateRow>
         </DateCard>
       </Contents>
+
       <BottomBar>
-          width="343px"
-          height="56px"
-          onClick={handleLoad}
-        
-          불러오기
+        <LoadButton onClick={handleLoad}>불러오기</LoadButton>
       </BottomBar>
     </Page>
   )
@@ -118,4 +116,16 @@ const BottomBar = styled.footer`
   align-items: center;
   justify-content: center;
   height: 88px;
+`
+
+const LoadButton = styled.button`
+  width: 343px;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  background: #4880af;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
 `

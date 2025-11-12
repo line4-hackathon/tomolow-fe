@@ -14,6 +14,7 @@ export const Content = styled.div`
   flex: 1;
   padding: 16px 20px 0;
   overflow-y: auto;
+  padding-bottom: 60px;
 `
 
 export const Messages = styled.div`
@@ -78,8 +79,12 @@ export const Chip = styled.button`
 
 /* ▼ 입력 바 영역: 항상 화면 맨 아래에 붙도록 sticky */
 export const InputArea = styled.div`
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  z-index: 10;
+  background-color: #f5f6f9;
+  width: 100%;
+  max-width: 342px;
+  bottom: 61px;
   padding: 12px 16px 16px;
   display: flex;
   align-items: center;
