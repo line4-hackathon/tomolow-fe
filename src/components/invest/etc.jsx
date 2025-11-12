@@ -13,7 +13,7 @@ export default function Etc({selectedMenu, handleSelect,orderData,etcData}) {
       contents=<EtcMyorder data={orderData}/>
       break
     case 'NEWS':
-      contents=<EtcNews />
+      contents=<EtcNews data={etcData}/>
       break
     case 'AI':
       contents=<EctAI/>

@@ -10,7 +10,7 @@ export default function ({data}) {
       <OrderCardBox>
         {data && data.length>0 ? (
           <>
-          {data.map(()=><OrderCard />)}
+          {data.map((data)=><OrderCard data={data}/>)}
           </>
         ) : (
           <NothingBox>

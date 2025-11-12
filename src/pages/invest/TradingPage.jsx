@@ -14,6 +14,7 @@ import { APIService, WS_ENDPOINT } from './api'
 import { Client } from '@stomp/stompjs'
 import { DateTypes } from './selectType'
 import useSelect from '@/hooks/select'
+import useStockStore from '@/stores/stockStores'
 
 export default function InvestTradingPage() {
   const isOrder = 1
@@ -22,8 +23,6 @@ export default function InvestTradingPage() {
   const { state } = location
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
-  const [stockData, setStockData] = useState()
-  const symbol = state?.symbol
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
   const { selectedMenu: selectedDate, handleSelect: setSelectedDate } = useSelect("DAY");
@@ -31,6 +30,7 @@ export default function InvestTradingPage() {
   const { selectedMenu: selectedEtc, handleSelect: setSelectedEtc } = useSelect('ORDER');
   const [etcData,setEtcData]=useState([]);
   const [orderData,setOrderData]=useState([]);
+  const {stockData,setStockData}=useStockStore();
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -89,7 +89,7 @@ export default function InvestTradingPage() {
     // 렌더링 시 단 한 번만 실행 (의존성 배열: [])
 
     // 심볼이 없을 경우 연결 시도하지 않음
-    if (!symbol) {
+    if (!stockData.symbol) {
       console.warn('Symbol not found in state, cannot connect to ticker.')
       return
     }
@@ -110,7 +110,7 @@ export default function InvestTradingPage() {
       onConnect: () => {
         console.log('✅ STOMP 연결 성공')
         // 연결 성공 시 구독 시작
-        subscribeToTicker(client, symbol)
+        subscribeToTicker(client, stockData.symbol)
       },
       onStompError: (frame) => {
         console.error('❌ STOMP 에러:', frame)
@@ -136,7 +136,7 @@ export default function InvestTradingPage() {
 
 
   useEffect(() => {
-    if(!symbol){
+    if(!stockData.symbol){
       console.log("심볼 없음")
       return
     }
@@ -160,7 +160,7 @@ export default function InvestTradingPage() {
           break;
       }
       try {
-        const res = await APIService.private.get(`/api/candles/${symbol}?tf=${param}`)
+        const res = await APIService.private.get(`/api/candles/${stockData.symbol}?tf=${param}`)
         setChartData(res.data)
       } catch (error) {
         console.log('차트 조회 실패')
@@ -168,7 +168,7 @@ export default function InvestTradingPage() {
     }
 
     chartDataGet();
-  },[selectedDate,symbol])
+  },[selectedDate,stockData.symbol])
 
   useEffect(()=>{
     const etcGet=async ()=>{
@@ -178,7 +178,7 @@ export default function InvestTradingPage() {
           apiUrl="/api/orders/pending/list"
           break;
         case "NEWS":
-          apiUrl=`/api/market/3/news`
+          apiUrl=`/api/market/${stockData.marketId}/news`
           break;
         case "AI":
           apiUrl="/api/orders/pending/list"
@@ -186,12 +186,15 @@ export default function InvestTradingPage() {
       }
       try{
         const res=await APIService.private.get(apiUrl)
+        if(selectedEtc=="ORDER"){
         setOrderData(res.data)
+      } else { setEtcData(res.data); console.log("뉴스 데이터 적용")}
       }catch(error){
         console.log("기타 불러오기 실패")
       }
     }
-  })
+    etcGet()
+  },[selectedEtc])
 
   const isPurchase = (p) => {
     navigate('/invest/purchase', {
@@ -203,10 +206,10 @@ export default function InvestTradingPage() {
 
   return (
     <Page>
-      {stockData && <InvestHeader data={stockData} />}
+      {stockData && <InvestHeader  />}
       <Contents>
-        {stockData && <StockInfo data={stockData} />}
-        <Chart  selectedDate={selectedDate} setSelectedDate={setSelectedDate} symbol={symbol} chartData={chartData}/>
+        {stockData && <StockInfo />}
+        <Chart  selectedDate={selectedDate} setSelectedDate={setSelectedDate} symbol={stockData.symbol} chartData={chartData}/>
         <Etc selectedMenu={selectedEtc} handleSelect={setSelectedEtc} etcData={etcData} orderData={orderData}/>
       </Contents>
       <Bar>
@@ -239,7 +242,7 @@ const Page = styled.div`
 `
 const Contents = styled.div`
   width: 375px;
-  height: 640px;
+  height: 582px;
   display: flex;
   flex-direction: column;
   padding-top: 32px;
