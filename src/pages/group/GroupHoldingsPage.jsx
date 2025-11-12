@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
@@ -29,6 +29,8 @@ const dummyData = [
 
 const GroupHoldingsPage = () => {
   const navigate = useNavigate()
+  const { groupId } = useParams()
+
   const getTextColor = (profit) => {
     if (profit > 0) return '#FF2E4E'
     if (profit < 0) return '#0084FE'
@@ -37,7 +39,7 @@ const GroupHoldingsPage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='보유종목' showIcon='true' path='/group/home' />
+        <Header title='보유종목' showIcon='true' path={`/group/home/${groupId}`} />
         <Container>
           <List>
             {dummyData.map((item) => (

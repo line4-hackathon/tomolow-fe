@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
@@ -29,6 +29,7 @@ const dummyData = [
 
 const GroupWaitingOrdersPage = () => {
   const navigate = useNavigate()
+  const { groupId } = useParams()
   const modal = useModal()
   const [toastMessage, setToastMessage] = useState('')
 
@@ -48,7 +49,7 @@ const GroupWaitingOrdersPage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='대기주문' showIcon={true} path='/group/home' />
+        <Header title='대기주문' showIcon={true} path={`/group/home/${groupId}`} />
         <Container>
           <List>
             {dummyData.map((item) => (

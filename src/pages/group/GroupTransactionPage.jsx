@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
@@ -19,9 +20,9 @@ const GroupTransactionPage = () => {
     start: '2025-01-01',
     end: getTodayDate(),
   })
-
   const [summary, setSummary] = useState({})
   const [transactions, setTransactions] = useState([])
+  const { groupId } = useParams()
 
   useEffect(() => {
     const found = dummyData.find(
@@ -40,7 +41,7 @@ const GroupTransactionPage = () => {
   return (
     <>
       <Scrollable>
-        <Header title='거래내역' showIcon='true' path='/group/home' />
+        <Header title='거래내역' showIcon='true' path={`/group/home/${groupId}`} />
         <TopContainer>
           <DayPicker value={range} onApply={setRange} />
           <InvestSummaryCard summary={summary} />
