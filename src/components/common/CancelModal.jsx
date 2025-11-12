@@ -1,16 +1,23 @@
 import styled from 'styled-components'
 import GrayButton from './GrayButton'
 import NavyButton from './NavyButton'
+import { APIService } from '@/pages/invest/api'
 
-export default function CancelModal({setIsModal}) {
-
+export default function CancelModal({setIsModal,orderId}) {
+  const orderCancel=async ()=>{
+    try{
+      const res=await APIService.private.delete(`/api/orders/pending`,{ orderId:{orderId}})
+    }catch(error){
+      console.log("주문 취소 실패");
+    }
+  }
   return (
   <BackGround>
     <Modal>
         <a>주문을 취소할까요?</a>
         <ButtonBox>
             <GrayButton name="닫기" width="120px" height="40px" onClick={()=>setIsModal(false)}/>
-            <NavyButton name="취소하기" width="120px" height="40px"/>
+            <NavyButton name="취소하기" width="120px" height="40px" onClick={()=>orderCancel()}/>
         </ButtonBox>
     </Modal>
   </BackGround>)

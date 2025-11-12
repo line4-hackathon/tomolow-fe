@@ -1,13 +1,16 @@
 import styled from 'styled-components'
 
-export default function NewsCard() {
+export default function NewsCard({data}) {
+  const toNews = () => {
+  window.open(`${data.url}`,'_blank');
+};
   return (
-    <Box>
-      <NewsBox>
-        <NewsTitle>뉴욕증시, 대만 TSMC ‘깜짝 실적'에 AI 낙관론 재점화</NewsTitle>
-        <NewsSource>아시아경제</NewsSource>
+    <Box onClick={()=>toNews()}>
+      <NewsBox >
+        <NewsTitle>{data.title}</NewsTitle>
+        <NewsSource>{data.source_name}</NewsSource>
       </NewsBox>
-      <NewsImg/>
+      <NewsImg src={data.image_url}/>
     </Box>
   )
 }
@@ -25,6 +28,9 @@ const Box = styled.div`
 
   /* Bottom */
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  :hover{
+    cursor: pointer;
+  }
 `
 const NewsBox = styled.div`
   display: flex;
@@ -39,6 +45,17 @@ const NewsTitle = styled.div`
   font-weight: 400;
   line-height: 24px; /* 150% */
   width: 215px;
+  /* 2. 필수: 텍스트를 두 줄로 제한 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 두 줄로 제한 */
+  -webkit-box-orient: vertical;
+  /* 필수: 넘치는 내용을 숨김 */
+  overflow: hidden; 
+  /* 필수: 숨겨진 부분 대신 말줄임표(...) 표시 */
+  text-overflow: ellipsis; 
+  
+  /* 너비를 지정해야 잘리는 부분이 생깁니다. */
+  max-width: 215px; /* 예시 너비 */
 `
 const NewsSource = styled.div`
   color: var(--Neutral-300, #b0b0b0);
@@ -50,7 +67,7 @@ const NewsSource = styled.div`
   font-weight: 400;
   line-height: 16px; /* 133.333% */
 `
-const NewsImg = styled.div`
+const NewsImg = styled.img`
   width: 80px;
   height: 80px;
   border-radius: var(--Radius-M, 12px);
