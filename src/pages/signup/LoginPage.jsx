@@ -61,7 +61,7 @@ const LoginPage = () => {
 
         <FormContainer>
           <InputField
-            label='아이디'
+            label='아이디(이메일)'
             type='text'
             placeholder='아이디'
             value={id}
