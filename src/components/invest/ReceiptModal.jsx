@@ -6,16 +6,28 @@ import RedButton from './RedButton'
 import BlueButton from './BlueButton'
 import { APIService } from '@/pages/invest/api'
 import useStockStore from '@/stores/stockStores'
+import { useType } from '@/contexts/TypeContext'
 
 export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
   const navigate = useNavigate()
   const { stockData, setStockData } = useStockStore()
+  const type = useType()
+  const { groupData } = useGroupStore()
 
   const purchaseOrsell = (p) => {
+    let purchaseUrl
+    let sellUrl
+    if (type == 'group') {
+      purchaseUrl = `/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}`
+      sellUrl = `/api/group/${groupData.groupId}/sell/limit/${stockData.marketId}`
+    } else {
+      purchaseUrl = `/api/buy/limit/${stockData.marketId}`
+      sellUrl = `/api/sell/limit/${stockData.marketId}`
+    }
     if (p) {
       const purchase = async () => {
         try {
-          const res = await APIService.private.post(`/api/buy/limit/${stockData.marketId}`, {
+          const res = await APIService.private.post(purchaseUrl, {
             quantity: parseInt(count),
             price: parseInt(price),
           })
@@ -33,7 +45,7 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
     } else {
       const sell = async () => {
         try {
-          const res = await APIService.private.post(`/api/sell/limit/${stockData.marketId}`, {
+          const res = await APIService.private.post(sellUrl, {
             quantity: parseInt(count),
             price: parseInt(price),
           })
@@ -67,7 +79,7 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
         <RecieptBox>
           <RecieptText>
             <Title>1주 희망 가격</Title>
-            <Price>{price.toLocaleString()}원</Price>
+            <Price>{parseInt(price).toLocaleString()}원</Price>
           </RecieptText>
           <RecieptText>
             <Title>총 주문 금액</Title>

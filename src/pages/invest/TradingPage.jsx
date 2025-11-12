@@ -90,7 +90,7 @@ export default function InvestTradingPage() {
 
     // 심볼이 없을 경우 연결 시도하지 않음
     if (!stockData.symbol) {
-      console.warn('Symbol not found in state, cannot connect to ticker.')
+      console.warn('Symbol not found in stockData, cannot connect to ticker.')
       return
     }
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'

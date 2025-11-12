@@ -6,7 +6,7 @@ export default function StockInfo() {
   return (
     <Box>
       <Stock $fontSize="20px">{stockData.name}</Stock>
-      <Stock $fontSize="24px">{stockData.price.toLocaleString()}원</Stock>
+      <Stock $fontSize="24px">{stockData.price ?  stockData.price.toLocaleString():"0"}원</Stock>
       <Yesterday>
         어제보다 <a style={{ color: "#FF2E4E" }}>+{stockData.prevClose}원</a>
       </Yesterday>
