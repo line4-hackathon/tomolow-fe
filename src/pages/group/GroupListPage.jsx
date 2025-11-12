@@ -29,7 +29,7 @@ const GroupListPage = () => {
   const [joinedRecruitList, setJoinedRecruitList] = useState([]) // 내가 참여한 모집중 그룹
   const [notJoinedRecruitList, setNotJoinedRecruitList] = useState([]) // 내가 참여하지 않은 모집중 그룹
   const modal = useModal()
-  const { setGroupData } = useGroupStore
+  const { setGroupData } = useGroupStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const token = localStorage.getItem('accessToken')
 
