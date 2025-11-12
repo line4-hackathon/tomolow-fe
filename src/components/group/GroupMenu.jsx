@@ -1,11 +1,13 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import pinkSquare from '@/assets/images/img-pink-square.svg'
 import GroupMiniButton from './GroupMiniButton'
 
 const GroupMenuButtons = () => {
   const navigate = useNavigate()
+  const { groupId } = useParams()
+
   return (
     <Container>
       <ButtonContainer>
@@ -13,7 +15,7 @@ const GroupMenuButtons = () => {
           <GroupMiniButton
             img={pinkSquare}
             label={'보유 종목'}
-            onClick={() => navigate('/group/holdings')}
+            onClick={() => navigate(`/group/holdings/${groupId}`)}
           />
           <GroupMiniButton
             img={pinkSquare}
@@ -25,12 +27,12 @@ const GroupMenuButtons = () => {
           <GroupMiniButton
             img={pinkSquare}
             label={'대기주문'}
-            onClick={() => navigate('/group/waiting')}
+            onClick={() => navigate(`/group/waiting/${groupId}`)}
           />
           <GroupMiniButton
             img={pinkSquare}
             label={'거래내역'}
-            onClick={() => navigate('/group/transaction')}
+            onClick={() => navigate(`/group/transaction/${groupId}`)}
           />
         </Row>
       </ButtonContainer>
