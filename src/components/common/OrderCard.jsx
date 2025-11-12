@@ -10,7 +10,6 @@ export default function OrderCard({ data }) {
   const [isModal,setIsModal]=useState(false);
   const navigate=useNavigate()
 
-
   return (
     <Card>
       {data.imageUrl ? <img src={data.imageUrl}/>:  <Logo />}
@@ -19,7 +18,7 @@ export default function OrderCard({ data }) {
         <Price>주당 {data.limitPrice.toLocaleString()}원</Price>
       </InfoBox>
       <GrayButton name='취소' width='47px' height='47px' onClick={()=>setIsModal(true)}/>
-      <NavyButton name='정정' width='47px' height='47px' onClick={()=>navigate("/invest/correction")}/>
+      <NavyButton name='정정' width='47px' height='47px' onClick={()=>navigate("/invest/correction",{state:{orderId:data.orderId}})}/>
       {isModal ? <CancelModal setIsModal={setIsModal} orderId={data.orderId}/>:<></>}
     </Card> 
   )
