@@ -8,6 +8,8 @@ import { useLocation } from 'react-router-dom'
 import CorrectionModal from '@/components/invest/CorrectionModal'
 import useStockStore from '@/stores/stockStores'
 import useGroupStore from '@/stores/groupStores'
+import { useType } from '@/contexts/TypeContext'
+import { APIService } from './api'
 
 export default function InvestCorrectionPage() {
   const [isModal, setIsModal] = useState(false)
@@ -18,6 +20,7 @@ export default function InvestCorrectionPage() {
   const location=useLocation();
   const {state}=location
   const orderId=sessionStorage.getItem('orderId')
+  const type=useType();
 
 
   useEffect(() => {

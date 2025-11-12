@@ -8,7 +8,7 @@ import useStockStore from '@/stores/stockStores'
 import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
 
-export default function InvestHeader() {
+export default function InvestHeader({path=-1}) {
   const { stockData, setStockData } = useStockStore()
   const [isInterest, setIsInterest] = useState(stockData.interested)
   const navigate=useNavigate();
@@ -24,7 +24,7 @@ export default function InvestHeader() {
   }
   return (
     <HeaderBar>
-      <BackButton onClick={()=>navigate(-1)}/>
+      <BackButton onClick={()=>navigate(path)}/>
       <HeaderInfo>
         <HeadName>{stockData.name}</HeadName>
         <HeadPrice>
