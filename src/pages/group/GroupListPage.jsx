@@ -13,6 +13,7 @@ import Tab from '@/components/group/Tab'
 import List from '@/components/group/List'
 import Modal from '@/components/common/Modal'
 import MenuBar from '@/components/common/MenuBar'
+import Loading from '@/components/common/Loading'
 
 const ITEMS = [
   { key: 'now', label: '진행 중인 그룹' },
@@ -28,6 +29,7 @@ const GroupListPage = () => {
   const [expiredList, setExpiredList] = useState([]) // 종료된 그룹
   const [joinedRecruitList, setJoinedRecruitList] = useState([]) // 내가 참여한 모집중 그룹
   const [notJoinedRecruitList, setNotJoinedRecruitList] = useState([]) // 내가 참여하지 않은 모집중 그룹
+  const [loading, setLoading] = useState(false)
   const modal = useModal()
   const { setGroupData } = useGroupStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
@@ -56,6 +58,8 @@ const GroupListPage = () => {
   useEffect(() => {
     const getGroups = async () => {
       try {
+        setLoading(true)
+
         if (activeTab === 'now' || activeTab === 'finished') {
           const res = await axios.get(`${apiUrl}/api/group`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -110,6 +114,8 @@ const GroupListPage = () => {
       } catch (err) {
         console.error('그룹 리스트 불러오기 실패')
         console.error(err)
+      } finally {
+        setLoading(false)
       }
     }
     getGroups()
@@ -152,6 +158,7 @@ const GroupListPage = () => {
     }
   }
 
+  if (loading) return <Loading />
   return (
     <>
       <Scrollable>
