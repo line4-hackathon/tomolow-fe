@@ -12,7 +12,7 @@ function GroupRankList({ rankings = [] }) {
               <Rank>{item.ranking}위</Rank>
               <Name>{item.userPnl.nickName}</Name>
             </Left>
-            <Profit $isPositive={item.userPnl.pnL > 0}>
+            <Profit $value={item.userPnl.pnL}>
               {item.userPnl.pnL > 0 ? '+' : ''}
               {item.userPnl.pnL.toLocaleString()}원
             </Profit>
@@ -72,7 +72,7 @@ const Name = styled.p`
 `
 
 const Profit = styled.p`
-  color: ${({ $isPositive }) => ($isPositive ? '#FF2E4E' : ' #0084FE')};
+  color: ${({ $value }) => ($value > 0 ? '#FF2E4E' : $value < 0 ? '#0084FE' : '#333')};
   font-weight: 600;
   text-align: right;
   min-width: 80px;
