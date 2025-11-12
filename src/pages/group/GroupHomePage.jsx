@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import { useParams } from 'react-router-dom'
+import useGroupStore from '@/stores/groupStores'
 import Header from '@/components/common/Header'
 import MyAssets from '@/components/home/MyAssets'
 import GroupInfoCard from '@/components/group/GroupInfoCard'
@@ -11,6 +12,13 @@ import MenuBar from '@/components/common/MenuBar'
 
 const GroupHomePage = () => {
   const { groupId } = useParams()
+  const { groupData, setGroupData } = useGroupStore()
+
+  useEffect(() => {
+    if (groupId && groupId !== groupData.groupId) {
+      setGroupData({ groupId })
+    }
+  }, [groupId, groupData.groupId, setGroupData])
   return (
     <>
       <Scrollable>

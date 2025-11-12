@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import useModal from '@/hooks/useModal'
+import useGroupStore from '@/stores/groupStores'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
@@ -28,11 +29,13 @@ const GroupListPage = () => {
   const [joinedRecruitList, setJoinedRecruitList] = useState([]) // 내가 참여한 모집중 그룹
   const [notJoinedRecruitList, setNotJoinedRecruitList] = useState([]) // 내가 참여하지 않은 모집중 그룹
   const modal = useModal()
+  const { setGroupData } = useGroupStore
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const token = localStorage.getItem('accessToken')
 
   // 특정 탭 클릭시
   const handleItemClick = (item) => {
+    setGroupData({ groupId: item.id })
     // 모집 중 탭일 때인 경우 홈 이동 or 모달 열기
     if (activeTab === 'recruiting') {
       const isJoined = joinedRecruitList.some((joined) => joined.id === item.id)
@@ -138,7 +141,7 @@ const GroupListPage = () => {
       })
 
       if (res.data.success) {
-        navigate('/group') // 특정 그룹 아이디 홈으로 이동 (수정 필요)
+        navigate('/group')
         modal.close()
       } else {
         console.log(res.data.message)
