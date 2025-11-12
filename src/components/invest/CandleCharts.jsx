@@ -96,20 +96,40 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function CandleChart({ chartData }) {
   // ✅ y축 도메인 계산
-    const allPrices = chartData.flatMap((d) => [d.high, d.low])
-    const minY = Math.min(...allPrices)
-    const maxY = Math.max(...allPrices)
+  const allPrices = chartData.flatMap((d) => [d.high, d.low])
+  const minY = Math.min(...allPrices)
+  const maxY = Math.max(...allPrices)
 
-    // 거래량 최대값 계산 (거래량 축 도메인 설정용)
-    const maxVolume = Math.max(...chartData.map((d) => d.volume))
+  // 거래량 최대값 계산 (거래량 축 도메인 설정용)
+  const maxVolume = Math.max(...chartData.map((d) => d.volume))
 
-    // ✅ y좌표 변환 함수 (d3-scale 사용)
-    const yScale = useMemo(() => {
-      return scaleLinear().domain([minY, maxY]).range([300, 50])
-    }, [minY, maxY])
-    const formatYAxis = (tickValue) => {
-      return `${tickValue.toLocaleString()}원`
+  // ✅ y좌표 변환 함수 (d3-scale 사용)
+  const yScale = useMemo(() => {
+    return scaleLinear().domain([minY, maxY]).range([300, 50])
+  }, [minY, maxY])
+  const formatYAxis = (tickValue) => {
+    return `${tickValue.toLocaleString()}원`
+  }
+
+  // 1. 폰트 사이즈를 결정하는 함수
+  const getFontSize = (maxPrice) => {
+    // 가격(숫자)을 문자열로 변환하여 길이를 측정
+    const priceStringLength = String(Math.round(maxPrice)).length
+
+    if (priceStringLength > 6) {
+      // 7자리 이상 (e.g., 1,000,000)
+      return 7
+    } else if (priceStringLength > 4) {
+      // 5~6자리 (e.g., 10,000 ~ 99,999)
+      return 10
+    } else {
+      // 4자리 이하
+      return 12
     }
+  }
+
+  // 2. 컴포넌트 내에서 사용
+  const fontSize = getFontSize(maxY)
 
   return (
     <ChartContainer>
@@ -124,7 +144,7 @@ export default function CandleChart({ chartData }) {
           <YAxis
             orientation='right'
             domain={[minY - 1, maxY + 1]}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: fontSize }}
             tickFormatter={formatYAxis}
             yAxisId={0} // 명시적으로 ID 0 지정
           />
