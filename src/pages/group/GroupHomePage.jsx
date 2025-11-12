@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Scrollable } from '@/styles/Scrollable.styled'
+import { useParams } from 'react-router-dom'
 import Header from '@/components/common/Header'
 import MyAssets from '@/components/home/MyAssets'
 import GroupInfoCard from '@/components/group/GroupInfoCard'
@@ -9,6 +10,7 @@ import GroupRankList from '@/components/group/GroupRankList'
 import MenuBar from '@/components/common/MenuBar'
 
 const GroupHomePage = () => {
+  const { groupId } = useParams()
   return (
     <>
       <Scrollable>
