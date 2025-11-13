@@ -129,7 +129,7 @@ export default function InvestPurchasePage() {
       </PurchaseBox>
       <Numpad
         isFocus={isFocus}
-        currentValue={isFocus ? price : count}
+        currentValue={isFocus ? String(price) : String(count)}
         setPrice={setPrice}
         setCount={setCount}
         price={price}
