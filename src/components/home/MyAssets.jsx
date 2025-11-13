@@ -31,8 +31,18 @@ function toSockJsUrl(base) {
   }
 }
 
-const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
-const pct = (n) => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
+const fmt = n => {
+  if (typeof n !== 'number' || Number.isNaN(n)) return '0'
+  return n.toLocaleString('ko-KR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+}
+
+const pct = n => {
+  if (typeof n !== 'number' || Number.isNaN(n)) return '0.00'
+  return (n * 100).toFixed(2)
+}
 
 export default function MyAssets({ mode = 'personal', title = '내 자산 현황' }) {
   const [loading, setLoading] = useState(true)
@@ -262,7 +272,7 @@ const CenterAsset = styled.div`
 `
 const CenterValue = styled.div`
   color: var(--Neutral-900, #333);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 600;
   line-height: 32px;
 `

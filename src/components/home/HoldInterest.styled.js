@@ -134,7 +134,7 @@ S.Diff = styled.div`
   text-align: right;
   font-weight: 400;
   line-height: 16px;
-  color: #ff2e4e;
+  color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
 `
 
 S.HeartButton = styled.button`
@@ -226,7 +226,7 @@ S.InterestPriceRow = styled.div`
 
 S.InterestPrice = styled.div`
   font-size: 12px;
-  color: #ff2e4e;
+  color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
 `
 
 S.LeftBtnText = styled.div`
