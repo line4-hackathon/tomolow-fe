@@ -57,9 +57,13 @@ const GroupHomePage = () => {
 
   return (
     <>
+      {groupInfo && (
+        <FixedHeader>
+          <Header title={groupInfo.groupName} showIcon={true} path='/group' />
+        </FixedHeader>
+      )}{' '}
+      {/* 그룹 정보 */}
       <Scrollable>
-        {groupInfo && <Header title={groupInfo.groupName} showIcon={true} path='/group' />}
-        {/* 그룹 정보 */}
         <Container>
           {groupInfo && (
             <GroupInfoCard
@@ -108,11 +112,22 @@ const GroupHomePage = () => {
 
 export default GroupHomePage
 
+const FixedHeader = styled.div`
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 375px;
+  z-index: 100;
+  background: #fff;
+`
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
   background: var(--Neutral-50, #f6f6f6);
+  margin-top: 64px;
 `
 const Space = styled.div`
   height: 24px;

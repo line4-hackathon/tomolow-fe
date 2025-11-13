@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import styled from 'styled-components'
-import Header from '@/components/common/Header.jsx'
+import Header from '@/components/common/FixedHeader'
 import HomeHeader from '@/components/home/HomeHeader.jsx'
 import MyAssets from '@/components/home/MyAssets.jsx'
 import HoldInterest from '@/components/home/HoldInterest.jsx'
@@ -43,7 +43,8 @@ function HomePage() {
   const getTransactions = async () => {
     try {
       let url = ''
-      if (range.start === '2025-01-01' && range.end === getTodayDate()) {
+      const isDefaultRange = range.start === '2025-01-01' && range.end === getTodayDate()
+      if (isDefaultRange) {
         url = `${apiUrl}/api/transactions/history/default`
       } else {
         url = `${apiUrl}/api/transactions/history?startDate=${range.start}&endDate=${range.end}`
@@ -57,6 +58,22 @@ function HomePage() {
 
       const data = res.data.data
 
+      // 첫 거래일을 시작일로 자동 세팅
+      if (isDefaultRange) {
+        const allDays = data.days
+
+        if (allDays.length > 0) {
+          const firstTradeDate = allDays[allDays.length - 1].date
+
+          if (firstTradeDate !== range.start) {
+            setRange({
+              start: firstTradeDate,
+              end: getTodayDate(),
+            })
+            return
+          }
+        }
+      }
       // 받은 데이터 포맷팅
       const formattedTransactions = data.days.flatMap((day) =>
         day.items.map((item) => {
@@ -96,7 +113,7 @@ function HomePage() {
   return (
     <>
       <Container>
-        <Header title='홈' />
+        <Header title='홈' showIcon={false} />
         <HomeHeader selectedTab={selectedTab} onChangeTab={setSelectedTab} />{' '}
         {/* 상단 헤더 + 탭 + 배너 */}
         {selectedTab === 'asset' ? (

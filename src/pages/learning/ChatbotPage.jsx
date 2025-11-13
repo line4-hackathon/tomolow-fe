@@ -7,11 +7,7 @@ import Chatbot from '@/components/learning/Chatbot.jsx'
 function ChatbotPage() {
     return (
         <Container className='scrollable'>
-            <Header
-                title="학습"
-                showSave={true}          
-                savePath="/learning/save" 
-            />
+            <Header title="학습" showIcon={false} />
             <Chatbot />
             <MenuBar /> {/* 하단 탭바 */} 
         </Container>

@@ -1,5 +1,5 @@
 import React from 'react'
-import Header from '@/components/common/Header.jsx'
+import Header from '@/components/common/FixedHeader.jsx'
 import styled from 'styled-components'
 import useSelect from '@/hooks/select.js'
 
@@ -54,6 +54,7 @@ const Container = styled.div`
   align-self: stretch;
   display: flex;
   flex-direction: column;
+  margin-top: 60px;
 `
 
 const TabWrapper = styled.div`

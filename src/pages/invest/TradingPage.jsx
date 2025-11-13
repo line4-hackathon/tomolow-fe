@@ -43,7 +43,7 @@ export default function InvestTradingPage() {
   const handleCloseToast = () => {
     setToastVisible(false)
   }
- //토스트 값 확인
+  //토스트 값 확인
   useEffect(() => {
     // 라우팅 state를 통해 메시지가 전달되었는지 확인
     if (state && state.toastMessage) {
@@ -261,24 +261,26 @@ export default function InvestTradingPage() {
   }, [selectedEtc])
 
   const isPurchase = (p) => {
-        if(type=='group'){
+    if (type == 'group') {
       navigate('/group/invest/purchase', {
-      state: {
-        purchase: p,
-      },
-    })
-    } else{
+        state: {
+          purchase: p,
+        },
+      })
+    } else {
       navigate('/invest/purchase', {
-      state: {
-        purchase: p,
-      },
-    })
+        state: {
+          purchase: p,
+        },
+      })
     }
   }
 
   return (
     <Page>
-      <InvestHeader path='/invest/search' />
+      <InvestHeader
+        path={type === 'group' ? `/group/home/${groupData.groupId}` : `/invest/search`}
+      />
       <Contents>
         <StockInfo />
         <Chart

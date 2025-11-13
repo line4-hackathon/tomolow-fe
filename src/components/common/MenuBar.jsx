@@ -75,14 +75,50 @@ const Bar = styled.nav`
 `
 
 const NavButton = styled.button`
+  position: relative;         /* ::before 오버레이 위치 기준 */
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
   background: transparent;
   border: none;
   cursor: pointer;
-  gap: 4px;
+  border-radius: 12px;        /* 오버레이 모서리 맞춰주기 */
+  padding: 4px 10px;
+  overflow: hidden;           /* scale 될 때 ::before가 삐져나오지 않게 */
+
+  /* 클릭 모션용 transition */
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  /* 오버레이 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
+    pointer-events: none;               /* 클릭 방해 X */
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  /* 클릭될 때 */
+  &:active {
+    font-size: 0.95em;        /* 살짝 줄어든 느낌 */
+    transform: scale(0.98);   /* 꾹 눌린 느낌 */
+
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);  /* 살짝 어두워짐 */
+    }
+  }
 `
+
 
 const Icon = styled.img`
   width: 26px;
