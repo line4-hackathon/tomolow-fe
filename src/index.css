@@ -62,54 +62,6 @@
   font-display: swap;
 }
 
-  /* 1. 기본 버튼 클래스: transition과 가상 요소의 기준점 설정 */
-.my-button {
-    /* 기존 스타일에서 가져온 설정 */
-    position: relative; /* ::before의 기준점 */
-    overflow: hidden; /* ::before가 버튼 밖으로 나가는 것을 방지 */
-    border-radius: 12px; /* ::before에도 동일하게 적용해야 함 */
-
-    /* 버튼 자체의 transition (transform, font-size) */
-    transition: 
-        transform 0.1s ease, 
-        font-size 0.1s ease;
-}
-
-/* 2. 오버레이 가상 요소의 기본 상태 (투명) */
-.my-button::before {
-    content: ''; 
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* 버튼과 동일한 모서리 둥글기 적용 */
-    border-radius: 12px;
-    
-    /* 기본 상태: 투명 */
-    background-color: rgba(0, 0, 0, 0.0); 
-    pointer-events: none; 
-    
-    /* 오버레이의 색상 변화 transition */
-    transition: background-color 0.1s ease; 
-}
-
-/* 3. 버튼 클릭 시 (:active) 스타일 변화 */
-.my-button:active {
-    /* 글씨 크기 0.95배로 작게 */
-    font-size: 0.95em; 
-    
-    /* 누르는 느낌을 주기 위해 살짝 축소 */
-    transform: scale(0.98); 
-}
-
-/* 4. 클릭 시 (:active) 오버레이 색상 변화 */
-.my-button:active::before {
-    /* 반투명 검은색으로 변경하여 어둡게 덮이게 함 */
-    background-color: rgba(0, 0, 0, 0.20); 
-}
-
 #root {
   display: flex;
   flex-direction: column;
