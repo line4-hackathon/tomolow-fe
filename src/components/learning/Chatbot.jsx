@@ -48,9 +48,16 @@ const Chatbot = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // SelectDatePage에서 넘어온 자동 질문 + 안내 문구
+  // (다른 경로에서 쓸 수 있는) 자동 질문
   const autoQuestion = location.state?.autoQuestion
-  const autoMetaText = location.state?.autoMetaText
+  const autoMetaText = location.state?.autoMetaText // 현재는 사용 안 하지만 남겨둠
+
+  // SelectDatePage 에서 넘어온 데이터 선택 상태
+  const dataSelectedFromState = location.state?.data_selected
+  const tickersFromState = location.state?.tickers
+  const startDateFromState = location.state?.start_date
+  const endDateFromState = location.state?.end_date
+  const metaTextFromState = location.state?.metaText
 
   const token = getAccessToken()
   const payload = token ? parseJwt(token) : null
@@ -69,6 +76,13 @@ const Chatbot = () => {
 
   // autoQuestion 한 번만 보내기 위한 플래그 (StrictMode 대비)
   const autoQuestionSentRef = useRef(false)
+
+  // 데이터 선택 컨텍스트 (주가 기반 답변 여부)
+  const [dataContext, setDataContext] = useState(null) // { active, tickers, start_date, end_date }
+  const [showFollowup, setShowFollowup] = useState(false)
+
+  // SelectDatePage에서 온 컨텍스트를 한 번만 초기화하기 위한 ref
+  const dataInitRef = useRef(false)
 
   // 스크롤 맨 아래로 내리기 위한 ref
   const bottomRef = useRef(null)
@@ -118,8 +132,7 @@ const Chatbot = () => {
   }, [messages.length])
 
   // 2) 질문 보내기
-  // metaTextFromOutside: SelectDatePage에서 온 경우에만 들어오는 안내 문구
-  const handleSend = async (textFromChip, metaTextFromOutside) => {
+  const handleSend = async textFromChip => {
     const content = (textFromChip ?? trimmed).trim()
     if (!content || isThinking) return
     if (!API_BASE_URL) return
@@ -128,9 +141,31 @@ const Chatbot = () => {
     setMessages(prev => [...prev, userMsg])
     setInput('')
     setIsThinking(true)
+    setShowFollowup(false) // 새 요청 시작 시 followup 버튼 숨김
 
     const controller = new AbortController()
     requestControllerRef.current = controller
+
+    // 현재 데이터 컨텍스트를 사용할지 여부
+    const useData =
+      dataContext &&
+      dataContext.active &&
+      dataContext.tickers &&
+      dataContext.start_date &&
+      dataContext.end_date
+
+    const body = useData
+      ? {
+          question: content,
+          data_selected: true,
+          tickers: dataContext.tickers,
+          start_date: dataContext.start_date,
+          end_date: dataContext.end_date,
+        }
+      : {
+          question: content,
+          data_selected: false,
+        }
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/chatbot/question`, {
@@ -140,10 +175,7 @@ const Chatbot = () => {
           ...getAuthHeader(),
         },
         signal: controller.signal,
-        body: JSON.stringify({
-          question: content,
-          data_selected: false,
-        }),
+        body: JSON.stringify(body),
       })
 
       if (!res.ok) {
@@ -194,25 +226,23 @@ const Chatbot = () => {
       const sources = Array.isArray(data.sources) ? data.sources : []
       setLastAnswerKey(data.key ?? null)
 
-      // metaTextFromOutside 가 있으면 먼저 안내 문구(meta: true) 그 다음 실제 답변
-      setMessages(prev => {
-        const arr = [...prev]
-        if (metaTextFromOutside && metaTextFromOutside.trim()) {
-          arr.push({
-            id: nextId(),
-            role: 'bot',
-            text: metaTextFromOutside.trim(),
-            meta: true, // 파란색 안내문
-          })
-        }
-        arr.push({
+      // 실제 답변 + 뉴스 카드
+      setMessages(prev => [
+        ...prev,
+        {
           id: nextId(),
           role: 'bot',
           text: answer,
           sources, // 뉴스 카드 정보
-        })
-        return arr
-      })
+        },
+      ])
+
+      // 데이터 기반 답변이면 follow-up 버튼 표시
+      if (useData) {
+        setShowFollowup(true)
+      } else {
+        setShowFollowup(false)
+      }
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.error('question error:', err)
@@ -365,21 +395,80 @@ const Chatbot = () => {
     }
 
     fetchRoom()
-  }, [nickname])
+  }, [nickname, navigate])
 
-  // SelectDatePage에서 넘어온 autoQuestion 자동 전송 (한 번만, room 로딩 이후)
+  // SelectDatePage에서 온 경우: 데이터 컨텍스트 + 안내 문구 세팅
+  useEffect(() => {
+    if (dataInitRef.current) return
+    if (!roomLoaded) return
+    if (!dataSelectedFromState) return
+
+    // 데이터 컨텍스트 활성화
+    setDataContext({
+      active: true,
+      tickers: tickersFromState,
+      start_date: startDateFromState,
+      end_date: endDateFromState,
+    })
+
+    // 안내 문구 (파란 글씨)
+    if (metaTextFromState) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: nextId(),
+          role: 'bot',
+          text: metaTextFromState,
+          meta: true,
+        },
+      ])
+    }
+
+    dataInitRef.current = true
+
+    // state 비워서 뒤로가기 등에서 재전송 안 되게
+    navigate('/learning', { replace: true, state: {} })
+  }, [
+    roomLoaded,
+    dataSelectedFromState,
+    tickersFromState,
+    startDateFromState,
+    endDateFromState,
+    metaTextFromState,
+    navigate,
+  ])
+
+  // (기존) autoQuestion 자동 전송 로직 - 다른 플로우에서 사용할 수 있게 남겨둠
   useEffect(() => {
     if (!autoQuestion) return
     if (!roomLoaded) return
     if (autoQuestionSentRef.current) return
 
     autoQuestionSentRef.current = true
-    // autoMetaText 를 두 번째 인자로 넣어
-    handleSend(autoQuestion, autoMetaText)
+    handleSend(autoQuestion)
 
-    // state 비워서 뒤로가기 등에서 재전송 안 되게
     navigate('/learning', { replace: true, state: {} })
-  }, [autoQuestion, autoMetaText, roomLoaded, navigate])
+  }, [autoQuestion, roomLoaded, navigate])
+
+  // follow-up: "더 물어볼게요" / "이제 다른 질문할게요"
+  const handleMoreAsk = () => {
+    // 컨텍스트 유지, 버튼만 숨김
+    setShowFollowup(false)
+  }
+
+  const handleAnotherQuestion = () => {
+    setShowFollowup(false)
+    setDataContext(null)
+    setMessages(prev => [
+      ...prev,
+      {
+        id: nextId(),
+        role: 'bot',
+        text:
+          '좋아요. 이제는 주식 데이터와 상관없는 새로운 질문에도 답변해 드릴게요.',
+      },
+    ])
+  }
 
   return (
     <S.ChatbotWrapper>
@@ -426,7 +515,21 @@ const Chatbot = () => {
           <div ref={bottomRef} />
         </S.Messages>
 
-        {!hasUserMessage && (
+        {/* 데이터 기반 답변 뒤 follow-up 영역 */}
+        {showFollowup && (
+          <S.SuggestionsSection>
+            <S.SuggestionsTitle>관련 내용을 더 학습할까요?</S.SuggestionsTitle>
+            <S.ChipsColumn>
+              <S.Chip onClick={handleMoreAsk}>더 물어볼게요</S.Chip>
+              <S.Chip onClick={handleAnotherQuestion}>
+                이제 다른 질문할게요
+              </S.Chip>
+            </S.ChipsColumn>
+          </S.SuggestionsSection>
+        )}
+
+        {/* 첫 사용자 메시지 전 + 데이터 컨텍스트 없을 때만 추천 질문 보여주기 */}
+        {!hasUserMessage && !dataContext?.active && (
           <S.SuggestionsSection>
             <S.SuggestionsTitle>이런 질문은 어때요?</S.SuggestionsTitle>
             <S.ChipsColumn>

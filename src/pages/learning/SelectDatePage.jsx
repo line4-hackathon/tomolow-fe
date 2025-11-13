@@ -26,6 +26,19 @@ const formatKoreanDate = value => {
   return `${y}년 ${m}월 ${d}일`
 }
 
+// API로 보낼 YYYY-MM-DD 포맷터
+const formatAPIDate = value => {
+  if (!value) return ''
+
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export default function SelectDatePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -51,16 +64,29 @@ export default function SelectDatePage() {
   const symbol = effectiveStock?.symbol
 
   const handleLoad = () => {
+    if (!effectiveStock || !symbol) return
+
     const stockName =
       effectiveStock?.name || effectiveStock?.symbol || '선택한 종목'
 
-    const metaText = `해당 답변은 ${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 뉴스를 참고해 생성되었어요.`
-    const question = `${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 주가를 분석하고 변동 원인을 설명해줘`
+    // 화면용 안내 문구
+    const metaText =
+      `${stockName}의 ${formatKoreanDate(startDate)}부터 ${formatKoreanDate(
+        endDate,
+      )}까지 뉴스 정보를 바탕으로 답변드릴게요.\n\n` +
+      '궁금한 점을 물어봐주세요.'
+
+    // API로 보낼 날짜
+    const apiStartDate = formatAPIDate(startDate)
+    const apiEndDate = formatAPIDate(endDate)
 
     navigate('/learning', {
       state: {
-        autoQuestion: question,
-        autoMetaText: metaText
+        data_selected: true,
+        tickers: symbol, // 예: "ETH"
+        start_date: apiStartDate, // "2025-05-05"
+        end_date: apiEndDate, // "2025-05-31"
+        metaText, // 챗봇 첫 안내 문구
       },
     })
   }
@@ -98,7 +124,7 @@ export default function SelectDatePage() {
 
   return (
     <Page>
-      <Header title='학습' />
+      <Header title="학습" />
       <Contents>
         <StockInfo />
 
@@ -123,11 +149,9 @@ export default function SelectDatePage() {
         </DateCard>
 
         <BottomBar>
-        <LoadButton onClick={handleLoad}>불러오기</LoadButton>
-      </BottomBar>
+          <LoadButton onClick={handleLoad}>불러오기</LoadButton>
+        </BottomBar>
       </Contents>
-
-      
     </Page>
   )
 }
@@ -180,7 +204,7 @@ const DateLabel = styled.div`
 `
 
 const DateValue = styled.div`
-  color: var(--Primary-500, #4880AF);
+  color: var(--Primary-500, #4880af);
   font-size: 20px;
   font-style: normal;
   font-weight: 500;

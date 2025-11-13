@@ -232,7 +232,8 @@ const Wrapper = styled.div`
   min-height: 80vh;
   background-color: #f5f6f9;
   padding-top: 32px;
-  margin-bottom: 60px;
+  margin-bottom: 65px;
+  padding-bottom: 60px;
 `
 
 const Content = styled.div`
@@ -254,14 +255,14 @@ const Message = styled.p`
 const List = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 30px;
   margin-bottom: 16px;
 `
 
 const Item = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 15px;
   cursor: pointer;
 `
 

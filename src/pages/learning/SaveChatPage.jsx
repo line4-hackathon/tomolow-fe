@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Header from '@/components/common/Header'
+import Header from '@/components/common/FixedHeader'
 import MenuBar from '@/components/common/MenuBar'
 import SaveChat from '@/components/learning/SaveChat'
 
