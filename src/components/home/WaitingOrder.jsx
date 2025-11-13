@@ -5,8 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import useStockStore from '@/stores/stockStores'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const LIST_URL   = `${API_BASE_URL}/api/orders/pending/list`   // GET
-const DELETE_URL = `${API_BASE_URL}/api/orders/pending`        // DELETE {orderId}
+const LIST_URL = `${API_BASE_URL}/api/orders/pending/list`   // GET
+const DELETE_URL = `${API_BASE_URL}/api/orders/pending`      // DELETE {orderId}
 
 const getAccessToken = () => localStorage.getItem('accessToken')
 const getAuthHeader = () => {
@@ -14,9 +14,13 @@ const getAuthHeader = () => {
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
 
-const safeJson = async (res) => {
+const safeJson = async res => {
   const text = await res.text()
-  try { return text ? JSON.parse(text) : null } catch { return null }
+  try {
+    return text ? JSON.parse(text) : null
+  } catch {
+    return null
+  }
 }
 
 export default function WaitingOrder() {
@@ -24,17 +28,14 @@ export default function WaitingOrder() {
   const location = useLocation()
   const isGroupRoute = location.pathname.startsWith('/group')
 
-  // 트레이딩/정정 페이지에서 쓰는 전역 종목 상태
   const { setStockData } = useStockStore()
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // 취소 모달
   const [confirmId, setConfirmId] = useState(null)
 
-  // 토스트
   const [toast, setToast] = useState({ open: false, msg: '' })
   useEffect(() => {
     if (!toast.open) return
@@ -76,7 +77,7 @@ export default function WaitingOrder() {
         marketId: it.marketId || it.symbol,
         quantity: it.quantity ?? 0,
         limitPrice: it.limitPrice ?? 0,
-        tradeType: it.tradeType,                    // 'BUY' | 'SELL'
+        tradeType: it.tradeType,
         typeLabel: it.tradeType === 'SELL' ? '매도' : '매수',
         imageUrl: it.imageUrl || null,
       }))
@@ -119,47 +120,91 @@ export default function WaitingOrder() {
     }
   }
 
-  // 트레이딩 페이지(차트)로 이동 – 옵션
-  const goChart = (order) => {
+  // 클릭한 주문 기준으로 현재 시세를 조회하고 store를 채우는 함수
+  const fillStoreFromOrder = async order => {
+    if (!order) return
+
+    let tradePrice = 0
+    let changeRate = 0
+
+    // 현재 시세 조회해서 헤더용 데이터 채우기
+    if (order.symbol && API_BASE_URL) {
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/ticker/${encodeURIComponent(order.symbol)}`,
+          {
+            method: 'GET',
+            headers: { Accept: 'application/json', ...getAuthHeader() },
+          },
+        )
+        const json = await safeJson(res)
+
+        if (res.ok && json?.success) {
+          const d = json.data || {}
+          tradePrice = d.currentPrice ?? d.price ?? d.tradePrice ?? 0
+          changeRate  = d.pnlRate ?? d.changeRate ?? 0
+        }
+      } catch (e) {
+        console.error('ticker load error >>>', e)
+      }
+    }
+
+    // 헤더에서 사용할 현재가/변동률을 store에 넣는다.
+    // price: 현재가, changeRate: 변동률
+    setStockData({
+      market: '',
+      symbol: order.symbol || '',
+      marketId: order.marketId || '',
+      marketName: '',
+      name: order.name || '',
+      price: tradePrice,       // 헤더가 보는 현재가
+      tradePrice: tradePrice,  // 혹시 다른 컴포넌트가 쓰고 있다면 대비
+      changeRate: changeRate,
+      changePrice: 0,
+      prevClose: '',
+      accVolume: '',
+      accTradePrice24h: '',
+      tradeTimestamp: '',
+      interested: '',
+    })
+  }
+
+  // 차트(트레이딩) 페이지로 이동
+  const goChart = async order => {
     if (!order?.symbol) return
 
-    setStockData({
-      symbol:   order.symbol,
-      name:     order.name,
-      marketId: order.marketId,
-      imageUrl: order.imageUrl || null,
-    })
+    await fillStoreFromOrder(order)
 
     const path = isGroupRoute ? '/group/invest/trading' : '/invest/trading'
     navigate(path)
   }
 
-  // 🔥 정정 페이지로 이동 (여기가 핵심)
-  const goCorrection = (order) => {
+  // 정정 페이지로 이동
+  const goCorrection = async order => {
     if (!order) return
 
-    // 1) 정정/트레이딩에서 사용할 종목 정보 전역 저장
-    setStockData({
-      symbol:   order.symbol,
-      name:     order.name,
-      marketId: order.marketId,
-      imageUrl: order.imageUrl || null,
-    })
+    await fillStoreFromOrder(order)
 
-    // 2) 정정 페이지에서 필요로 할 만한 주문 정보들을 state로 넘김
+    // CorrectionPage 쪽에서 orderId 를 세션에서 쓰고 있으니 같이 넣어준다
+    sessionStorage.setItem('orderId', order.orderId)
+
     const path = isGroupRoute ? '/group/invest/correction' : '/invest/correction'
     navigate(path, {
       state: {
-        // CorrectionPage 에서 state.orderId 를 읽어도 되고,
-        // state.order.orderId 를 읽어도 되게 둘 다 넘겨줌
         orderId: order.orderId,
+        symbol: order.symbol,
+        marketId: order.marketId,
+        name: order.name,
+        tradeType: order.tradeType,
+        quantity: order.quantity,
+        limitPrice: order.limitPrice,  // 정정 입력 박스 초기값으로 사용할 값
         order: {
-          orderId:    order.orderId,
-          symbol:     order.symbol,
-          marketId:   order.marketId,
-          name:       order.name,
-          tradeType:  order.tradeType,
-          quantity:   order.quantity,
+          orderId: order.orderId,
+          symbol: order.symbol,
+          marketId: order.marketId,
+          name: order.name,
+          tradeType: order.tradeType,
+          quantity: order.quantity,
           limitPrice: order.limitPrice,
         },
       },
@@ -189,7 +234,6 @@ export default function WaitingOrder() {
   return (
     <Section>
       <Title>대기주문</Title>
-
       <CardList>
         {orders.map(order => (
           <Card key={order.id}>
@@ -217,7 +261,6 @@ export default function WaitingOrder() {
         ))}
       </CardList>
 
-      {/* 취소 모달 */}
       {confirmId && (
         <ModalOverlay>
           <ModalBox>
@@ -237,6 +280,7 @@ export default function WaitingOrder() {
   )
 }
 
+// 스타일은 그대로
 const Section = styled.section`
   padding: 0px 16px 32px;
   background-color: #f6f6f6;
