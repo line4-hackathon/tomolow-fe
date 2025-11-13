@@ -82,7 +82,6 @@ export default function HoldingStockPage() {
     <Page>
       <Header title="학습" />
       <Contents>
-        {/* 🔍 검색어 입력 */}
         <SearchBar
           explain="보유중인 자산을 검색해보세요"
           value={query}

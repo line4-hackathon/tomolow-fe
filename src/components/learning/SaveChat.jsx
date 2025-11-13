@@ -12,309 +12,320 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const getAccessToken = () => localStorage.getItem('accessToken')
 
 const getAuthHeader = () => {
-    const token = getAccessToken()
-    return token ? { Authorization: `Bearer ${token}` } : {}
+  const token = getAccessToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+
 export default function SaveChat() {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
-    const [items, setItems] = useState([]) // [{ key, question, answer }]
-    const [selectedKeys, setSelectedKeys] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [saving, setSaving] = useState(false)
-    const [toastVisible, setToastVisible] = useState(false)
-    const [toastMessage, setToastMessage] = useState('')
+  // items: [{ key, question, answer }]
+  const [items, setItems] = useState([])
+  const [selectedKeys, setSelectedKeys] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
-    const hasSelection = selectedKeys.length > 0
+  const hasSelection = selectedKeys.length > 0
 
-  //  기존 대화 목록 가져오기
-    useEffect(() => {
-        const fetchRoom = async () => {
-        if (!API_BASE_URL) {
-            setError('서버 주소가 설정되어 있지 않습니다.')
-            setLoading(false)
-            return
-        }
-
-        const token = getAccessToken()
-        if (!token) {
-            setError('로그인 후 이용 가능한 서비스입니다.')
-            setLoading(false)
-            return
-        }
-
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/chatbot/room`, {
-            method: 'GET',
-            headers: { ...getAuthHeader() },
-            })
-
-            if (!res.ok) {
-            const text = await res.text()
-            console.error('room error:', res.status, text)
-
-            if (res.status === 401 || res.status === 403) {
-                setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
-            } else {
-                setError('대화 목록을 불러오지 못했습니다.')
-            }
-            return
-            }
-
-            const json = await res.json()
-            console.log('room (save page) response:', json)
-
-            if (!json.success) {
-            setError(json.message || '대화 목록을 불러오지 못했습니다.')
-            return
-            }
-
-            setItems(Array.isArray(json.data) ? json.data : [])
-        } catch (err) {
-            console.error('room error:', err)
-            setError('서버 통신 중 오류가 발생했습니다.')
-        } finally {
-            setLoading(false)
-        }
-        }
-
-        fetchRoom()
-    }, [])
-
-    // 체크박스 토글
-    const toggleKey = key => {
-        setSelectedKeys(prev =>
-        prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
-        )
-    }
-
-    // 토스트 닫기
-    const handleCloseToast = () => {
-        setToastVisible(false)
-    }
-
-    // 저장 API 호출
-    const handleSave = async () => {
-        if (!hasSelection || saving || !API_BASE_URL) return
-
-        const token = getAccessToken()
-        if (!token) {
-        setError('로그인 후 이용 가능한 서비스입니다.')
+  // 1) 저장 가능한 채팅 목록 가져오기
+  useEffect(() => {
+    const fetchRoom = async () => {
+      if (!API_BASE_URL) {
+        setError('서버 주소가 설정되어 있지 않습니다.')
+        setLoading(false)
         return
-        }
+      }
 
-        setSaving(true)
-        setError('')
+      const token = getAccessToken()
+      if (!token) {
+        setError('로그인 후 이용 가능한 서비스입니다.')
+        setLoading(false)
+        return
+      }
 
-        try {
-        const res = await fetch(`${API_BASE_URL}/api/chatbot/save`, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-            },
-            body: JSON.stringify({ keys: selectedKeys }),
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/chatbot/room`, {
+          method: 'GET',
+          headers: { ...getAuthHeader() },
         })
 
         if (!res.ok) {
-            const text = await res.text()
-            console.error('save error:', res.status, text)
+          const text = await res.text()
+          console.error('room error:', res.status, text)
 
-            if (res.status === 401 || res.status === 403) {
+          if (res.status === 401 || res.status === 403) {
             setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
-            } else {
-            setError('대화 저장에 실패했습니다.')
-            }
-            return
+          } else {
+            setError('대화 목록을 불러오지 못했습니다.')
+          }
+          return
         }
 
         const json = await res.json()
-        console.log('save response:', json)
+        console.log('room (save page) response:', json)
 
         if (!json.success) {
-            setError(json.message || '대화 저장에 실패했습니다.')
-            return
+          setError(json.message || '대화 목록을 불러오지 못했습니다.')
+          return
         }
 
-        // 성공 토스트 메시지 표시
-        setToastMessage('선택한 대화가 저장되었어요!')
-        setToastVisible(true)
+        const messages = json.data?.messages
 
-        // 2초 뒤 학습(챗봇) 화면으로 이동
-        setTimeout(() => {
-            navigate('/learning')
-        }, 2000)
+        if (!Array.isArray(messages)) {
+        console.warn('messages is not array, fallback to empty []')
+        setItems([])
+        return
+        }
 
-        setSelectedKeys([])
-        } catch (err) {
-        console.error('save error:', err)
+        setItems(messages)
+
+      } catch (err) {
+        console.error('room error:', err)
         setError('서버 통신 중 오류가 발생했습니다.')
-        } finally {
-        setSaving(false)
-        }
+      } finally {
+        setLoading(false)
+      }
     }
 
-    return (
-        <Wrapper>
-        <Content>
-            {loading && <Message>대화 목록을 불러오는 중이에요...</Message>}
-            {!loading && error && <Message>{error}</Message>}
-            {!loading && !error && items.length === 0 && (
-            <Message>저장할 수 있는 대화가 아직 없어요.</Message>
-            )}
+    fetchRoom()
+  }, [])
 
-            {!loading && !error && items.length > 0 && (
-            <List>
-                {items.map(item => {
-                const isChecked = selectedKeys.includes(item.key)
-                return (
-                    <Item key={item.key} onClick={() => toggleKey(item.key)}>
-                    <CheckboxWrapper>
-                        <CheckIcon
-                        src={isChecked ? CheckOnIcon : CheckOffIcon}
-                        alt={isChecked ? 'checked' : 'unchecked'}
-                        />
-                    </CheckboxWrapper>
-
-                    <ChatBlock>
-                        <QuestionBubble>{item.question}</QuestionBubble>
-                        <AnswerBubble>{item.answer}</AnswerBubble>
-                    </ChatBlock>
-                    </Item>
-                )
-                })}
-            </List>
-            )}
-        </Content>
-
-        <BottomBar>
-            <SaveButton
-            type="button"
-            disabled={!hasSelection || saving}
-            onClick={handleSave}
-            >
-            {saving
-                ? '저장 중...'
-                : hasSelection
-                ? '저장하기'
-                : '저장할 대화를 선택해 주세요'}
-            </SaveButton>
-        </BottomBar>
-
-        {/* 토스트 메시지 */}
-        {toastVisible && (
-            <Toast
-            message={toastMessage}
-            onClose={handleCloseToast}
-            />
-        )}
-        </Wrapper>
+  // 2) 체크박스 토글
+  const toggleKey = key => {
+    setSelectedKeys(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
     )
+  }
+
+  // 3) 토스트 닫기
+  const handleCloseToast = () => {
+    setToastVisible(false)
+  }
+
+  // 4) 선택된 key들 저장 요청
+  const handleSave = async () => {
+    if (!hasSelection || saving || !API_BASE_URL) return
+
+    const token = getAccessToken()
+    if (!token) {
+      setError('로그인 후 이용 가능한 서비스입니다.')
+      return
     }
+
+    setSaving(true)
+    setError('')
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/chatbot/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        // ★ BE 스펙: keys: [ "CHAT:1:..." , ... ]
+        body: JSON.stringify({ keys: selectedKeys }),
+      })
+
+      if (!res.ok) {
+        const text = await res.text()
+        console.error('save error:', res.status, text)
+
+        if (res.status === 401 || res.status === 403) {
+          setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
+        } else {
+          setError('대화 저장에 실패했습니다.')
+        }
+        return
+      }
+
+      const json = await res.json()
+      console.log('save response:', json)
+
+      if (!json.success) {
+        setError(json.message || '대화 저장에 실패했습니다.')
+        return
+      }
+
+      // 성공 토스트 메시지 표시
+      setToastMessage('선택한 대화가 저장되었어요!')
+      setToastVisible(true)
+
+      // 2초 뒤 학습(챗봇) 화면으로 이동
+      setTimeout(() => {
+        navigate('/learning')
+      }, 2000)
+
+      setSelectedKeys([])
+    } catch (err) {
+      console.error('save error:', err)
+      setError('서버 통신 중 오류가 발생했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  
+  useEffect(() => {
+    console.log('items state updated >>>', items.length, items[0])
+  }, [items])
+
+  return (
+    <Wrapper>
+      <Content>
+        {loading && <Message>대화 목록을 불러오는 중이에요...</Message>}
+        {!loading && error && <Message>{error}</Message>}
+        {!loading && !error && items.length === 0 && (
+          <Message>저장할 수 있는 대화가 아직 없어요.</Message>
+        )}
+
+        {!loading && !error && items.length > 0 && (
+          <List>
+            {items.map(item => {
+              const isChecked = selectedKeys.includes(item.key)
+              return (
+                <Item key={item.key} onClick={() => toggleKey(item.key)}>
+                  <CheckboxWrapper>
+                    <CheckIcon
+                      src={isChecked ? CheckOnIcon : CheckOffIcon}
+                      alt={isChecked ? 'checked' : 'unchecked'}
+                    />
+                  </CheckboxWrapper>
+
+                  <ChatBlock>
+                    <QuestionBubble>{item.question}</QuestionBubble>
+                    <AnswerBubble>{item.answer}</AnswerBubble>
+                  </ChatBlock>
+                </Item>
+              )
+            })}
+          </List>
+        )}
+      </Content>
+
+      <BottomBar>
+        <SaveButton
+          type="button"
+          disabled={!hasSelection || saving}
+          onClick={handleSave}
+        >
+          {saving
+            ? '저장 중...'
+            : hasSelection
+            ? '저장하기'
+            : '저장할 대화를 선택해 주세요'}
+        </SaveButton>
+      </BottomBar>
+
+      {toastVisible && (
+        <Toast message={toastMessage} onClose={handleCloseToast} />
+      )}
+    </Wrapper>
+  )
+}
 
 const Wrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    min-height: 80vh;
-    background-color: #f5f6f9;
-    padding-top: 32px;
-    margin-bottom: 60px;
-    `
+  display: flex;
+  flex-direction: column;
+  min-height: 80vh;
+  background-color: #f5f6f9;
+  padding-top: 32px;
+  margin-bottom: 60px;
+`
 
 const Content = styled.div`
-    flex: 1;
-    padding: 0 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    `
+  flex: 1;
+  padding: 0 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`
 
 const Message = styled.p`
-    margin-top: 40px;
-    text-align: center;
-    color: #9ca3af;
-    font-size: 14px;
-    `
+  margin-top: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+`
 
 const List = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    margin-bottom: 16px;
-    `
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-bottom: 16px;
+`
 
 const Item = styled.div`
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    cursor: pointer;
-    `
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+`
 
 const CheckboxWrapper = styled.div`
-    padding-top: 8px;
-    flex-shrink: 0;
-    `
+  padding-top: 8px;
+  flex-shrink: 0;
+`
 
 const CheckIcon = styled.img`
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    user-select: none;
-    `
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  user-select: none;
+`
 
 const ChatBlock = styled.div`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    `
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`
 
 const QuestionBubble = styled.div`
-    align-self: flex-end;
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: var(--Radius-M, 12px);
-    background: var(--Primary-100, #e8eef6);
-    color: #111827;
-    font-size: 14px;
-    line-height: 1.4;
-    `
+  align-self: flex-end;
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: var(--Radius-M, 12px);
+  background: var(--Primary-100, #e8eef6);
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.4;
+`
 
 const AnswerBubble = styled.div`
-    align-self: flex-start;
-    max-width: 100%;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #111827;
-    `
+  align-self: flex-start;
+  max-width: 100%;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #111827;
+`
 
 const BottomBar = styled.footer`
-    position: sticky;
-    bottom: 0;
-    padding: 12px 16px 16px;
-    background-color: #f5f6f9;
-    `
+  position: sticky;
+  bottom: 0;
+  padding: 12px 16px 16px;
+  background-color: #f5f6f9;
+`
 
 const SaveButton = styled.button`
-    width: 100%;
-    height: 48px;
-    max-width: 341px;
-    height: 48px;
-    position: fixed;
-    bottom: 80px;
-    border-radius: var(--Radius-M, 12px);
-    border: none;
-    font-size: 15px;
-    font-weight: 500;
-    color: #ffffff;
-    background: ${({ disabled }) => (disabled ? '#d1d1d1' : '#4880af')};
-    cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
-    transition: 0.2s ease;
+  width: 100%;
+  max-width: 341px;
+  height: 48px;
+  position: fixed;
+  bottom: 80px;
+  border-radius: var(--Radius-M, 12px);
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  background: ${({ disabled }) => (disabled ? '#d1d1d1' : '#4880af')};
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+  transition: 0.2s ease;
 
-    &:hover {
-        opacity: ${({ disabled }) => (disabled ? 1 : 0.9)};
-    }
-    `
+  &:hover {
+    opacity: ${({ disabled }) => (disabled ? 1 : 0.9)};
+  }
+`

@@ -30,20 +30,22 @@ export const BotBubble = styled.div`
   font-size: 14px;
   line-height: 1.6;
   color: #111827;
+
+  /* 불러오기 안내문 같은 meta 텍스트는 파란색 */
   &.meta {
-    color: #366693;
+    color: #1570ef;
   }
 `
 
 export const UserBubble = styled.div`
-    align-self: flex-end;
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: var(--Radius-M, 12px);
-    background: var(--Primary-100, #E8EEF6);
-    color: #111827;
-    font-size: 14px;
-    line-height: 1.4;
+  align-self: flex-end;
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: var(--Radius-M, 12px);
+  background: var(--Primary-100, #e8eef6);
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.4;
 `
 
 export const SuggestionsSection = styled.section`
@@ -80,7 +82,7 @@ export const Chip = styled.button`
   }
 `
 
-/* ▼ 입력 바 영역: 항상 화면 맨 아래에 붙도록 sticky */
+/* ▼ 입력 바 영역: 항상 화면 맨 아래에 붙도록 fixed */
 export const InputArea = styled.div`
   position: fixed;
   z-index: 10;
@@ -95,14 +97,14 @@ export const InputArea = styled.div`
 `
 
 export const TextInput = styled.input`
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    padding: 10px 14px;
-    border-radius: var(--Radius-M, 12px);
-    background: var(--Neutral-0, #FFF);
-    color: #111827;
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: var(--Radius-M, 12px);
+  background: var(--Neutral-0, #fff);
+  color: #111827;
 
   &::placeholder {
     color: #9ca3af;
@@ -129,4 +131,49 @@ export const IconCircleButton = styled.button`
 export const IconImg = styled.img`
   width: 32px;
   height: 32px;
+`
+
+export const SourceList = styled.div`
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  justify-content: center;
+`
+
+export const SourceCard = styled.div`
+  min-width: 104px;
+  max-width: 145px;
+  height: 120px;
+  border-radius: 16px;
+  background: #263C54;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  overflow: hidden;
+  align-items: center;
+`
+
+export const SourceThumb = styled.img`
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+`
+
+export const SourceFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  padding-bottom: 14px;
+`
+
+
+export const SourceDomain = styled.span`
+  font-size: 11px;
+  color: #e5e7eb;
+  margin-top: 2px;  
 `

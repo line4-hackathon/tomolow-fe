@@ -54,7 +54,7 @@ export default function SelectDatePage() {
     const stockName =
       effectiveStock?.name || effectiveStock?.symbol || '선택한 종목'
 
-    const metaText = `답변을 ${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 뉴스를 참고해 생성하는 중입니다.`
+    const metaText = `해당 답변은 ${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 뉴스를 참고해 생성되었어요.`
     const question = `${stockName}의 ${formatKoreanDate(startDate,)}부터 ${formatKoreanDate(endDate,)}까지 주가를 분석하고 변동 원인을 설명해줘`
 
     navigate('/learning', {

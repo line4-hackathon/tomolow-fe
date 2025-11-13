@@ -284,7 +284,7 @@ export default function HoldInterest() {
         <S.EmptyState>
           {isHoldTab ? (
             <>
-              <S.EmptyText>아직 보유한 주식이 없습니다</S.EmptyText>
+              <S.EmptyText>아직 보유한 자산이 없습니다</S.EmptyText>
               <S.InvestButton onClick={() => navigate('/invest/search')}>
                 투자하기
               </S.InvestButton>
