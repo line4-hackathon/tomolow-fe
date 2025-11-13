@@ -7,12 +7,13 @@ import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import GroupMiniButton from '@/components/group/GroupMiniButton'
-import pinkSquare from '@/assets/images/img-pink-square.svg'
-import yellowSquare from '@/assets/images/img-yellow-square.svg'
+import groupSearch from '@/assets/icons/icon-group-search.svg'
+import groupParticipate from '@/assets/icons/icon-group-participate.svg'
 import Tab from '@/components/group/Tab'
 import List from '@/components/group/List'
 import Modal from '@/components/common/Modal'
 import MenuBar from '@/components/common/MenuBar'
+import Loading from '@/components/common/Loading'
 
 const ITEMS = [
   { key: 'now', label: '진행 중인 그룹' },
@@ -28,6 +29,7 @@ const GroupListPage = () => {
   const [expiredList, setExpiredList] = useState([]) // 종료된 그룹
   const [joinedRecruitList, setJoinedRecruitList] = useState([]) // 내가 참여한 모집중 그룹
   const [notJoinedRecruitList, setNotJoinedRecruitList] = useState([]) // 내가 참여하지 않은 모집중 그룹
+  const [loading, setLoading] = useState(false)
   const modal = useModal()
   const { setGroupData } = useGroupStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
@@ -56,6 +58,8 @@ const GroupListPage = () => {
   useEffect(() => {
     const getGroups = async () => {
       try {
+        setLoading(true)
+
         if (activeTab === 'now' || activeTab === 'finished') {
           const res = await axios.get(`${apiUrl}/api/group`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -110,6 +114,8 @@ const GroupListPage = () => {
       } catch (err) {
         console.error('그룹 리스트 불러오기 실패')
         console.error(err)
+      } finally {
+        setLoading(false)
       }
     }
     getGroups()
@@ -152,6 +158,7 @@ const GroupListPage = () => {
     }
   }
 
+  if (loading) return <Loading />
   return (
     <>
       <Scrollable>
@@ -159,11 +166,15 @@ const GroupListPage = () => {
         <Container>
           <MiniButtonContainer>
             <GroupMiniButton
-              img={pinkSquare}
+              img={groupSearch}
               label={'그룹 생성'}
               onClick={() => navigate('/group/create')}
             />
-            <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={() => modal.open()} />
+            <GroupMiniButton
+              img={groupParticipate}
+              label={'그룹 참가'}
+              onClick={() => modal.open()}
+            />
           </MiniButtonContainer>
 
           {/* Tab 바 */}

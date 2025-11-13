@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import useStockStore from '@/stores/stockStores'
 import axios from 'axios'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
@@ -16,8 +17,10 @@ const GroupWaitingOrdersPage = () => {
   const { groupId } = useParams()
   const modal = useModal()
   const [toastMessage, setToastMessage] = useState('')
+  const [cancelItem, setCancelItem] = useState(null)
   const [loading, setLoading] = useState(false)
   const [waitingList, setWaitingList] = useState([])
+  const { setStockData } = useStockStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const token = localStorage.getItem('accessToken')
 
@@ -40,17 +43,47 @@ const GroupWaitingOrdersPage = () => {
     getWaitingLists()
   }, [groupId])
 
-  const handleButtonClick = () => {
-    modal.open()
+  // 정정 버튼 클릭시
+  const handleEditClick = (item) => {
+    setStockData({
+      marketId: item.marketId,
+    })
+
+    navigate(`/group/invest/correction`, {
+      state: { orderId: item.orderId },
+    })
   }
 
+  // 취소 버튼 클릭시
+  const handleCancelClick = (item) => {
+    setCancelItem(item)
+    modal.open()
+  }
   const handleClose = () => {
     modal.close()
   }
 
-  const handleToast = () => {
-    modal.close()
-    setToastMessage('주문이 취소됐어요')
+  const handleCancelConfirm = async () => {
+    try {
+      if (!cancelItem) return
+
+      const res = await axios.delete(`${apiUrl}/api/group/${groupId}/pending`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { orderId: cancelItem.orderId },
+      })
+
+      if (res.data.success) {
+        setWaitingList((prev) => prev.filter((item) => item.orderId !== cancelItem.orderId))
+        setToastMessage('주문이 취소됐어요')
+      } else {
+        console.error(res.data.message)
+      }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      modal.close()
+      setCancelItem(null)
+    }
   }
 
   if (loading) return <Loading />
@@ -61,7 +94,7 @@ const GroupWaitingOrdersPage = () => {
         <Header title='대기주문' showIcon={true} path={`/group/home/${groupId}`} />
         <Container>
           <List>
-            {waitingList.lengh > 0 ? (
+            {waitingList.length > 0 ? (
               waitingList.map((item) => (
                 <Item key={item.orderId}>
                   <Left>
@@ -72,17 +105,13 @@ const GroupWaitingOrdersPage = () => {
                     </LeftText>
                   </Left>
                   <Right>
-                    <CancelButton onClick={handleButtonClick}>취소</CancelButton>
-                    <EditButton onClick={() => navigate('/group/invest/correction')}>
-                      정정
-                    </EditButton>
+                    <CancelButton onClick={() => handleCancelClick(item)}>취소</CancelButton>
+                    <EditButton onClick={() => handleEditClick(item)}>정정</EditButton>
                   </Right>
                 </Item>
               ))
             ) : (
-              <>
-                <ListEmpty emptyMessage={'보유한 자산이 없어요.'} />
-              </>
+              <ListEmpty emptyMessage={'보유한 자산이 없어요.'} />
             )}
           </List>
         </Container>
@@ -94,7 +123,7 @@ const GroupWaitingOrdersPage = () => {
         leftButtonLabel='닫기'
         rightButtonLabel='취소하기'
         onLeftClick={handleClose}
-        onRightClick={handleToast}
+        onRightClick={handleCancelConfirm}
       />
       {toastMessage && <Toast msg={toastMessage} onClose={() => setToastMessage('')} />}{' '}
     </>
