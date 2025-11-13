@@ -2,12 +2,23 @@ import styled from 'styled-components'
 import GrayButton from './GrayButton'
 import NavyButton from './NavyButton'
 import { APIService } from '@/pages/invest/api'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function CancelModal({setIsModal,orderId}) {
+  const navigate=useNavigate();
+  const location=useLocation();
+  const {state}=location;
+
   const orderCancel=async ()=>{
     try{
-      console.log(orderId)
-      const res=await APIService.private.delete(`/api/orders/pending`,{ orderId:orderId})
+      const res=await APIService.private.delete(`/api/orders/pending`,{ data:{orderId:orderId}})
+      setIsModal(false)
+      navigate(location.pathname, { 
+        state: { 
+          toastMessage: '주문 취소 됐어요', // ✨ 전달할 메시지
+        } 
+      });
+      window.location.reload()
     }catch(error){
       console.log("주문 취소 실패");
     }
