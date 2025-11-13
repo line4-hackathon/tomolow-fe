@@ -25,7 +25,7 @@ export default function Etc({selectedMenu, handleSelect,orderData,etcData}) {
       }
       break
     case 'AI':
-      if(etcData && etcData.length>0){
+      if(etcData){
       contents=<EctAI data={etcData}/>
       } else {
         contents=<LoadingImage/>

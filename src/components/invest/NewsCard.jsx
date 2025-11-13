@@ -8,9 +8,9 @@ export default function NewsCard({data}) {
     <Box onClick={()=>toNews()}>
       <NewsBox >
         <NewsTitle>{data.title}</NewsTitle>
-        <NewsSource>{data.source_name}</NewsSource>
+        <NewsSource>{data.source_name || data.sourceName}</NewsSource>
       </NewsBox>
-      <NewsImg src={data.image_url}/>
+      <NewsImg src={data.image_url || data.imageUrl}/>
     </Box>
   )
 }
