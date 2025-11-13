@@ -1,4 +1,4 @@
-// src/pages/learning/Chatbot.jsx (또는 해당 경로)
+// src/pages/learning/Chatbot.jsx
 
 import React, { useState, useEffect, useRef } from 'react'
 import * as S from './Chatbot.styled'
@@ -18,7 +18,7 @@ console.log('API_BASE_URL >>>', API_BASE_URL)
 // accessToken 가져오기
 const getAccessToken = () => localStorage.getItem('accessToken')
 
-// JWT payload 파싱 (sub, nickname 등 꺼내기)
+// JWT payload 파싱 (로그인 체크용 정도로만 사용)
 const parseJwt = token => {
   try {
     const base64Payload = token.split('.')[1]
@@ -35,6 +35,15 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+// url에서 도메인만 뽑는 함수 (뉴스 카드 푸터용)
+const getDomain = url => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'news'
+  }
+}
+
 const Chatbot = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -45,7 +54,11 @@ const Chatbot = () => {
 
   const token = getAccessToken()
   const payload = token ? parseJwt(token) : null
-  const nickname = payload?.nickname || payload?.sub || '투모루우'
+
+  // 닉네임: 기본값은 JWT / 없으면 '투모루우'
+  const [nickname, setNickname] = useState(
+    payload?.nickname || payload?.sub || '투모루우',
+  )
 
   // 메시지 id를 위한 카운터 (항상 유니크)
   const msgIdRef = useRef(1)
@@ -60,15 +73,8 @@ const Chatbot = () => {
   // 스크롤 맨 아래로 내리기 위한 ref
   const bottomRef = useRef(null)
 
-  const [messages, setMessages] = useState(() => [
-    {
-      id: msgIdRef.current, // 1
-      role: 'bot',
-      text:
-        `안녕하세요! 저는 ‘${nickname}’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! ` +
-        '본격적인 학습에 앞서 주식 하나를 가져와 공부를 시작해 볼까요?',
-    },
-  ])
+  // 처음엔 메시지 비워두고, room 응답을 받은 뒤에 인사말 + 히스토리 세팅
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [roomId, setRoomId] = useState(null)
@@ -185,9 +191,10 @@ const Chatbot = () => {
 
       const data = json.data || {}
       const answer = data.answer ?? '답변이 없습니다.'
+      const sources = Array.isArray(data.sources) ? data.sources : []
       setLastAnswerKey(data.key ?? null)
 
-      // 🔹 metaTextFromOutside 가 있으면, 먼저 안내 문구(meta: true), 그 다음 실제 답변
+      // metaTextFromOutside 가 있으면 먼저 안내 문구(meta: true) 그 다음 실제 답변
       setMessages(prev => {
         const arr = [...prev]
         if (metaTextFromOutside && metaTextFromOutside.trim()) {
@@ -195,10 +202,15 @@ const Chatbot = () => {
             id: nextId(),
             role: 'bot',
             text: metaTextFromOutside.trim(),
-            meta: true,
+            meta: true, // 파란색 안내문
           })
         }
-        arr.push({ id: nextId(), role: 'bot', text: answer })
+        arr.push({
+          id: nextId(),
+          role: 'bot',
+          text: answer,
+          sources, // 뉴스 카드 정보
+        })
         return arr
       })
     } catch (err) {
@@ -300,16 +312,47 @@ const Chatbot = () => {
           return
         }
 
-        const data = json.data
-        if (data?.roomId) setRoomId(data.roomId)
+        const data = json.data || {}
 
-        if (Array.isArray(data)) {
-          const history = data.flatMap(item => [
-            { id: nextId(), role: 'user', text: item.question ?? '' },
-            { id: nextId(), role: 'bot', text: item.answer ?? '' },
+        if (data.roomId) setRoomId(data.roomId)
+
+        // 서버에서 내려준 닉네임이 있으면 이걸 우선 사용
+        const nicknameFromServer = data.nickname || nickname
+        setNickname(nicknameFromServer)
+
+        const messagesFromServer = Array.isArray(data.messages)
+          ? data.messages
+          : []
+
+        // 인사말 + 히스토리 한 번에 세팅
+        setMessages(prev => {
+          // StrictMode에서 effect가 두 번 호출되는 것 방지
+          if (prev.length > 0) return prev
+
+          const history = messagesFromServer.flatMap(item => [
+            {
+              id: nextId(),
+              role: 'user',
+              text: item.question ?? '',
+            },
+            {
+              id: nextId(),
+              role: 'bot',
+              text: item.answer ?? '',
+            },
           ])
-          setMessages(prev => [...prev, ...history])
-        }
+
+          return [
+            {
+              id: nextId(),
+              role: 'bot',
+              text:
+                `안녕하세요! 저는 ‘${nicknameFromServer}’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! ` +
+                '본격적인 학습에 앞서 주식 하나를 가져와 공부를 시작해 볼까요?',
+            },
+            ...history,
+          ]
+        })
       } catch (err) {
         console.error('room error:', err)
         setMessages(prev => [
@@ -322,7 +365,7 @@ const Chatbot = () => {
     }
 
     fetchRoom()
-  }, [])
+  }, [nickname])
 
   // SelectDatePage에서 넘어온 autoQuestion 자동 전송 (한 번만, room 로딩 이후)
   useEffect(() => {
@@ -344,12 +387,37 @@ const Chatbot = () => {
         <S.Messages>
           {messages.map(msg =>
             msg.role === 'bot' ? (
-              <S.BotBubble
-                key={msg.id}
-                className={msg.meta ? 'meta' : ''} 
-              >
-                {msg.text}
-              </S.BotBubble>
+              <div key={msg.id}>
+                {/* 기본 답변 말풍선 */}
+                <S.BotBubble className={msg.meta ? 'meta' : ''}>
+                  {msg.text}
+                </S.BotBubble>
+
+                {/* 뉴스 카드: 최대 2개까지만 */}
+                {msg.sources && msg.sources.length > 0 && (
+                  <S.SourceList>
+                    {msg.sources.slice(0, 2).map((src, idx) => (
+                      <S.SourceCard
+                        key={src.url ?? idx}
+                        onClick={() =>
+                          src.url &&
+                          window.open(src.url, '_blank', 'noopener,noreferrer')
+                        }
+                      >
+                        {src.image_url && (
+                          <S.SourceThumb
+                            src={src.image_url}
+                            alt={`뉴스 ${idx + 1}`}
+                          />
+                        )}
+                        <S.SourceFooter>
+                          <S.SourceDomain>{getDomain(src.url)}</S.SourceDomain>
+                        </S.SourceFooter>
+                      </S.SourceCard>
+                    ))}
+                  </S.SourceList>
+                )}
+              </div>
             ) : (
               <S.UserBubble key={msg.id}>{msg.text}</S.UserBubble>
             ),
