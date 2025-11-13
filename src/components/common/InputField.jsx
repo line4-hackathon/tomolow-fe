@@ -23,7 +23,7 @@ function InputField({ label, type = 'text', placeholder, value, onChange, onBlur
         />
         {isVisible && (
           <Button onClick={handlePassword}>
-            <Icon src={seePassword ? eyeOff : eyeOn} />
+            <Icon src={seePassword ? eyeOn : eyeOff} />
           </Button>
         )}
       </InputContainer>
