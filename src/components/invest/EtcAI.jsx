@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import NewsCard from './NewsCard'
 import RobotIcon from '@/assets/icons/icon-robot.svg?react'
 
-export default function EctAI() {
+export default function EctAI({data}) {
   const isAI = 0
   return (
     <Box>
@@ -14,16 +14,12 @@ export default function EctAI() {
               최신 뉴스 기반으로 AI가 작성한 보고서예요
             </AIMessage>
             <AIMessageCard>
-              삼성전자는 미국 실리콘밸리에서 ‘2025 테크 포럼’을 개최하며 AI·차세대 기술 전략을
-              공개했고, 이는 기술 리더십 강화 신호로 해석됩니다. 가전·AI 홈 시장에서 ‘AI 구독
-              페스타’ 등 구독형 모델을 확대해 수익 구조 다각화에도 주력하고 있습니다. 덕분에 현재
-              주가 상승 중이라고 판단됩니다.
+              {data.analysis}
             </AIMessageCard>
           </AIBox>
           <NewsCardBox>
             <a>출처 뉴스</a>
-            <NewsCard />
-            <NewsCard />
+            
             <NewsCard />
           </NewsCardBox>
         </>

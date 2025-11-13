@@ -9,7 +9,7 @@ export default function CorrectionModal({setIsModal,price,orderId}) {
 
   const correction =async () => {
     try{
-      const res=await APIService.private.put(`/api/orders/pending`,{orderId: orderId, price: price})
+      const res=await APIService.private.put(`/api/orders/pending`,{orderId: orderId, price: parseInt(price)})
       navigate('/invest/trading', {
               state: {
                 toastMessage: '주문 정정이 완료됐어요',
