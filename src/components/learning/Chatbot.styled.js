@@ -30,6 +30,9 @@ export const BotBubble = styled.div`
   font-size: 14px;
   line-height: 1.6;
   color: #111827;
+  &.meta {
+    color: #366693;
+  }
 `
 
 export const UserBubble = styled.div`
