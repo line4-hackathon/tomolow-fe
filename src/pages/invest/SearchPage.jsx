@@ -98,12 +98,12 @@ export default function InvestSearchPage() {
           {selectedMenu === 'INTEREST' ? (
             <>
               <NothingHeart />
-              <p>관심 주식이 없어요</p>
+              <p>관심 자산이 없어요</p>
             </>
           ) : (
             <>
               <NothingIcon />
-              <p>검색된 주식이 없어요</p>
+              <p>검색된 자산이 없어요</p>
             </>
           )}
         </Nothing>
