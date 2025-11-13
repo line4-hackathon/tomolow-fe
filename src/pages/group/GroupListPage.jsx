@@ -7,8 +7,8 @@ import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import GroupMiniButton from '@/components/group/GroupMiniButton'
-import pinkSquare from '@/assets/images/img-pink-square.svg'
-import yellowSquare from '@/assets/images/img-yellow-square.svg'
+import groupSearch from '@/assets/icons/icon-group-search.svg'
+import groupParticipate from '@/assets/icons/icon-group-participate.svg'
 import Tab from '@/components/group/Tab'
 import List from '@/components/group/List'
 import Modal from '@/components/common/Modal'
@@ -166,11 +166,15 @@ const GroupListPage = () => {
         <Container>
           <MiniButtonContainer>
             <GroupMiniButton
-              img={pinkSquare}
+              img={groupSearch}
               label={'그룹 생성'}
               onClick={() => navigate('/group/create')}
             />
-            <GroupMiniButton img={yellowSquare} label={'그룹 참가'} onClick={() => modal.open()} />
+            <GroupMiniButton
+              img={groupParticipate}
+              label={'그룹 참가'}
+              onClick={() => modal.open()}
+            />
           </MiniButtonContainer>
 
           {/* Tab 바 */}
