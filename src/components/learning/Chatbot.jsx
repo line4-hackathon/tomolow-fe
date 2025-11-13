@@ -454,6 +454,15 @@ const Chatbot = () => {
   const handleMoreAsk = () => {
     // 컨텍스트 유지, 버튼만 숨김
     setShowFollowup(false)
+    setMessages(prev => [
+    ...prev,
+    {
+      id: nextId(),
+      role: 'bot',
+      text: '네 계속해서 관련 데이터에 관한 질문을 해주세요.',
+    },
+  ])
+    
   }
 
   const handleAnotherQuestion = () => {
@@ -465,7 +474,7 @@ const Chatbot = () => {
         id: nextId(),
         role: 'bot',
         text:
-          '좋아요. 이제는 주식 데이터와 상관없는 새로운 질문에도 답변해 드릴게요.',
+          '네 그러면 해당 자산 관련 학습은 마칠게요. 궁금한 게 있으시면 물어봐주세요.',
       },
     ])
   }

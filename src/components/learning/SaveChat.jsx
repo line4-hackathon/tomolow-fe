@@ -1,9 +1,12 @@
+// src/components/learning/SaveChat.jsx (경로는 너 프로젝트에 맞게)
+
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import CheckOnIcon from '@/assets/icons/icon-save-check-blue.svg'
 import CheckOffIcon from '@/assets/icons/icon-save-check-gray.svg'
 import Toast from '@/components/invest/ToastMessage'
+import * as ChatS from '@/components/learning/Chatbot.styled' // 뉴스카드 스타일 재사용
 
 // 서버 주소
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -16,11 +19,19 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+// url에서 도메인만 뽑는 함수 (챗봇이랑 동일)
+const getDomain = url => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'news'
+  }
+}
 
 export default function SaveChat() {
   const navigate = useNavigate()
 
-  // items: [{ key, question, answer }]
+  // items: [{ key, question, answer, sources? }]
   const [items, setItems] = useState([])
   const [selectedKeys, setSelectedKeys] = useState([])
   const [loading, setLoading] = useState(true)
@@ -76,13 +87,12 @@ export default function SaveChat() {
         const messages = json.data?.messages
 
         if (!Array.isArray(messages)) {
-        console.warn('messages is not array, fallback to empty []')
-        setItems([])
-        return
+          console.warn('messages is not array, fallback to empty []')
+          setItems([])
+          return
         }
 
         setItems(messages)
-
       } catch (err) {
         console.error('room error:', err)
         setError('서버 통신 중 오류가 발생했습니다.')
@@ -167,7 +177,7 @@ export default function SaveChat() {
       setSaving(false)
     }
   }
-  
+
   useEffect(() => {
     console.log('items state updated >>>', items.length, items[0])
   }, [items])
@@ -185,6 +195,9 @@ export default function SaveChat() {
           <List>
             {items.map(item => {
               const isChecked = selectedKeys.includes(item.key)
+              const hasSources =
+                Array.isArray(item.sources) && item.sources.length > 0
+
               return (
                 <Item key={item.key} onClick={() => toggleKey(item.key)}>
                   <CheckboxWrapper>
@@ -197,6 +210,39 @@ export default function SaveChat() {
                   <ChatBlock>
                     <QuestionBubble>{item.question}</QuestionBubble>
                     <AnswerBubble>{item.answer}</AnswerBubble>
+
+                    {/*뉴스카드: 챗봇이랑 동일하게 최대 2개만 표시 */}
+                    {hasSources && (
+                      <ChatS.SourceList>
+                        {item.sources.slice(0, 2).map((src, idx) => (
+                          <ChatS.SourceCard
+                            key={src.url ?? idx}
+                            onClick={e => {
+                              e.stopPropagation() // 카드 클릭해도 체크 토글 안 되게
+                              if (src.url) {
+                                window.open(
+                                  src.url,
+                                  '_blank',
+                                  'noopener,noreferrer',
+                                )
+                              }
+                            }}
+                          >
+                            {src.image_url && (
+                              <ChatS.SourceThumb
+                                src={src.image_url}
+                                alt={`뉴스 ${idx + 1}`}
+                              />
+                            )}
+                            <ChatS.SourceFooter>
+                              <ChatS.SourceDomain>
+                                {getDomain(src.url)}
+                              </ChatS.SourceDomain>
+                            </ChatS.SourceFooter>
+                          </ChatS.SourceCard>
+                        ))}
+                      </ChatS.SourceList>
+                    )}
                   </ChatBlock>
                 </Item>
               )

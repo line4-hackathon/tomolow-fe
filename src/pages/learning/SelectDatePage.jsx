@@ -73,7 +73,7 @@ export default function SelectDatePage() {
     const metaText =
       `${stockName}의 ${formatKoreanDate(startDate)}부터 ${formatKoreanDate(
         endDate,
-      )}까지 뉴스 정보를 바탕으로 답변드릴게요.\n\n` +
+      )}까지 뉴스 정보를 바탕으로 답변드릴게요.\n` +
       '궁금한 점을 물어봐주세요.'
 
     // API로 보낼 날짜
