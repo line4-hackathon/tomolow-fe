@@ -1,3 +1,5 @@
+// src/pages/learning/Chatbot.jsx (또는 해당 경로)
+
 import React, { useState, useEffect, useRef } from 'react'
 import * as S from './Chatbot.styled'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -37,14 +39,15 @@ const Chatbot = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // SelectDatePage에서 넘어온 자동 질문
+  // SelectDatePage에서 넘어온 자동 질문 + 안내 문구
   const autoQuestion = location.state?.autoQuestion
+  const autoMetaText = location.state?.autoMetaText
 
   const token = getAccessToken()
   const payload = token ? parseJwt(token) : null
-  const name = payload?.name || payload?.sub || '투모루우'
+  const nickname = payload?.nickname || payload?.sub || '투모루우'
 
-  // ✅ 메시지 id를 위한 카운터 (항상 유니크)
+  // 메시지 id를 위한 카운터 (항상 유니크)
   const msgIdRef = useRef(1)
   const nextId = () => {
     msgIdRef.current += 1
@@ -62,7 +65,7 @@ const Chatbot = () => {
       id: msgIdRef.current, // 1
       role: 'bot',
       text:
-        `안녕하세요! 저는 ‘${name}’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! ` +
+        `안녕하세요! 저는 ‘${nickname}’님이 부자가 될 때까지 함께 학습할 챗봇 투모입니다! ` +
         '본격적인 학습에 앞서 주식 하나를 가져와 공부를 시작해 볼까요?',
     },
   ])
@@ -109,7 +112,8 @@ const Chatbot = () => {
   }, [messages.length])
 
   // 2) 질문 보내기
-  const handleSend = async textFromChip => {
+  // metaTextFromOutside: SelectDatePage에서 온 경우에만 들어오는 안내 문구
+  const handleSend = async (textFromChip, metaTextFromOutside) => {
     const content = (textFromChip ?? trimmed).trim()
     if (!content || isThinking) return
     if (!API_BASE_URL) return
@@ -183,10 +187,20 @@ const Chatbot = () => {
       const answer = data.answer ?? '답변이 없습니다.'
       setLastAnswerKey(data.key ?? null)
 
-      setMessages(prev => [
-        ...prev,
-        { id: nextId(), role: 'bot', text: answer },
-      ])
+      // 🔹 metaTextFromOutside 가 있으면, 먼저 안내 문구(meta: true), 그 다음 실제 답변
+      setMessages(prev => {
+        const arr = [...prev]
+        if (metaTextFromOutside && metaTextFromOutside.trim()) {
+          arr.push({
+            id: nextId(),
+            role: 'bot',
+            text: metaTextFromOutside.trim(),
+            meta: true,
+          })
+        }
+        arr.push({ id: nextId(), role: 'bot', text: answer })
+        return arr
+      })
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.error('question error:', err)
@@ -317,11 +331,12 @@ const Chatbot = () => {
     if (autoQuestionSentRef.current) return
 
     autoQuestionSentRef.current = true
-    handleSend(autoQuestion)
+    // autoMetaText 를 두 번째 인자로 넣어
+    handleSend(autoQuestion, autoMetaText)
 
     // state 비워서 뒤로가기 등에서 재전송 안 되게
     navigate('/learning', { replace: true, state: {} })
-  }, [autoQuestion, roomLoaded, navigate])
+  }, [autoQuestion, autoMetaText, roomLoaded, navigate])
 
   return (
     <S.ChatbotWrapper>
@@ -329,12 +344,17 @@ const Chatbot = () => {
         <S.Messages>
           {messages.map(msg =>
             msg.role === 'bot' ? (
-              <S.BotBubble key={msg.id}>{msg.text}</S.BotBubble>
+              <S.BotBubble
+                key={msg.id}
+                className={msg.meta ? 'meta' : ''} 
+              >
+                {msg.text}
+              </S.BotBubble>
             ) : (
               <S.UserBubble key={msg.id}>{msg.text}</S.UserBubble>
             ),
           )}
-          {/* ✅ 항상 맨 아래에 있는 앵커 */}
+          {/* 항상 맨 아래에 있는 앵커 */}
           <div ref={bottomRef} />
         </S.Messages>
 
@@ -345,8 +365,8 @@ const Chatbot = () => {
               <S.Chip onClick={() => handleSend('이더리움의 주가 등락 요인')}>
                 이더리움의 주가 등락 요인
               </S.Chip>
-              <S.Chip onClick={() => handleSend('가상화폐와 주식의 차이가 뭐야')}>
-                가상화폐와 주식의 차이가 뭐야
+              <S.Chip onClick={() => navigate('/learning/holding')}>
+                자산 정보 가져와서 분석하기
               </S.Chip>
             </S.ChipsColumn>
           </S.SuggestionsSection>

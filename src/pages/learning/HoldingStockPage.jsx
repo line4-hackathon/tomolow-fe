@@ -3,35 +3,32 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import HoldingStock from '@/components/learning/HoldingStock'
-import SearchBar from '@/components/common/searchBar'
+import SearchBar from '@/components/learning/searchbar'
 import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
 import NothingHeart from '@/assets/icons/icon-heart-navy.svg?react'
 
-// 환경변수에서 서버 주소
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-// 로그인 시 저장된 accessToken 사용
 const getAccessToken = () => localStorage.getItem('accessToken')
-
 const getAuthHeader = () => {
   const token = getAccessToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 export default function HoldingStockPage() {
-  const [stocks, setStocks] = useState([])
+  const [stocks, setStocks] = useState([])     // 전체 보유 자산
+  const [query, setQuery] = useState('')       // 검색어 상태
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // 📌 보유 자산 불러오기
   useEffect(() => {
     const fetchHolding = async () => {
-      // 토큰이 없으면 바로 에러 처리하고 종료
       const token = getAccessToken()
       if (!token) {
         setError('로그인 후 이용 가능한 서비스입니다.')
         setLoading(false)
-        setStocks([])
         return
       }
 
@@ -44,44 +41,24 @@ export default function HoldingStockPage() {
           },
         })
 
-        const contentType = res.headers.get('content-type') || ''
-        if (!contentType.includes('application/json')) {
-          const text = await res.text()
-          console.error('holding 응답이 JSON 이 아닙니다:', text)
-          setError('서버에서 올바르지 않은 응답이 왔습니다.')
-          setStocks([])
-          return
-        }
-
         const json = await res.json()
         console.log('holding response:', json)
 
-        // 인증 만료/실패에 대한 처리
-        if (res.status === 401 || res.status === 403) {
-          setError('로그인이 만료되었어요. 다시 로그인 후 이용해 주세요.')
-          setStocks([])
-          return
-        }
-
         if (!res.ok || !json.success) {
-          setError(json.message || '보유 주식 정보를 불러오지 못했습니다.')
-          setStocks([])
+          setError(json.message || '보유 자산을 불러오지 못했습니다.')
           return
         }
 
-        // data: [{ symbol, name, imageUrl, price, changeRate, interested }, ... ]
         setStocks(json.data || [])
       } catch (err) {
         console.error('holding error:', err)
         setError('서버 통신 중 오류가 발생했습니다.')
-        setStocks([])
       } finally {
         setLoading(false)
       }
     }
 
     if (!API_BASE_URL) {
-      console.error('VITE_API_BASE_URL 이 설정되어 있지 않습니다.')
       setError('서버 주소 설정이 올바르지 않습니다.')
       setLoading(false)
       return
@@ -90,32 +67,46 @@ export default function HoldingStockPage() {
     fetchHolding()
   }, [])
 
-  const hasStock = stocks.length > 0
+  // 보유 자산 중에서 검색 필터링
+  const filteredStocks = stocks.filter(stock => {
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+
+    const name = (stock.name || '').toLowerCase()
+    const symbol = (stock.symbol || '').toLowerCase()
+
+    return name.includes(q) || symbol.includes(q)
+  })
 
   return (
     <Page>
       <Header title="학습" />
-      <Title>보유 중인 주식</Title>
       <Contents>
-        <SearchBar explain="원하는 자산을 검색하세요" />
+        {/* 🔍 검색어 입력 */}
+        <SearchBar
+          explain="보유중인 자산을 검색해보세요"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
 
+        {/* 상태별 렌더링 */}
         {loading ? (
           <Message>불러오는 중...</Message>
         ) : error ? (
           <Message>{error}</Message>
-        ) : hasStock ? (
+        ) : filteredStocks.length > 0 ? (
           <StockCardBox>
-            {stocks.map((stock, idx) => (
+            {filteredStocks.map((stock, idx) => (
               <React.Fragment key={stock.symbol ?? idx}>
                 <HoldingStock stock={stock} />
-                {idx !== stocks.length - 1 && <Line />}
+                {idx !== filteredStocks.length - 1 && <Line />}
               </React.Fragment>
             ))}
           </StockCardBox>
         ) : (
           <Nothing>
             <NothingHeart />
-            <p>보유 중인 주식이 없어요</p>
+            <p>검색 결과가 없어요</p>
           </Nothing>
         )}
       </Contents>
@@ -123,6 +114,8 @@ export default function HoldingStockPage() {
     </Page>
   )
 }
+
+/* ---------------- styled-components ---------------- */
 
 const Page = styled.div``
 
@@ -159,16 +152,6 @@ const Nothing = styled.div`
   color: var(--Neutral-300, #b0b0b0);
   text-align: center;
   font-size: 16px;
-`
-
-const Title = styled.h2`
-  color: var(--Neutral-900, #333);
-  font-family: Inter;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 28px; /* 140% */
-  padding: 32px 0 0 16px;
 `
 
 const Message = styled.p`

@@ -54,6 +54,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'search', element: <InvestSearchPage /> },
       { path: 'trading', element: <InvestTradingPage /> },
+      { path: 'trading/:market', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
       { path: 'correction', element: <InvestCorrectionPage /> },
     ],
@@ -88,15 +89,15 @@ const router = createBrowserRouter([
         element: <InvestCorrectionPage />,
       },
       {
-        path: 'transaction',
+        path: 'transaction/:groupId',
         element: <GroupTransactionPage />,
       },
       {
-        path: 'holdings',
+        path: 'holdings/:groupId',
         element: <GroupHoldingsPage />,
       },
       {
-        path: 'waiting',
+        path: 'waiting/:groupId',
         element: <GroupWaitingOrdersPage />,
       },
     ],
