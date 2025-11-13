@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import styled from 'styled-components'
 import {
   ComposedChart,
@@ -22,6 +22,9 @@ const ChartContainer = styled.div`
   border-radius: 16px;
   display: flex;
   flex-direction: column;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none; /* Firefox */
 `
 
 // ✅ 커스텀 캔들 shape
@@ -98,6 +101,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function CandleChart({ chartData, setStartDate = '', setEndDate = '' }) {
   const location = useLocation()
   const isLearning = location.pathname.startsWith('/learning')
+  const chartRef = useRef(null);
 
   // ✅ y축 도메인 계산
   const allPrices = chartData.flatMap((d) => [d.high, d.low])
@@ -141,10 +145,29 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
     }
   }
 
+    // ⭐️⭐️⭐️ 스크롤링 및 크기 유지 로직 ⭐️⭐️⭐️
+  const MIN_BAR_WIDTH = 15 // 캔들당 최소 너비 (px)
+  const VIEWPORT_WIDTH = 375 // ChartContainer의 고정된 너비
+    // 데이터 길이에 따른 최소 요구 너비 계산
+  const requiredWidth = chartData.length * MIN_BAR_WIDTH;
+  // 실제 차트 너비: 뷰포트보다 크면 요구 너비 사용, 작으면 뷰포트 너비 사용
+  const chartWidth = Math.max(VIEWPORT_WIDTH, requiredWidth);
+  // ⭐️⭐️⭐️ ⭐️⭐️⭐️ ⭐️⭐️⭐️ ⭐️⭐️⭐️ ⭐️⭐️⭐️
+    // ⭐️ 2. 렌더링 후 스크롤을 오른쪽 끝으로 이동 ⭐️
+  useEffect(() => {
+    if (chartRef.current) {
+      // scrollWidth: 스크롤 가능한 전체 내용의 너비
+      // scrollLeft를 최대값으로 설정하여 가장 오른쪽으로 스크롤합니다.
+      chartRef.current.scrollLeft = chartRef.current.scrollWidth;
+    }
+  }, [chartData, chartWidth]); // 데이터가 변경되거나 차트 너비가 변경될 때마다 실행
+
   return (
-    <ChartContainer>
-      <ResponsiveContainer width='100%' height='100%'>
+    <ChartContainer ref={chartRef}>
+      <div style={{ width: chartWidth, height: '100%', flexShrink: 0 }}>
         <ComposedChart
+          width={chartWidth} // 동적으로 계산된 너비 적용
+          height={400}     // ChartContainer와 동일한 높이 유지
           data={chartData}
           margin={{ top: 20, bottom: 20, left: 20 }}
           barCategoryGap='0%'
@@ -171,7 +194,7 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
           {/* ✅ 캔들 */}
           <Bar
             dataKey='close'
-            barSize={20}
+            barSize={MIN_BAR_WIDTH * 0.8}
             shape={(props) => <CandleShape {...props} yScale={yScale} />}
             isAnimationActive={false}
             yAxisId={0} // 가격 축 사용
@@ -181,7 +204,7 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
           {/* ✅ 거래량 바 (하단) */}
           <Bar
             dataKey='volume'
-            barSize={20}
+            barSize={MIN_BAR_WIDTH * 0.8}
             fill='#d0d0d0'
             opacity={0.5}
             shape={(props) => {
@@ -200,7 +223,7 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
             yAxisId={1}
           />
         </ComposedChart>
-      </ResponsiveContainer>
+      </div>
     </ChartContainer>
   )
 }

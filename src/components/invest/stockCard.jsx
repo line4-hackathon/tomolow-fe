@@ -13,12 +13,16 @@ export default function StockCard({ data }) {
   const { stockData, setStockData } = useStockStore()
   const type=useType();
   let textColor = ''
+  let changeRate
   if (data.changeRate > 0) {
-    textColor = '#0084FE'
+    textColor = '#ff2e4e'
+    changeRate=`+${(data.changeRate * 100).toFixed(2)}`
   } else if (data.changeRate == 0) {
     textColor = '#11111'
+    changeRate=0
   } else {
-    textColor = '#ff2e4e'
+    textColor = '#0084FE'
+    changeRate=(data.changeRate * 100).toFixed(2)
   }
 
   const interest = async () => {
@@ -49,7 +53,7 @@ export default function StockCard({ data }) {
           <Number>{data.symbol}</Number>
           {data.price ? (
             <Price $color={textColor}>
-              {data.price.toLocaleString()}원({(data.changeRate * 100).toFixed(2)}%)
+              {data.price.toLocaleString()}원({changeRate}%)
             </Price>
           ) : (
             ''

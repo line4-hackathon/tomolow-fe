@@ -3,10 +3,9 @@ import NewsCard from './NewsCard'
 import RobotIcon from '@/assets/icons/icon-robot.svg?react'
 
 export default function EctAI({data}) {
-  const isAI = 0
   return (
     <Box>
-      {isAI ? (
+      {data ? (
         <>
           <AIBox>
             <AIMessage>
