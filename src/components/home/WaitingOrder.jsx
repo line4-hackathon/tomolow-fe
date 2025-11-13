@@ -282,6 +282,37 @@ export default function WaitingOrder() {
 }
 
 // 스타일은 그대로
+
+const clickMotion = css`
+  position: relative;
+  overflow: hidden; /* scale될 때 가상요소 삐져나오는 거 방지 */
+
+  /* 변화 부드럽게 */
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
+    pointer-events: none;               /* 클릭 방해 X */
+    border-radius: inherit;             /* 버튼 모서리 따라감 */
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;     /* 살짝 줄어든 느낌 */
+    transform: scale(0.98); /* 꾹 눌린 느낌 */
+
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2); /* 어두운 오버레이 */
+    }
+  }
+`
+
 const Section = styled.section`
   padding: 0px 16px 32px;
   background-color: #f6f6f6;
@@ -429,32 +460,3 @@ const Toast = styled.div`
   z-index: 1000;
 `
 
-const clickMotion = css`
-  position: relative;
-  overflow: hidden; /* scale될 때 가상요소 삐져나오는 거 방지 */
-
-  /* 변화 부드럽게 */
-  transition:
-    background-color 0.1s ease,
-    transform 0.1s ease,
-    font-size 0.1s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
-    pointer-events: none;               /* 클릭 방해 X */
-    border-radius: inherit;             /* 버튼 모서리 따라감 */
-    transition: background-color 0.1s ease;
-  }
-
-  &:active {
-    font-size: 0.95em;     /* 살짝 줄어든 느낌 */
-    transform: scale(0.98); /* 꾹 눌린 느낌 */
-
-    &::before {
-      background-color: rgba(0, 0, 0, 0.2); /* 어두운 오버레이 */
-    }
-  }
-`
