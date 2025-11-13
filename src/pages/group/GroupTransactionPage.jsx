@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { useParams } from 'react-router-dom'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
@@ -7,7 +8,6 @@ import DayPicker from '@/components/hometransaction/DayPicker'
 import InvestSummaryCard from '@/components/hometransaction/InvestSummaryCard'
 import TransactionList from '@/components/hometransaction/TransactionList'
 import MenuBar from '@/components/common/MenuBar'
-import { dummyData } from '@/components/hometransaction/dummyData' //더미데이터
 
 const formatting = (n) => String(n).padStart(2, '0')
 const getTodayDate = () => {
@@ -16,26 +16,72 @@ const getTodayDate = () => {
 }
 
 const GroupTransactionPage = () => {
+  // 날짜 범위
   const [range, setRange] = useState({
     start: '2025-01-01',
     end: getTodayDate(),
   })
+  // 요약 정보
   const [summary, setSummary] = useState({})
+  // 거래내역 리스트
   const [transactions, setTransactions] = useState([])
   const { groupId } = useParams()
 
-  useEffect(() => {
-    const found = dummyData.find(
-      (d) => new Date(d.start) <= new Date(range.end) && new Date(d.end) >= new Date(range.start),
-    )
+  // 연동
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const token = localStorage.getItem('accessToken')
 
-    if (found) {
-      setSummary(found.summary)
-      setTransactions(found.transactions)
-    } else {
-      setSummary({ profit: 0, profitRate: 0, totalBuy: 0, totalSell: 0 })
-      setTransactions([])
+  const getTransactions = async () => {
+    try {
+      let url = ''
+      if (range.start === '2025-01-01' && range.end === getTodayDate()) {
+        url = `${apiUrl}/api/group/${groupId}/transactions/history/default`
+      } else {
+        url = `${apiUrl}/api/group/${groupId}/transactions/history?startDate=${range.start}&endDate=${range.end}`
+      }
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (!res.data.success) return
+
+      const data = res.data.data
+
+      // 받은 데이터 포맷팅
+      const formattedTransactions = data.days.flatMap((day) =>
+        day.items.map((item) => {
+          // 일별 거래내역
+          const traded = new Date(item.tradedAt)
+          const koreaTime = new Date(traded.getTime() + 9 * 60 * 60 * 1000)
+
+          return {
+            date: day.date,
+            time: koreaTime.toTimeString().slice(0, 5), //HH:MM 형태
+            stock: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            amount: item.amount,
+            type: item.tradeType === 'BUY' ? '매수' : '매도',
+          }
+        }),
+      )
+
+      setSummary({
+        profit: data.periodPnlAmount,
+        profitRate: data.periodPnlRate,
+        totalBuy: data.totalBuyAmount,
+        totalSell: data.totalSellAmount,
+      })
+
+      setTransactions(formattedTransactions)
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  useEffect(() => {
+    getTransactions()
   }, [range])
 
   return (

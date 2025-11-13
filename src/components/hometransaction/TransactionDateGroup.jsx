@@ -13,10 +13,10 @@ function TransactionDateGroup({ date, list }) {
               <Time>{item.time}</Time>
               <Column>
                 <BigText>{item.stock}</BigText>
-                <Row>
+                <SmallRow>
                   <SmallText>{item.price.toLocaleString()}원</SmallText>
                   <SmallText>{item.quantity}주</SmallText>
-                </Row>
+                </SmallRow>
               </Column>
             </Left>
             <Row>
@@ -91,6 +91,14 @@ const BigText = styled.p`
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
+`
+
+const SmallRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 8px;
+  max-width: 100px;
 `
 
 const Row = styled.div`
