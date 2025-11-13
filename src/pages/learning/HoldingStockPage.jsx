@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import HoldingStock from '@/components/learning/HoldingStock'
 import SearchBar from '@/components/learning/searchbar'
-import Header from '@/components/common/Header'
+import Header from '@/components/common/FixedHeader'
 import MenuBar from '@/components/common/MenuBar'
 import NothingHeart from '@/assets/icons/icon-heart-navy.svg?react'
 
@@ -80,7 +80,7 @@ export default function HoldingStockPage() {
 
   return (
     <Page>
-      <Header title="학습" />
+      <Header title="학습" showIcon={true} />
       <Contents>
         <SearchBar
           explain="보유중인 자산을 검색해보세요"
@@ -114,7 +114,6 @@ export default function HoldingStockPage() {
   )
 }
 
-/* ---------------- styled-components ---------------- */
 
 const Page = styled.div``
 
@@ -124,7 +123,7 @@ const Contents = styled.div`
   height: 600px;
   gap: 32px;
   align-items: center;
-  margin-top: 32px;
+  margin-top: 88px;
 `
 
 const StockCardBox = styled.div`

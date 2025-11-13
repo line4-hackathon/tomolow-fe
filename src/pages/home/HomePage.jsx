@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import styled from 'styled-components'
-import Header from '@/components/common/Header.jsx'
+import Header from '@/components/common/FixedHeader'
 import HomeHeader from '@/components/home/HomeHeader.jsx'
 import MyAssets from '@/components/home/MyAssets.jsx'
 import HoldInterest from '@/components/home/HoldInterest.jsx'
@@ -113,7 +113,7 @@ function HomePage() {
   return (
     <>
       <Container>
-        <Header title='홈' />
+        <Header title='홈' showIcon={false} />
         <HomeHeader selectedTab={selectedTab} onChangeTab={setSelectedTab} />{' '}
         {/* 상단 헤더 + 탭 + 배너 */}
         {selectedTab === 'asset' ? (
@@ -149,6 +149,7 @@ const Container = styled.div`
   background-color: #f9f9fb;
   overflow-y: auto;
   padding-bottom: 64px; /* 하단바 높이만큼 여백 추가 */
+  
 `
 const TopContainer = styled.div`
   padding: 0 16px;

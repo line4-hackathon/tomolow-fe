@@ -34,6 +34,7 @@ export const BotBubble = styled.div`
   /* 불러오기 안내문 같은 meta 텍스트는 파란색 */
   &.meta {
     color: #1570ef;
+    white-space: pre-line;
   }
 `
 
