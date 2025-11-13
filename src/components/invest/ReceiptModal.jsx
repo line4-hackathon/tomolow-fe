@@ -9,7 +9,7 @@ import useStockStore from '@/stores/stockStores'
 import { useType } from '@/contexts/TypeContext'
 import useGroupStore from '@/stores/groupStores'
 
-export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
+export default function ReceiptModal({ setIsModal, isPurchase, count, price,marketPrice }) {
   const navigate = useNavigate()
   const { stockData, setStockData } = useStockStore()
   const type = useType()
@@ -18,12 +18,18 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price }) {
   const purchaseOrsell = (p) => {
     let purchaseUrl
     let sellUrl
-    if (type == 'group') {
-      purchaseUrl = `/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}`
-      sellUrl = `/api/group/${groupData.groupId}/sell/limit/${stockData.marketId}`
+    let market
+    if(price==marketPrice){
+      market="market"
     } else {
-      purchaseUrl = `/api/buy/limit/${stockData.marketId}`
-      sellUrl = `/api/sell/limit/${stockData.marketId}`
+      market="limit"
+    }
+    if (type == 'group') {
+      purchaseUrl = `/api/group/${groupData.groupId}/buy/${market}/${stockData.marketId}`
+      sellUrl = `/api/group/${groupData.groupId}/sell/${market}/${stockData.marketId}`
+    } else {
+      purchaseUrl = `/api/buy/${market}/${stockData.marketId}`
+      sellUrl = `/api/sell/${market}/${stockData.marketId}`
     }
     if (p) {
       const purchase = async () => {

@@ -15,7 +15,7 @@ export default function OrderCard({ data }) {
       {data.imageUrl ? <img src={data.imageUrl}/>:  <Logo />}
       <InfoBox>
         <Amount>{data.quantity}주 {data.tradeType==="BUY" ? "매수":"매도"}</Amount>
-        <Price>주당 {data.limitPrice.toLocaleString()}원</Price>
+        <Price>주당 {data.price.toLocaleString()}원</Price>
       </InfoBox>
       <GrayButton name='취소' width='47px' height='47px' onClick={()=>setIsModal(true)}/>
       <NavyButton name='정정' width='47px' height='47px' onClick={()=>navigate("/invest/correction",{state:{orderId:data.orderId}})}/>

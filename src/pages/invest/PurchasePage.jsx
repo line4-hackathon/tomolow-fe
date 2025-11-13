@@ -29,6 +29,8 @@ export default function InvestPurchasePage() {
   const [myCash, setMyCash] = useState(0)
   const [myStockCount, setStockCount] = useState(0)
   const [toastVisible, setToastVisible] = useState(false)
+  const [marketPrice,setMarketPrice]=useState(0);
+  let toastMessage="최대 매도 가능 수량 초과입니다"
   
   
   const purchase = async () => {
@@ -42,6 +44,7 @@ export default function InvestPurchasePage() {
             isPurchase={true}
             count={count}
             price={price}
+            marketPrice={marketPrice}
           />,
         )
       }
@@ -50,6 +53,7 @@ export default function InvestPurchasePage() {
   const sell = () => {
     if (price && count) {
       if (count > myStockCount) {
+        toastMessage=`최대 판매가능 수량은 ${myStockCount}주입니다`
         setToastVisible(true)
       } else {
         setIsModal(
@@ -81,18 +85,18 @@ export default function InvestPurchasePage() {
       let purchaseUrl
       let sellUrl
     if(type=="group"){
-      purchaseUrl=`/api/group/${groupData.groupId}/buy/limit/${stockData.marketId}?price=1000`
+      purchaseUrl=`/api/group/${groupData.groupId}/buy/market/${stockData.marketId}`
       sellUrl=`/api/group/${groupData.groupId}/sell/${stockData.marketId}`
     } else{
-      purchaseUrl=`/api/buy/limit/${stockData.marketId}?price=1000`
+      purchaseUrl=`/api/buy/market/${stockData.marketId}`
       sellUrl=`/api/sell/${stockData.marketId}`
     }
     if (state.purchase) {
       const purchaseGet = async () => {
         try{
           const res = await APIService.private.get(purchaseUrl)
-
         setMyCash(res.data.userCashBalance)
+        setMarketPrice(res.data.marketPrice)
         }catch(error){
           console.log("현금 조회 실패")
         }
@@ -102,8 +106,8 @@ export default function InvestPurchasePage() {
       const sellGet = async () => {
         try{
           const res = await APIService.private.get(sellUrl)
-
         setStockCount(res.data.maxQuantity)
+        setMarketPrice(res.data.marketPrice)
         }catch(error){
           console.log("수량 조회 실패")
         }
@@ -127,7 +131,7 @@ export default function InvestPurchasePage() {
       </PurchaseBox>
       <Numpad
         isFocus={isFocus}
-        currentValue={isFocus ? price : count}
+        currentValue={isFocus ? String(price) : String(count)}
         setPrice={setPrice}
         setCount={setCount}
         price={price}
@@ -144,9 +148,8 @@ export default function InvestPurchasePage() {
       <AnimatePresence>
         {toastVisible && (
           <Toast
-            message='최대 판매가능 수량은 34주입니다'
+            message={toastMessage}
             onClose={handleCloseToast}
-            // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
           />
         )}
       </AnimatePresence>

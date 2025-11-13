@@ -15,6 +15,8 @@ import { Client } from '@stomp/stompjs'
 import { DateTypes } from './selectType'
 import useSelect from '@/hooks/select'
 import useStockStore from '@/stores/stockStores'
+import { useType } from '@/contexts/TypeContext'
+import useGroupStore from '@/stores/groupStores'
 
 export default function InvestTradingPage() {
   const navigate = useNavigate()
@@ -30,6 +32,9 @@ export default function InvestTradingPage() {
   const [etcData, setEtcData] = useState([])
   const [orderData, setOrderData] = useState([])
   const { stockData, setStockData } = useStockStore()
+  const [isHold,setIsHold]=useState(false);
+  const type=useType();
+  const {groupData}=useGroupStore();
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -133,6 +138,7 @@ export default function InvestTradingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 의존성 배열이 빈 배열이므로 마운트 시 한 번만 실행
 
+  //주식 데이터 얻기
   useEffect(() => {
     if (!stockData.symbol) {
       console.log('심볼 없음')
@@ -164,15 +170,29 @@ export default function InvestTradingPage() {
         console.log('차트 조회 실패')
       }
     }
+    const holdingDataGet=async ()=>{
+      try{
+        const res=await APIService.private.get(`/api/market/${stockData.marketId}/holding`)
+        setIsHold(res.data.holding)
+      } catch(error){
+        console.log("보유 여부 조회 실패")
+      }
+    }
     chartDataGet()
-  }, [selectedDate, stockData.symbol])
+    holdingDataGet()
+  }, [selectedDate, stockData.symbol,stockData.marketId])
 
+  //기타 데이터 얻기
   useEffect(() => {
     const etcGet = async () => {
       let apiUrl
       switch (selectedEtc) {
         case 'ORDER':
-          apiUrl = '/api/orders/pending/list'
+          if(type=="group"){
+            apiUrl=`/api/market/${stockData.marketId}/pending/group/${groupData.groupId}`
+          } else{
+            apiUrl = `/api/market/${stockData.marketId}/pending`
+          }
           break
         case 'NEWS':
           apiUrl = `/api/market/${stockData.marketId}/news`
@@ -222,7 +242,7 @@ export default function InvestTradingPage() {
         />
       </Contents>
       <Bar>
-        {orderData && orderData.length > 0 ? (
+        {isHold? (
           <>
             <BlueButton width='161px' height='56px' onClick={() => isPurchase(false)} />
             <RedButton width='161px' height='56px' onClick={() => isPurchase(true)} />

@@ -53,10 +53,32 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   const isUp = d.close > d.open
   const color = isUp ? '#2f6ef8' : '#e74c3c'
+  const date = new Date(d.startTime)
+
+  // 'ko-KR' 포맷을 사용하여 배열로 각 구성 요소를 추출
+  const parts = new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'Asia/Seoul',
+  }).formatToParts(date)
+
+  // 추출된 구성 요소 배열을 원하는 형식으로 조합
+  let year = ''
+  let month = ''
+  let day = ''
+
+  parts.forEach((part) => {
+    if (part.type === 'year') year = part.value
+    if (part.type === 'month') month = part.value
+    if (part.type === 'day') day = part.value
+  })
+
+  const finalDate = `${year}년 ${month}월 ${day}일`
 
   return (
     <ToolTip>
-      <a>{d.startTime}</a>
+      <a>{finalDate}</a>
       <a>
         종가 <span style={{ color }}> {d.close}</span>
       </a>
@@ -73,9 +95,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-export default function CandleChart({ chartData,setStartDate="",setEndDate="" }) {
-  const location=useLocation();
-  const isLearning=location.pathname.startsWith('/learning')
+export default function CandleChart({ chartData, setStartDate = '', setEndDate = '' }) {
+  const location = useLocation()
+  const isLearning = location.pathname.startsWith('/learning')
 
   // ✅ y축 도메인 계산
   const allPrices = chartData.flatMap((d) => [d.high, d.low])
@@ -112,8 +134,8 @@ export default function CandleChart({ chartData,setStartDate="",setEndDate="" })
   // 2. 컴포넌트 내에서 사용
   const fontSize = getFontSize(maxY)
 
-  const candleClick=(data)=>{
-    if(isLearning){
+  const candleClick = (data) => {
+    if (isLearning) {
       setStartDate(data.startTime)
       setEndDate(data.endTime)
     }
