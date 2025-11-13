@@ -1,4 +1,4 @@
-window.global = window;
+window.global = window
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
@@ -16,7 +16,11 @@ const getAuthHeader = () => {
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
 const parseJwt = (token) => {
-  try { return JSON.parse(atob(token.split('.')[1])) } catch { return null }
+  try {
+    return JSON.parse(atob(token.split('.')[1]))
+  } catch {
+    return null
+  }
 }
 
 function toSockJsUrl(base) {
@@ -24,7 +28,7 @@ function toSockJsUrl(base) {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) u.pathname = u.pathname.replace(/\/ws$/, '/ws-sockjs')
     if (u.protocol === 'wss:') u.protocol = 'https:'
-    if (u.protocol === 'ws:')  u.protocol = 'http:'
+    if (u.protocol === 'ws:') u.protocol = 'http:'
     return u.toString()
   } catch {
     return 'https://api.tomolow.store/ws-sockjs'
@@ -34,8 +38,8 @@ function toSockJsUrl(base) {
 const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
 const pct = (n) => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
 
-export default function MyAssets({ mode = 'personal', title = '내 자산 현황' }) {
-  const [loading, setLoading] = useState(true)
+export default function MyAssets({ mode = 'personal', title = '내 자산 현황', assetData }) {
+  const [loading, setLoading] = useState(mode !== 'group')
   const [error, setError] = useState('')
 
   const [portfolio, setPortfolio] = useState({
@@ -48,9 +52,28 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
   const [items, setItems] = useState([])
 
   useEffect(() => {
+    if (mode === 'group') {
+      setPortfolio({
+        totalInvestment: assetData.investmentBalance,
+        cashBalance: assetData.cashBalance,
+        totalCurrentValue: assetData.totalBalance,
+        totalPnlAmount: assetData.pnL,
+        totalPnlRate: assetData.pnLRate,
+      })
+      setLoading(false)
+      return
+    }
     const load = async () => {
-      if (!API_BASE_URL) { setError('서버 주소가 설정되어 있지 않습니다.'); setLoading(false); return }
-      if (!getAccessToken()) { setError('로그인 후 이용 가능한 서비스입니다.'); setLoading(false); return }
+      if (!API_BASE_URL) {
+        setError('서버 주소가 설정되어 있지 않습니다.')
+        setLoading(false)
+        return
+      }
+      if (!getAccessToken()) {
+        setError('로그인 후 이용 가능한 서비스입니다.')
+        setLoading(false)
+        return
+      }
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/home/assets/my`, {
@@ -85,8 +108,8 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
   }, [])
 
   // 2) 실시간 구독 (STOMP over SockJS)
-  const stompRef = useRef/** @type {React.MutableRefObject<Client|null>} */(null)
-  const symbols = useMemo(() => items.map(i => i.symbol).filter(Boolean), [items])
+  const stompRef = useRef(/** @type {React.MutableRefObject<Client|null>} */ null)
+  const symbols = useMemo(() => items.map((i) => i.symbol).filter(Boolean), [items])
   const userId = useMemo(() => {
     const t = getAccessToken()
     const jwt = t ? parseJwt(t) : null
@@ -112,18 +135,19 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
         client.subscribe(`/topic/ticker/${sym}`, (frame) => {
           try {
             const msg = JSON.parse(frame.body || '{}')
-            setItems(prev =>
-              prev.map(it =>
+            setItems((prev) =>
+              prev.map((it) =>
                 it.symbol === msg.symbol
                   ? {
                       ...it,
-                      currentPrice: typeof msg.currentPrice === 'number' ? msg.currentPrice : it.currentPrice,
-                      pnlAmount:    typeof msg.pnlAmount    === 'number' ? msg.pnlAmount    : it.pnlAmount,
-                      pnlRate:      typeof msg.pnlRate      === 'number' ? msg.pnlRate      : it.pnlRate,
+                      currentPrice:
+                        typeof msg.currentPrice === 'number' ? msg.currentPrice : it.currentPrice,
+                      pnlAmount: typeof msg.pnlAmount === 'number' ? msg.pnlAmount : it.pnlAmount,
+                      pnlRate: typeof msg.pnlRate === 'number' ? msg.pnlRate : it.pnlRate,
                       imageUrl: msg.imageUrl ?? it.imageUrl,
                     }
-                  : it
-              )
+                  : it,
+              ),
             )
           } catch {}
         })
@@ -133,11 +157,16 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
         client.subscribe(`/topic/portfolio/${userId}`, (frame) => {
           try {
             const msg = JSON.parse(frame.body || '{}')
-            setPortfolio(prev => ({
+            setPortfolio((prev) => ({
               ...prev,
-              totalPnlAmount:    typeof msg.totalPnlAmount    === 'number' ? msg.totalPnlAmount    : prev.totalPnlAmount,
-              totalPnlRate:      typeof msg.totalPnlRate      === 'number' ? msg.totalPnlRate      : prev.totalPnlRate,
-              totalCurrentValue: typeof msg.totalCurrentValue === 'number' ? msg.totalCurrentValue : prev.totalCurrentValue,
+              totalPnlAmount:
+                typeof msg.totalPnlAmount === 'number' ? msg.totalPnlAmount : prev.totalPnlAmount,
+              totalPnlRate:
+                typeof msg.totalPnlRate === 'number' ? msg.totalPnlRate : prev.totalPnlRate,
+              totalCurrentValue:
+                typeof msg.totalCurrentValue === 'number'
+                  ? msg.totalCurrentValue
+                  : prev.totalCurrentValue,
             }))
           } catch {}
         })
@@ -148,16 +177,20 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
     client.onWebSocketError = () => {}
     client.activate()
 
-    return () => { try { client.deactivate() } catch {} }
+    return () => {
+      try {
+        client.deactivate()
+      } catch {}
+    }
   }, [symbols.join('|'), userId])
 
   // 파생값
   const investAmount = portfolio.totalInvestment
-  const cashAmount   = portfolio.cashBalance
-  const totalAmount  = investAmount + cashAmount
+  const cashAmount = portfolio.cashBalance
+  const totalAmount = investAmount + cashAmount
 
   const profitAmount = portfolio.totalPnlAmount
-  const profitRate   = portfolio.totalPnlRate
+  const profitRate = portfolio.totalPnlRate
   const profitPositive = profitAmount >= 0
   const profitText = `${profitPositive ? '+' : ''}${fmt(profitAmount)}원(${profitPositive ? '+' : ''}${pct(profitRate)}%)`
 
@@ -182,7 +215,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
           <LegendRow>
             <LegendTop>
               <LegendItem>
-                <LegendDot $color="#4880AF" />
+                <LegendDot $color='#4880AF' />
                 <LegendText>투자</LegendText>
               </LegendItem>
               <LegendValue>{fmt(investAmount)}원</LegendValue>
@@ -190,7 +223,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
             <LegendBottom>
               <LegendItem>
-                <LegendDot $color="#E8EEF6" />
+                <LegendDot $color='#E8EEF6' />
                 <LegendText>현금</LegendText>
               </LegendItem>
               <LegendValue>{fmt(cashAmount)}원</LegendValue>
