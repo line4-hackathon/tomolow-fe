@@ -149,7 +149,6 @@ const Container = styled.div`
   background-color: #f9f9fb;
   overflow-y: auto;
   padding-bottom: 64px; /* 하단바 높이만큼 여백 추가 */
-  
 `
 const TopContainer = styled.div`
   padding: 0 16px;
