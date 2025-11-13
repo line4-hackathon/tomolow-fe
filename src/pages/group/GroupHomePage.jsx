@@ -77,7 +77,17 @@ const GroupHomePage = () => {
             <>
               <Space></Space>
               {/* 그룹 내 자산 현황 */}
-              <MyAssets mode='group' title='그룹의 내 자산 현황' />
+              <MyAssets
+                mode='group'
+                title='그룹의 내 자산 현황'
+                assetData={{
+                  totalBalance: groupInfo.totalBalance,
+                  cashBalance: groupInfo.cashBalance,
+                  investmentBalance: groupInfo.investmentBalance,
+                  pnL: groupInfo.pnL,
+                  pnLRate: groupInfo.pnLRate,
+                }}
+              />
               {/* 메뉴 버튼 */}
               <GroupMenu />
               {/* 랭킹 확인 */}
