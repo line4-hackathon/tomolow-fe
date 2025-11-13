@@ -29,6 +29,7 @@ export default function InvestPurchasePage() {
   const [myCash, setMyCash] = useState(0)
   const [myStockCount, setStockCount] = useState(0)
   const [toastVisible, setToastVisible] = useState(false)
+  let toastMessage="최대 매도 가능 수량 초과입니다"
   
   
   const purchase = async () => {
@@ -50,6 +51,7 @@ export default function InvestPurchasePage() {
   const sell = () => {
     if (price && count) {
       if (count > myStockCount) {
+        toastMessage=`최대 판매가능 수량은 ${myStockCount}주입니다`
         setToastVisible(true)
       } else {
         setIsModal(
@@ -144,9 +146,8 @@ export default function InvestPurchasePage() {
       <AnimatePresence>
         {toastVisible && (
           <Toast
-            message='최대 판매가능 수량은 34주입니다'
+            message={toastMessage}
             onClose={handleCloseToast}
-            // duration을 props로 전달할 수 있으나, Toast.jsx 내부에서 기본값 2500ms를 사용합니다.
           />
         )}
       </AnimatePresence>
