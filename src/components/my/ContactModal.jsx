@@ -27,4 +27,32 @@ const Button = styled.button`
   border: none;
   background: var(--Primary-500, #4880af);
   cursor: pointer;
+
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;
+
+    transform: scale(0.98);
+
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 `
