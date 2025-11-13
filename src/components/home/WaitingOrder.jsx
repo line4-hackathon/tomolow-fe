@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate, useLocation } from 'react-router-dom'
 import useStockStore from '@/stores/stockStores'
+import { css } from 'styled-components'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const LIST_URL = `${API_BASE_URL}/api/orders/pending/list`   // GET
@@ -365,6 +366,7 @@ const BaseButton = styled.button`
   border: none;
   cursor: pointer;
   border-radius: var(--Radius-S, 8px);
+  ${clickMotion};
 `
 const CancelButton = styled(BaseButton)`
   color: #6d6d6d;
@@ -425,4 +427,34 @@ const Toast = styled.div`
   font-size: 14px;
   color: #333;
   z-index: 1000;
+`
+
+const clickMotion = css`
+  position: relative;
+  overflow: hidden; /* scale될 때 가상요소 삐져나오는 거 방지 */
+
+  /* 변화 부드럽게 */
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
+    pointer-events: none;               /* 클릭 방해 X */
+    border-radius: inherit;             /* 버튼 모서리 따라감 */
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;     /* 살짝 줄어든 느낌 */
+    transform: scale(0.98); /* 꾹 눌린 느낌 */
+
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2); /* 어두운 오버레이 */
+    }
+  }
 `

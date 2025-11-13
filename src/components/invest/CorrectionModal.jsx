@@ -3,34 +3,47 @@ import GrayButton from '../common/GrayButton'
 import BlackButton from './BlackButton'
 import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
+import { useType } from '@/contexts/TypeContext'
 
-export default function CorrectionModal({setIsModal,price,orderId}) {
-      const navigate = useNavigate()
+export default function CorrectionModal({ setIsModal, price, orderId }) {
+  const navigate = useNavigate()
+  const type=useType();
 
-  const correction =async () => {
-    try{
-      const res=await APIService.private.put(`/api/orders/pending`,{orderId: orderId, price: price})
-      navigate('/invest/trading', {
-              state: {
-                toastMessage: '주문 정정이 완료됐어요',
-              },
-            })
-    }catch(error){
-      console.log("주문 정정 실패");
+  const correction = async () => {
+    try {
+      const res = await APIService.private.put(`/api/orders/pending`, {
+        orderId: orderId,
+        price: parseInt(price),
+      })
+      if (type == 'group') {
+        navigate('/group/invest/trading', {
+        state: {
+          toastMessage: '주문 정정이 완료됐어요',
+        },
+      })
+      } else {
+        navigate('/invest/trading', {
+        state: {
+          toastMessage: '주문 정정이 완료됐어요',
+        },
+      })
+      }
+    } catch (error) {
+      console.log('주문 정정 실패')
     }
-      
   }
 
   return (
-  <BackGround>
-    <Modal>
+    <BackGround>
+      <Modal>
         <a>주문을 정정하시겠어요?</a>
         <ButtonBox>
-            <GrayButton name="닫기" width="120px" height="40px" onClick={()=>setIsModal(false)}/>
-            <BlackButton name="정정하기" width="120px" height="40px" onClick={()=>correction()}/>
+          <GrayButton name='닫기' width='120px' height='40px' onClick={() => setIsModal(false)} />
+          <BlackButton name='정정하기' width='120px' height='40px' onClick={() => correction()} />
         </ButtonBox>
-    </Modal>
-  </BackGround>)
+      </Modal>
+    </BackGround>
+  )
 }
 
 const BackGround = styled.div`
@@ -54,10 +67,10 @@ const Modal = styled.div`
   height: 136px;
   gap: var(--Spacing-XL, 24px);
   border-radius: var(--Radius-M, 12px);
-background: var(--Neutral-0, #FFF);
+  background: var(--Neutral-0, #fff);
 
-/* Bottom */
-box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  /* Bottom */
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 
   color: var(--Neutral-900, #333);
   text-align: center;
