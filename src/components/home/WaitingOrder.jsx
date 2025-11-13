@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate, useLocation } from 'react-router-dom'
+import useStockStore from '@/stores/stockStores'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const LIST_URL   = `${API_BASE_URL}/api/orders/pending/list`   // GET
@@ -12,6 +13,7 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
+
 const safeJson = async (res) => {
   const text = await res.text()
   try { return text ? JSON.parse(text) : null } catch { return null }
@@ -21,6 +23,9 @@ export default function WaitingOrder() {
   const navigate = useNavigate()
   const location = useLocation()
   const isGroupRoute = location.pathname.startsWith('/group')
+
+  // 트레이딩/정정 페이지에서 쓰는 전역 종목 상태
+  const { setStockData } = useStockStore()
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,15 +43,24 @@ export default function WaitingOrder() {
   }, [toast])
 
   const loadList = async () => {
-    if (!API_BASE_URL) { setError('서버 주소가 설정되어 있지 않습니다.'); setLoading(false); return }
-    if (!getAccessToken()) { setError('로그인 후 이용 가능한 서비스입니다.'); setLoading(false); return }
+    if (!API_BASE_URL) {
+      setError('서버 주소가 설정되어 있지 않습니다.')
+      setLoading(false)
+      return
+    }
+    if (!getAccessToken()) {
+      setError('로그인 후 이용 가능한 서비스입니다.')
+      setLoading(false)
+      return
+    }
 
     try {
       const res = await fetch(LIST_URL, {
         method: 'GET',
-        headers: { 'Accept': 'application/json', ...getAuthHeader() },
+        headers: { Accept: 'application/json', ...getAuthHeader() },
       })
       const json = await safeJson(res)
+
       if (!res.ok || !json?.success) {
         setError(json?.message || '대기주문을 불러오지 못했습니다.')
         setOrders([])
@@ -58,11 +72,11 @@ export default function WaitingOrder() {
         id: it.orderId || String(i),
         orderId: it.orderId || String(i),
         name: it.name || it.symbol || '종목',
-        symbol: it.symbol,                    
-        marketId: it.marketId || it.symbol,   
+        symbol: it.symbol,
+        marketId: it.marketId || it.symbol,
         quantity: it.quantity ?? 0,
         limitPrice: it.limitPrice ?? 0,
-        tradeType: it.tradeType,              // 'BUY' | 'SELL'
+        tradeType: it.tradeType,                    // 'BUY' | 'SELL'
         typeLabel: it.tradeType === 'SELL' ? '매도' : '매수',
         imageUrl: it.imageUrl || null,
       }))
@@ -77,7 +91,9 @@ export default function WaitingOrder() {
     }
   }
 
-  useEffect(() => { loadList() }, [])
+  useEffect(() => {
+    loadList()
+  }, [])
 
   const doCancel = async () => {
     if (!confirmId) return
@@ -88,6 +104,7 @@ export default function WaitingOrder() {
         body: JSON.stringify({ orderId: confirmId }),
       })
       const json = await safeJson(res)
+
       if (!res.ok || !json?.success) {
         setToast({ open: true, msg: json?.message || '주문 취소에 실패했습니다.' })
       } else {
@@ -102,39 +119,70 @@ export default function WaitingOrder() {
     }
   }
 
-  const goChart = (symbol) => {
-    if (!symbol) return
+  // 트레이딩 페이지(차트)로 이동 – 옵션
+  const goChart = (order) => {
+    if (!order?.symbol) return
+
+    setStockData({
+      symbol:   order.symbol,
+      name:     order.name,
+      marketId: order.marketId,
+      imageUrl: order.imageUrl || null,
+    })
+
     const path = isGroupRoute ? '/group/invest/trading' : '/invest/trading'
-    navigate(path, { state: { symbol } })
-  }
-
-  // 정정 페이지로 이동 
-  const goCorrection = (order) => {
-    // CorrectionPage에서 세션을 읽는 구조를 대비
-    sessionStorage.setItem('orderId', order.orderId)
-    sessionStorage.setItem('investType', isGroupRoute ? 'group' : 'personal')
-    if (order.marketId) sessionStorage.setItem('marketId', order.marketId)
-    if (order.symbol)   sessionStorage.setItem('symbol', order.symbol)
-    // 필요시 초기 지정가를 참고하려면(페이지에서 사용한다면)
-    sessionStorage.setItem('limitPrice', String(order.limitPrice ?? ''))
-
-    const path = isGroupRoute ? '/group/invest/correction' : '/invest/correction'
     navigate(path)
   }
 
-  if (loading) return (
-    <Section>
-      <Title>대기주문</Title>
-      <Message>불러오는 중…</Message>
-    </Section>
-  )
+  // 🔥 정정 페이지로 이동 (여기가 핵심)
+  const goCorrection = (order) => {
+    if (!order) return
 
-  if (error) return (
-    <Section>
-      <Title>대기주문</Title>
-      <Message>{error}</Message>
-    </Section>
-  )
+    // 1) 정정/트레이딩에서 사용할 종목 정보 전역 저장
+    setStockData({
+      symbol:   order.symbol,
+      name:     order.name,
+      marketId: order.marketId,
+      imageUrl: order.imageUrl || null,
+    })
+
+    // 2) 정정 페이지에서 필요로 할 만한 주문 정보들을 state로 넘김
+    const path = isGroupRoute ? '/group/invest/correction' : '/invest/correction'
+    navigate(path, {
+      state: {
+        // CorrectionPage 에서 state.orderId 를 읽어도 되고,
+        // state.order.orderId 를 읽어도 되게 둘 다 넘겨줌
+        orderId: order.orderId,
+        order: {
+          orderId:    order.orderId,
+          symbol:     order.symbol,
+          marketId:   order.marketId,
+          name:       order.name,
+          tradeType:  order.tradeType,
+          quantity:   order.quantity,
+          limitPrice: order.limitPrice,
+        },
+      },
+    })
+  }
+
+  if (loading) {
+    return (
+      <Section>
+        <Title>대기주문</Title>
+        <Message>불러오는 중…</Message>
+      </Section>
+    )
+  }
+
+  if (error) {
+    return (
+      <Section>
+        <Title>대기주문</Title>
+        <Message>{error}</Message>
+      </Section>
+    )
+  }
 
   if (!orders.length) return null
 
@@ -145,9 +193,9 @@ export default function WaitingOrder() {
       <CardList>
         {orders.map(order => (
           <Card key={order.id}>
-            <Thumbnail onClick={() => goChart(order.symbol)} role="button" />
+            <Thumbnail onClick={() => goChart(order)} role="button" />
             <Content>
-              <Left onClick={() => goChart(order.symbol)} role="button">
+              <Left onClick={() => goChart(order)} role="button">
                 <LeftText>
                   <StockName>{order.name}</StockName>
                   <StockSub>
@@ -157,9 +205,12 @@ export default function WaitingOrder() {
               </Left>
 
               <Right>
-                <CancelButton onClick={() => setConfirmId(order.orderId)}>취소</CancelButton>
-                {/* 정정 버튼: 세션 저장 후 경로 이동 */}
-                <EditButton onClick={() => goCorrection(order)}>정정</EditButton>
+                <CancelButton onClick={() => setConfirmId(order.orderId)}>
+                  취소
+                </CancelButton>
+                <EditButton onClick={() => goCorrection(order)}>
+                  정정
+                </EditButton>
               </Right>
             </Content>
           </Card>
@@ -172,7 +223,9 @@ export default function WaitingOrder() {
           <ModalBox>
             <ModalText>주문을 취소할까요?</ModalText>
             <ModalButtonRow>
-              <ModalSecondary onClick={() => setConfirmId(null)}>닫기</ModalSecondary>
+              <ModalSecondary onClick={() => setConfirmId(null)}>
+                닫기
+              </ModalSecondary>
               <ModalPrimary onClick={doCancel}>취소하기</ModalPrimary>
             </ModalButtonRow>
           </ModalBox>
