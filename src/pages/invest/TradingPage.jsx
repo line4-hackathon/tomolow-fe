@@ -15,6 +15,8 @@ import { Client } from '@stomp/stompjs'
 import { DateTypes } from './selectType'
 import useSelect from '@/hooks/select'
 import useStockStore from '@/stores/stockStores'
+import { useType } from '@/contexts/TypeContext'
+import useGroupStore from '@/stores/groupStores'
 
 export default function InvestTradingPage() {
   const navigate = useNavigate()
@@ -31,6 +33,8 @@ export default function InvestTradingPage() {
   const [orderData, setOrderData] = useState([])
   const { stockData, setStockData } = useStockStore()
   const [isHold,setIsHold]=useState(false);
+  const type=useType();
+  const {groupData}=useGroupStore();
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -184,7 +188,11 @@ export default function InvestTradingPage() {
       let apiUrl
       switch (selectedEtc) {
         case 'ORDER':
-          apiUrl = '/api/orders/pending/list'
+          if(type==group){
+            apiUrl=`/api/market/${stockData.marketId}/pending/group/${groupData.groupId}`
+          } else{
+            apiUrl = `/api/market/${stockData.marketId}/pending`
+          }
           break
         case 'NEWS':
           apiUrl = `/api/market/${stockData.marketId}/news`
