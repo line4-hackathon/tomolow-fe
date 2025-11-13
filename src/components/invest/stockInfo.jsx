@@ -8,7 +8,7 @@ export default function StockInfo() {
       <Stock $fontSize="20px">{stockData.name}</Stock>
       <Stock $fontSize="24px">{stockData.price ?  stockData.price.toLocaleString():"0"}원</Stock>
       <Yesterday>
-        어제보다 <a style={{ color: "#FF2E4E" }}>+{stockData.prevClose}원</a>
+        어제보다 <a style={{ color: "#FF2E4E" }}>+{stockData.changePrice}원</a>
       </Yesterday>
       <MoveAverage>
         이동평균선 <a style={{ color: "#57B789" }}>5 </a>

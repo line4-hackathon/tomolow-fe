@@ -236,9 +236,9 @@ export default function InvestTradingPage() {
 
   return (
     <Page>
-      {stockData && <InvestHeader path='/invest/search' />}
+      <InvestHeader path='/invest/search' />
       <Contents>
-        {stockData && <StockInfo />}
+        <StockInfo />
         <Chart
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
