@@ -8,45 +8,49 @@ import { APIService } from '@/pages/invest/api'
 import useStockStore from '@/stores/stockStores'
 
 export default function StockCard({ data }) {
-  const [isInterest, setIsInterest] = useState(data.interested)
-  const {stockData,setStockData}=useStockStore();
-  let textColor=""
-  if(data.changeRate>0){
-    textColor="#0084FE"
-  } else if(data.changeRate==0){
-    textColor="#11111"
-  } else{
-    textColor="#ff2e4e"
+  const [isInterest, setIsInterest] = useState(data.interested == '' ? data.interseted : true)
+  const { stockData, setStockData } = useStockStore()
+  let textColor = ''
+  if (data.changeRate > 0) {
+    textColor = '#0084FE'
+  } else if (data.changeRate == 0) {
+    textColor = '#11111'
+  } else {
+    textColor = '#ff2e4e'
   }
 
   const interest = async () => {
-      try {
-        const res = await APIService.private.post(`/api/interests/markets/${data.marketId}/toggle`)
-        setIsInterest(!isInterest)
-      } catch (error) {
-        console.log('관심 등록/취소 실패')
-      } 
+    try {
+      const res = await APIService.private.post(`/api/interests/markets/${data.marketId}/toggle`)
+      setIsInterest(!isInterest)
+    } catch (error) {
+      console.log('관심 등록/취소 실패')
+    }
   }
 
   const navigate = useNavigate()
-  const toTrading=()=>{
+  const toTrading = () => {
     setStockData(data)
     navigate('/invest/trading')
   }
 
   return (
     <Card>
-      <Logo onClick={()=>toTrading()} />
-      <TextBox onClick={()=>toTrading()}>
+      {data.imgUrl ? <img src={data.imgUrl} /> : <Logo onClick={() => toTrading()} />}
+      <TextBox onClick={() => toTrading()}>
         <Name>{data.name}</Name>
         <Detail>
           <Number>{data.symbol}</Number>
-          <Price $color={textColor}>{data.price.toLocaleString()}원({(data.changeRate*100).toFixed(2)}%)</Price>
+          {data.price ? (
+            <Price $color={textColor}>
+              {data.price.toLocaleString()}원({(data.changeRate * 100).toFixed(2)}%)
+            </Price>
+          ) : (
+            ''
+          )}
         </Detail>
       </TextBox>
-      <Interest onClick={() => interest()}>
-        {isInterest ? <RedHeart /> : <GrayHeart />}
-      </Interest>
+      <Interest onClick={() => interest()}>{isInterest ? <RedHeart /> : <GrayHeart />}</Interest>
     </Card>
   )
 }
@@ -103,7 +107,7 @@ const Number = styled.div`
   line-height: 16px; /* 133.333% */
 `
 const Price = styled.div`
-  color: ${({$color})=> $color};
+  color: ${({ $color }) => $color};
 
   /* Caption-Regular */
   font-family: Inter;

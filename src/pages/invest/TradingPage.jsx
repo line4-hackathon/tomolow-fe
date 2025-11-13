@@ -188,7 +188,7 @@ export default function InvestTradingPage() {
       let apiUrl
       switch (selectedEtc) {
         case 'ORDER':
-          if(type==group){
+          if(type=="group"){
             apiUrl=`/api/market/${stockData.marketId}/pending/group/${groupData.groupId}`
           } else{
             apiUrl = `/api/market/${stockData.marketId}/pending`
