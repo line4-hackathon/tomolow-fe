@@ -1,20 +1,21 @@
 // src/components/home/HoldInterest.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import useSelect from '@/hooks/select'
 import { useNavigate } from 'react-router-dom'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client/dist/sockjs.js'
+
+import useSelect from '@/hooks/select'
+import useStockStore from '@/stores/stockStores'
+import S from '@/components/home/HoldInterest.styled'
+
 import rightArrow from '@/assets/icons/icon-right-arrow.svg'
 import heartOn from '@/assets/icons/icon-heart-red.svg'
 import heartOff from '@/assets/icons/icon-heart-gray.svg'
 import heartBlue from '@/assets/icons/icon-heart-navy.svg'
-import S from '@/components/home/HoldInterest.styled'
-import useStockStore from '@/stores/stockStores'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
 
-// 유틸
 const getAccessToken = () => localStorage.getItem('accessToken')
 const getAuthHeader = () => {
   const t = getAccessToken()
@@ -23,35 +24,18 @@ const getAuthHeader = () => {
 const fmt = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
 const safeSym = s => (s || '').trim().toUpperCase()
 
-// ws/wss → http/https 변환
+// ws → sockjs url 변환 (MyAssets와 동일)
 const toSockJsUrl = base => {
   try {
     const u = new URL(base)
-    const secure = u.protocol === 'wss:'
-    let path = u.pathname.replace(/\/ws$/, '/ws-sockjs')
-    if (!path.endsWith('/ws-sockjs')) path = (path.endsWith('/') ? path : path + '/') + 'ws-sockjs'
-    return `${secure ? 'https' : 'http'}://${u.host}${path}`
+    if (u.pathname.endsWith('/ws')) {
+      u.pathname = u.pathname.replace(/\/ws$/, '/ws-sockjs')
+    }
+    if (u.protocol === 'wss:') u.protocol = 'https:'
+    if (u.protocol === 'ws:') u.protocol = 'http:'
+    return u.toString()
   } catch {
     return 'https://api.tomolow.store/ws-sockjs'
-  }
-}
-async function fetchTickerOnce(symbol) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/ticker/${encodeURIComponent(symbol)}`, {
-      headers: { Accept: 'application/json', ...getAuthHeader() },
-    })
-    const txt = await res.text()
-    const json = txt ? JSON.parse(txt) : null
-    if (!res.ok || json?.success === false) return null
-
-    const d = json.data || {}
-    return {
-      symbol: safeSym(symbol),
-      currentPrice: d.currentPrice ?? d.price ?? d.tradePrice ?? 0,
-      changeRate: d.pnlRate ?? d.changeRate ?? 0,
-    }
-  } catch {
-    return null
   }
 }
 
@@ -61,62 +45,83 @@ const TABS = [
 ]
 
 export default function HoldInterest() {
-  const { selectedMenu, handleSelect } = useSelect('hold')
   const navigate = useNavigate()
+  const { selectedMenu, handleSelect } = useSelect('hold')
   const { setStockData } = useStockStore()
 
   const [holdingStocks, setHoldingStocks] = useState([])
   const [interestList, setInterestList] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const stompRef = useRef(null)
 
-  // 데이터 초기 로드
+  // 1) 초기 데이터 로드
   useEffect(() => {
     const load = async () => {
-      if (!API_BASE_URL || !getAccessToken()) {
-        setError('로그인 후 이용해주세요.')
+      if (!API_BASE_URL) {
+        setError('서버 주소가 설정되어 있지 않습니다.')
+        setLoading(false)
+        return
+      }
+      if (!getAccessToken()) {
+        setError('로그인 후 이용 가능한 서비스입니다.')
         setLoading(false)
         return
       }
 
       try {
-        const holdRes = await fetch(`${API_BASE_URL}/api/home/assets/my`, {
-          headers: { Accept: 'application/json', ...getAuthHeader() },
-        })
-        const holdJson = await holdRes.json()
-        if (holdRes.ok && holdJson?.success) {
-          const items = holdJson.data?.items ?? []
-          setHoldingStocks(items.map((it, i) => ({
-            id: it.marketId ?? i,
-            marketId: it.marketId,
-            name: it.name,
-            symbol: safeSym(it.symbol),
-            quantity: it.quantity ?? 0,
-            currentPrice: it.currentPrice ?? 0,
-            changeRate: it.pnlRate ?? it.changeRate ?? 0,
-            imageUrl: it.imageUrl ?? null,
-          })))
+        const [holdRes, intRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/home/assets/my`, {
+            headers: { Accept: 'application/json', ...getAuthHeader() },
+          }),
+          fetch(`${API_BASE_URL}/api/interests/markets`, {
+            headers: { Accept: 'application/json', ...getAuthHeader() },
+          }),
+        ])
+
+        // 보유
+        if (holdRes.ok) {
+          const json = await holdRes.json()
+          if (json?.success) {
+            const items = json.data?.items ?? []
+            setHoldingStocks(
+              items.map((it, i) => ({
+                id: it.marketId ?? i, market: it.market ?? '',          // 있으면 넣고 없으면 빈값
+                marketId: it.marketId, marketName: it.marketName ?? '',
+                name: it.name, symbol: safeSym(it.symbol),
+                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0, changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                accTradePrice24h: it.accTradePrice24h ?? 0,
+                tradeTimestamp: it.tradeTimestamp ?? null,
+                interested: true, quantity: it.quantity ?? 0, imageUrl: it.imageUrl ?? null,
+              })),
+              
+            )
+          }
         }
 
-        // --- 관심 종목 불러오기 ---
-        const intRes = await fetch(`${API_BASE_URL}/api/interests/markets`, {
-          headers: { Accept: 'application/json', ...getAuthHeader() },
-        })
-        const intJson = await intRes.json()
-        if (intRes.ok && intJson?.success) {
-          const items = intJson.data?.items ?? []
-          setInterestList(items.map((it, i) => ({
-            id: it.marketId ?? i,
-            marketId: it.marketId,
-            name: it.name,
-            symbol: safeSym(it.symbol),
-            currentPrice: it.currentPrice ?? 0,
-            changeRate: it.pnlRate ?? it.changeRate ?? 0,
-            isLiked: true,
-            imageUrl: it.imageUrl ?? null,
-          })))
+        // 관심
+        if (intRes.ok) {
+          const json = await intRes.json()
+          if (json?.success) {
+            const items = json.data?.items ?? []
+            setInterestList(
+              items.map((it, i) => ({
+                id: it.marketId ?? i,
+                market: it.market ?? '', marketId: it.marketId, marketName: it.marketName ?? '',
+                name: it.name, symbol: safeSym(it.symbol),
+                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
+                changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                accTradePrice24h: it.accTradePrice24h ?? 0,
+                tradeTimestamp: it.tradeTimestamp ?? null,
+                interested: it.interested ?? true, imageUrl: it.imageUrl ?? null, isLiked: true,
+              })),
+            )
+          }
         }
-      } catch {
+      } catch (e) {
+        console.error('home hold/interest load error >>>', e)
         setError('데이터를 불러오지 못했습니다.')
       } finally {
         setLoading(false)
@@ -126,8 +131,7 @@ export default function HoldInterest() {
     load()
   }, [])
 
-  // WebSocket 실시간 반영
-  const stompRef = useRef(null)
+  // 2) 실시간 심볼 리스트
   const symbols = useMemo(() => {
     const s = new Set()
     holdingStocks.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
@@ -135,72 +139,112 @@ export default function HoldInterest() {
     return Array.from(s)
   }, [holdingStocks, interestList])
 
+  // 3) WebSocket (시세만 업데이트)
   useEffect(() => {
     if (symbols.length === 0) return
-    const sock = new SockJS(toSockJsUrl(WS_BASE_URL))
-    const client = new Client({ webSocketFactory: () => sock, reconnectDelay: 3000 })
+
+    const sockUrl = toSockJsUrl(WS_BASE_URL)
+    const client = new Client({
+      webSocketFactory: () => new SockJS(sockUrl),
+      reconnectDelay: 3000,
+      debug: () => {},
+    })
+
     stompRef.current = client
 
     client.onConnect = () => {
       symbols.forEach(sym => {
-        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
+        client.subscribe(`/topic/ticker/${sym}`, frame => {
           try {
-            const m = JSON.parse(frame.body || '{}')
-            const ms = safeSym(m?.symbol)
+            const msg = JSON.parse(frame.body || '{}')
+            const ms = safeSym(msg?.symbol)
             if (!ms) return
 
-            const price = m.currentPrice ?? m.price ?? m.tradePrice ?? null
-            const rate = m.pnlRate ?? m.changeRate ?? null
+            const price = msg.currentPrice ?? msg.price ?? msg.tradePrice
+            const rate = msg.pnlRate ?? msg.changeRate
 
-            setHoldingStocks(prev => prev.map(it =>
-              safeSym(it.symbol) === ms
-                ? { ...it, currentPrice: price ?? it.currentPrice, changeRate: rate ?? it.changeRate }
-                : it
-            ))
+            setHoldingStocks(prev =>
+              prev.map(it =>
+                safeSym(it.symbol) === ms
+                  ? {
+                      ...it,
+                      price: typeof price === 'number' ? price : it.price,
+                      changeRate:
+                        typeof rate === 'number' ? rate : it.changeRate,
+                    }
+                  : it,
+              ),
+            )
 
-            setInterestList(prev => prev.map(it =>
-              safeSym(it.symbol) === ms
-                ? { ...it, currentPrice: price ?? it.currentPrice, changeRate: rate ?? it.changeRate }
-                : it
-            ))
-          } catch {}
+            setInterestList(prev =>
+              prev.map(it =>
+                safeSym(it.symbol) === ms
+                  ? {
+                      ...it,
+                      price: typeof price === 'number' ? price : it.price,
+                      changeRate:
+                        typeof rate === 'number' ? rate : it.changeRate,
+                    }
+                  : it,
+              ),
+            )
+          } catch (e) {
+            console.error('ticker frame parse error >>>', e)
+          }
         })
       })
     }
 
-    client.activate()
-    return () => client.deactivate()
-  }, [symbols.join('|')])
+    client.onStompError = f => {
+      console.error('STOMP error >>>', f)
+    }
 
-  // navigate (store 기반)
-  const handleGoTrading = (stock) => {
+    client.activate()
+    return () => {
+      try {
+        client.deactivate()
+      } catch {}
+    }
+  }, [JSON.stringify(symbols)])
+
+  // 4) 트레이딩 페이지로 이동
+  const handleGoTrading = stock => {
+    if (!stock) return
     setStockData(stock)
     navigate('/invest/trading')
   }
 
-  // 관심 토글
-  const toggleLike = async (marketId) => {
+  // 5) 관심 토글
+  const toggleLike = async marketId => {
+    if (!API_BASE_URL) return
     try {
       await fetch(`${API_BASE_URL}/api/interests/markets/${marketId}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       })
       setInterestList(cur =>
-        cur.map(s => (s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s))
+        cur.map(s =>
+          s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s,
+        ),
       )
     } catch (err) {
-      console.error('관심 토글 실패', err)
+      console.error('관심 토글 실패 >>>', err)
     }
   }
 
-  // 렌더링
+  // 6) 렌더링
   const isHoldTab = selectedMenu === 'hold'
-  const list = isHoldTab ? holdingStocks : interestList
+
+  const list = isHoldTab
+    ? holdingStocks.filter(item => (item.quantity ?? 0) > 0)
+    : interestList
 
   return (
     <S.Container>
-      {/* 머니 충전 버튼 */}
-      <S.MoneyCharge onClick={() => navigate('/mypage/charge')} style={{ cursor: 'pointer' }}>
+      <S.MoneyCharge
+        onClick={() => navigate('/mypage/charge')}
+        style={{ cursor: 'pointer' }}
+      >
         <S.LeftBox>
           <S.IconBox />
           <S.Label>머니 충전</S.Label>
@@ -210,7 +254,6 @@ export default function HoldInterest() {
         </S.RightBox>
       </S.MoneyCharge>
 
-      {/* 탭 선택 */}
       <S.TabRow>
         {TABS.map(tab => (
           <S.TabButton
@@ -223,7 +266,6 @@ export default function HoldInterest() {
         ))}
       </S.TabRow>
 
-      {/* 데이터 렌더링 */}
       {loading ? (
         <S.Message>불러오는 중...</S.Message>
       ) : error ? (
@@ -245,7 +287,7 @@ export default function HoldInterest() {
                 </S.Left>
                 <S.HoldRight>
                   <S.Price>
-                    {fmt(stock.currentPrice)}원
+                    {fmt(stock.price)}원
                     <S.Diff $positive={(stock.changeRate ?? 0) >= 0}>
                       {((stock.changeRate ?? 0) * 100).toFixed(2)}%
                     </S.Diff>
@@ -265,19 +307,27 @@ export default function HoldInterest() {
                       <S.StockSub>{stock.symbol}</S.StockSub>
                       <S.InterestPriceRow>
                         <S.InterestPrice $positive={(stock.changeRate ?? 0) >= 0}>
-                          {fmt(stock.currentPrice)}원 ({((stock.changeRate ?? 0) * 100).toFixed(2)}%)
+                          {fmt(stock.price)}원 (
+                          {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                         </S.InterestPrice>
                       </S.InterestPriceRow>
                     </S.LeftBtnText>
                   </S.LeftText>
                 </S.Left>
-                <S.InterestRight onClick={(e) => e.stopPropagation()}>
+                <S.InterestRight
+                  onClick={e => {
+                    e.stopPropagation()
+                  }}
+                >
                   <S.HeartButton onClick={() => toggleLike(stock.marketId)}>
-                    <S.HeartIcon src={stock.isLiked ? heartOn : heartOff} alt="하트" />
+                    <S.HeartIcon
+                      src={stock.isLiked ? heartOn : heartOff}
+                      alt="하트"
+                    />
                   </S.HeartButton>
                 </S.InterestRight>
               </S.InterestCard>
-            )
+            ),
           )}
         </S.CardList>
       ) : (
