@@ -186,6 +186,7 @@ export default function InvestTradingPage() {
         console.log('보유 여부 조회 실패')
       }
     }
+    stockInfoGet()
     chartDataGet()
     holdingDataGet()
   }, [selectedDate, stockData.symbol, stockData.marketId])
@@ -227,11 +228,19 @@ export default function InvestTradingPage() {
   }, [selectedEtc])
 
   const isPurchase = (p) => {
-    navigate('/invest/purchase', {
+        if(type=='group'){
+      navigate('/group/invest/purchase', {
       state: {
         purchase: p,
       },
     })
+    } else{
+      navigate('/invest/purchase', {
+      state: {
+        purchase: p,
+      },
+    })
+    }
   }
 
   return (
