@@ -19,8 +19,8 @@ export default function EctAI({data}) {
           </AIBox>
           <NewsCardBox>
             <a>출처 뉴스</a>
+            {data.sources.map((data)=><NewsCard data={data}/>) }
             
-            <NewsCard />
           </NewsCardBox>
         </>
       ) : (
