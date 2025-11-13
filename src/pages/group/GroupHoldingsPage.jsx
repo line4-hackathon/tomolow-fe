@@ -61,11 +61,8 @@ const GroupHoldingsPage = () => {
                     setStockData({
                       marketId: item.marketId,
                       marketName: item.marketName,
+                      symbol: item.marketSymbol,
                       imageUrl: item.marketImgUrl,
-                      quantity: item.quantity,
-                      totalPrice: item.totalPrice,
-                      pnlAmount: item.pnL,
-                      pnlRate: item.pnLRate,
                     })
                     navigate('/group/invest/trading')
                   }}
