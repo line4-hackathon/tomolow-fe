@@ -1,66 +1,92 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import useStockStore from '@/stores/stockStores'
+import axios from 'axios'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
 import Header from '@/components/common/Header'
 import MenuBar from '@/components/common/MenuBar'
-
-// 더미 데이터
-const dummyData = [
-  {
-    id: 1,
-    src: '/src/assets/images/logo-company.svg',
-    name: '삼성전자',
-    quantity: 3,
-    price: 87000,
-    profit: 43000,
-    rates: 10.5,
-  },
-  {
-    id: 2,
-    src: '/src/assets/images/logo-company.svg',
-    name: '카카오',
-    quantity: 2,
-    price: 60000,
-    profit: -20000,
-    rates: -1.2,
-  },
-]
+import Loading from '@/components/common/Loading'
+import ListEmpty from '@/components/group/ListEmpty'
 
 const GroupHoldingsPage = () => {
   const navigate = useNavigate()
   const { groupId } = useParams()
+  const [loading, setLoading] = useState(false)
+  const [holdingList, setHoldingList] = useState([])
+  const { setStockData } = useStockStore()
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const token = localStorage.getItem('accessToken')
 
-  const getTextColor = (profit) => {
-    if (profit > 0) return '#FF2E4E'
-    if (profit < 0) return '#0084FE'
+  const getTextColor = (pnL) => {
+    if (pnL > 0) return '#FF2E4E'
+    if (pnL < 0) return '#0084FE'
     return '#333'
   }
+
+  useEffect(() => {
+    const getHoldingLists = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(`${apiUrl}/api/group/${groupId}/holding`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (res.data.success) {
+          setHoldingList(res.data.data.pnLDtos)
+        } else {
+          console.log(res.data.message)
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    getHoldingLists()
+  }, [groupId])
+
+  if (loading) return <Loading />
   return (
     <>
       <Scrollable>
-        <Header title='보유종목' showIcon='true' path={`/group/home/${groupId}`} />
+        <Header title='보유종목' showIcon={true} path={`/group/home/${groupId}`} />
         <Container>
-          <List>
-            {dummyData.map((item) => (
-              <Item key={item.id} onClick={() => navigate('/group/invest/trading')}>
-                <Left>
-                  <Img src={item.src} />
-                  <LeftText>
-                    <Name>{item.name}</Name>
-                    <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
-                  </LeftText>
-                </Left>
-                <Right>
-                  <Price>{`${item.price.toLocaleString()}원`}</Price>
-                  <ColoredText color={getTextColor(item.profit)}>
-                    {`${item.profit.toLocaleString()}원`}
-                    {`(${item.rates}%)`}
-                  </ColoredText>
-                </Right>
-              </Item>
-            ))}
-          </List>
+          {holdingList.length > 0 ? (
+            <List>
+              {holdingList.map((item) => (
+                <Item
+                  key={item.marketId}
+                  onClick={() => {
+                    setStockData({
+                      marketId: item.marketId,
+                      marketName: item.marketName,
+                      symbol: item.marketSymbol,
+                      imageUrl: item.marketImgUrl,
+                    })
+                    navigate('/group/invest/trading')
+                  }}
+                >
+                  <Left>
+                    <Img src={item.marketImgUrl} />
+                    <LeftText>
+                      <Name>{item.marketName}</Name>
+                      <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
+                    </LeftText>
+                  </Left>
+                  <Right>
+                    <Price>{`${item.totalPrice.toLocaleString()}원`}</Price>
+                    <ColoredText color={getTextColor(item.pnL)}>
+                      {`${item.pnL.toLocaleString()}원`}
+                      {`(${item.pnLRate}%)`}
+                    </ColoredText>
+                  </Right>
+                </Item>
+              ))}
+            </List>
+          ) : (
+            <ListEmpty emptyMessage={'보유한 자산이 없어요.'} />
+          )}
         </Container>
       </Scrollable>
       <MenuBar />

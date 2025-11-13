@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import useModal from '@/hooks/useModal'
 import { Scrollable } from '@/styles/Scrollable.styled'
 import styled from 'styled-components'
@@ -15,18 +16,42 @@ import MenuBar from '@/components/common/MenuBar'
 const MyPage = () => {
   const navigate = useNavigate()
   const { isOpen, open, close } = useModal()
+  const [nickName, setNickName] = useState('')
+  const [cash, setCash] = useState('')
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+
+  useEffect(() => {
+    const loadMyPage = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        const res = await axios.get(`${apiUrl}/api/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (res.data.success) {
+          setNickName(res.data.data.nickname)
+          setCash(res.data.data.cashBalance)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    loadMyPage()
+  }, [])
+
   return (
     <>
       <Scrollable>
         <Header title='MY' />
         <Container>
           <NameContainer>
-            <Name>{`멋쟁이사자`} </Name>
+            <Name>{nickName} </Name>
             <Span> 님</Span>
           </NameContainer>
           <MoneyContainer>
             <Label>보유 중인 머니</Label>
-            <Money>{(160434464).toLocaleString()}원</Money>
+            <Money>{cash.toLocaleString()}원</Money>
           </MoneyContainer>
           <ButtonContainer>
             <ButtonItem
