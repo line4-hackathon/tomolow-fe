@@ -146,7 +146,7 @@ export const SourceList = styled.div`
 export const SourceCard = styled.div`
   min-width: 104px;
   max-width: 145px;
-  height: 120px;
+  height: 135px;
   border-radius: 16px;
   background: #263C54;
   color: #fff;
@@ -174,7 +174,8 @@ export const SourceFooter = styled.div`
 
 
 export const SourceDomain = styled.span`
-  font-size: 11px;
+  font-size: 10px;
   color: #e5e7eb;
-  margin-top: 2px;  
+  overflow: hidden;      /* 넘치는 글자 숨김 */
+  text-overflow: ellipsis; /* ... 표시 */
 `

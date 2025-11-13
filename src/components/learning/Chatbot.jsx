@@ -490,7 +490,6 @@ const Chatbot = () => {
                 <S.BotBubble className={msg.meta ? 'meta' : ''}>
                   {msg.text}
                 </S.BotBubble>
-
                 {/* 뉴스 카드: 최대 2개까지만 */}
                 {msg.sources && msg.sources.length > 0 && (
                   <S.SourceList>
@@ -509,7 +508,7 @@ const Chatbot = () => {
                           />
                         )}
                         <S.SourceFooter>
-                          <S.SourceDomain>{getDomain(src.url)}</S.SourceDomain>
+                            <S.SourceDomain>{src.title}</S.SourceDomain>
                         </S.SourceFooter>
                       </S.SourceCard>
                     ))}
