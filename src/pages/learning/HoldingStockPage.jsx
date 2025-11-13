@@ -97,7 +97,7 @@ export default function HoldingStockPage() {
       <Header title="학습" />
       <Title>보유 중인 주식</Title>
       <Contents>
-        <SearchBar explain="주식명 혹은 주식코드를 입력하세요" />
+        <SearchBar explain="원하는 자산을 검색하세요" />
 
         {loading ? (
           <Message>불러오는 중...</Message>

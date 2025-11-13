@@ -118,7 +118,7 @@ export default function InvestSearchPage() {
       <Header title='투자' showIcon={type==="group"? true :false} path={-1}/>
       <Contents>
         <SearchBar
-          explain='주식명 혹은 주식코드를 입력하세요'
+          explain='원하는 자산을 검색하세요'
           searchName={searchName}
           setSearchName={setSearchName}
         />
