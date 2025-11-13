@@ -155,7 +155,12 @@ const Item = styled.div`
   background: var(--Neutral-0, #fff);
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 `
-const Img = styled.img``
+const Img = styled.img`
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 100;
+`
 const Left = styled.div`
   display: flex;
   flex-direction: row;
