@@ -80,16 +80,16 @@ const CustomTooltip = ({ active, payload, label }) => {
     <ToolTip>
       <a>{finalDate}</a>
       <a>
-        종가 <span style={{ color }}> {d.close}</span>
+        종가 <span style={{ color }}> {d.close.toLocaleString()}</span>
       </a>
       <a>
-        시가: <span style={{ color }}>{d.open}</span>
+        시가: <span style={{ color }}>{d.open.toLocaleString()}</span>
       </a>
       <a>
-        고가: <span style={{ color }}>{d.high}</span>
+        고가: <span style={{ color }}>{d.high.toLocaleString()}</span>
       </a>
       <a>
-        저가: <span style={{ color }}>{d.low}</span>
+        저가: <span style={{ color }}>{d.low.toLocaleString()}</span>
       </a>
     </ToolTip>
   )
@@ -210,9 +210,9 @@ const ToolTip = styled.div`
   flex-direction: column;
   justify-content: center;
   padding-left: 16px;
+  padding-right: 16px;
   border-radius: var(--Radius-M, 12px);
   background: var(--Neutral-0, #fff);
-  width: 166px;
   height: 128px;
 
   /* Bottom */
