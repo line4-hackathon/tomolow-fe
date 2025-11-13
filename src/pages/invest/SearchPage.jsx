@@ -38,7 +38,7 @@ export default function InvestSearchPage() {
     if (searchName) {
       const Search = async () => {
         try {
-          const res = await APIService.private.get(`/api/stock/search?keyword=${debouncedSearch}`)
+          const res = await APIService.private.get(`/api/search`,{params:{query:debouncedSearch}})
           setStockData(res.data)
         } catch (error) {
           console.log('검색어 조회 실패')
