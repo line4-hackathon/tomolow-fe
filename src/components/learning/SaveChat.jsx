@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import CheckOnIcon from '@/assets/icons/icon-save-check-blue.svg'
 import CheckOffIcon from '@/assets/icons/icon-save-check-gray.svg'
 import Toast from '@/components/invest/ToastMessage'
-import * as ChatS from '@/components/learning/Chatbot.styled' // 🔥 뉴스카드 스타일 재사용
+import * as ChatS from '@/components/learning/Chatbot.styled' // 뉴스카드 스타일 재사용
 
 // 서버 주소
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -211,7 +211,7 @@ export default function SaveChat() {
                     <QuestionBubble>{item.question}</QuestionBubble>
                     <AnswerBubble>{item.answer}</AnswerBubble>
 
-                    {/* 🔥 뉴스카드: 챗봇이랑 동일하게 최대 2개만 표시 */}
+                    {/*뉴스카드: 챗봇이랑 동일하게 최대 2개만 표시 */}
                     {hasSources && (
                       <ChatS.SourceList>
                         {item.sources.slice(0, 2).map((src, idx) => (

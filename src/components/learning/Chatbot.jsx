@@ -459,9 +459,10 @@ const Chatbot = () => {
     {
       id: nextId(),
       role: 'bot',
-      text: '네, 계속해서 관련 데이터에 관한 질문을 해주세요.',
+      text: '네 계속해서 관련 데이터에 관한 질문을 해주세요.',
     },
   ])
+    
   }
 
   const handleAnotherQuestion = () => {
@@ -473,7 +474,7 @@ const Chatbot = () => {
         id: nextId(),
         role: 'bot',
         text:
-          '네, 그러면 해당 자산 관련 학습은 마칠게요. 궁금한 게 있으시면 물어봐주세요.',
+          '네 그러면 해당 자산 관련 학습은 마칠게요. 궁금한 게 있으시면 물어봐주세요.',
       },
     ])
   }

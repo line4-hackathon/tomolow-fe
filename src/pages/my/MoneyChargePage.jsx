@@ -31,5 +31,5 @@ const Container = styled.div`
   flex-direction: column;
   padding: 32px 16px;
   background: var(--Neutral-50, #f6f6f6);
-  gap: 16px;
+  gap: 24px;
 `
