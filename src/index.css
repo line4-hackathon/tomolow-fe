@@ -1,5 +1,5 @@
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 100;
   font-style: normal;
   src: url('@/assets/font/Interop-Thin.woff2') format('woff2');
@@ -7,7 +7,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 200;
   font-style: normal;
   src: url('@/assets/font/Interop-ExtraLight.woff2') format('woff2');
@@ -15,7 +15,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 300;
   font-style: normal;
   src: url('@/assets/font/Interop-Light.woff2') format('woff2');
@@ -23,7 +23,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 400;
   font-style: normal;
   src: url('@/assets/font/Interop-Regular.woff2') format('woff2');
@@ -31,7 +31,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 500;
   font-style: normal;
   src: url('@/assets/font/Interop-Medium.woff2') format('woff2');
@@ -39,7 +39,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 600;
   font-style: normal;
   src: url('@/assets/font/Interop-SemiBold.woff2') format('woff2');
@@ -47,7 +47,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 700;
   font-style: normal;
   src: url('@/assets/font/Interop-Bold.woff2') format('woff2');
@@ -55,7 +55,7 @@
 }
 
 @font-face {
-  font-family: 'Interop';
+  font-family: 'Inter';
   font-weight: 800;
   font-style: normal;
   src: url('@/assets/font/Interop-ExtraBold.woff2') format('woff2');
@@ -72,7 +72,7 @@
   margin: 0;
   padding: 0;
   font-family:
-    'Interop',
+    'Inter',
     system-ui,
     -apple-system,
     sans-serif;
