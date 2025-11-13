@@ -120,7 +120,12 @@ const Item = styled.div`
   cursor: pointer;
 `
 
-const Img = styled.img``
+const Img = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: 999;
+  border: none;
+`
 const Left = styled.div`
   display: flex;
   flex-direction: row;
