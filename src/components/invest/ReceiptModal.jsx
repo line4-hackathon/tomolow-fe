@@ -9,7 +9,7 @@ import useStockStore from '@/stores/stockStores'
 import { useType } from '@/contexts/TypeContext'
 import useGroupStore from '@/stores/groupStores'
 
-export default function ReceiptModal({ setIsModal, isPurchase, count, price,marketPrice }) {
+export default function ReceiptModal({ setIsModal, isPurchase, count, price, marketPrice }) {
   const navigate = useNavigate()
   const { stockData, setStockData } = useStockStore()
   const type = useType()
@@ -19,10 +19,10 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price,mark
     let purchaseUrl
     let sellUrl
     let market
-    if(price==marketPrice){
-      market="market"
+    if (price == marketPrice) {
+      market = 'market'
     } else {
-      market="limit"
+      market = 'limit'
     }
     if (type == 'group') {
       purchaseUrl = `/api/group/${groupData.groupId}/buy/${market}/${stockData.marketId}`
@@ -38,11 +38,19 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price,mark
             quantity: parseInt(count),
             price: parseInt(price),
           })
-          navigate('/invest/trading', {
+          if (type == 'group') {
+            navigate('/group/invest/trading', {
             state: {
               toastMessage: '매수 주문이 완료됐어요',
             },
           })
+          } else {
+            navigate('/invest/trading', {
+            state: {
+              toastMessage: '매수 주문이 완료됐어요',
+            },
+          })
+          }
         } catch (error) {
           console.log('매수 실패')
           return

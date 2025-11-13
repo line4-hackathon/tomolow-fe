@@ -6,10 +6,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
 import useStockStore from '@/stores/stockStores'
+import { useType } from '@/contexts/TypeContext'
 
 export default function StockCard({ data }) {
   const [isInterest, setIsInterest] = useState(data.interested == '' ? data.interseted : true)
   const { stockData, setStockData } = useStockStore()
+  const type=useType();
   let textColor = ''
   if (data.changeRate > 0) {
     textColor = '#0084FE'
@@ -31,7 +33,11 @@ export default function StockCard({ data }) {
   const navigate = useNavigate()
   const toTrading = () => {
     setStockData(data)
-    navigate('/invest/trading')
+    if(type=='group'){
+      navigate('/group/invest/trading')
+    } else{
+      navigate('/invest/trading')
+    }
   }
 
   return (
