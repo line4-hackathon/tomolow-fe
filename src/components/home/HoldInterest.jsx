@@ -12,6 +12,7 @@ import rightArrow from '@/assets/icons/icon-right-arrow.svg'
 import heartOn from '@/assets/icons/icon-heart-red.svg'
 import heartOff from '@/assets/icons/icon-heart-gray.svg'
 import heartBlue from '@/assets/icons/icon-heart-navy.svg'
+import moneycharge from '@/assets/icons/icon-money-recharge.svg'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
@@ -246,7 +247,7 @@ export default function HoldInterest() {
         style={{ cursor: 'pointer' }}
       >
         <S.LeftBox>
-          <S.IconBox />
+          <S.MoneyIcon src={moneycharge} alt="머니 충전 아이콘" />
           <S.Label>머니 충전</S.Label>
         </S.LeftBox>
         <S.RightBox>
@@ -342,7 +343,7 @@ export default function HoldInterest() {
           ) : (
             <>
               <S.HeartEmpty src={heartBlue} alt="빈 하트" />
-              <S.EmptyText>관심 주식이 없어요</S.EmptyText>
+              <S.EmptyText>관심 자산이 없어요</S.EmptyText>
             </>
           )}
         </S.EmptyState>
