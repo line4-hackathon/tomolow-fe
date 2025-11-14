@@ -12,6 +12,7 @@ import rightArrow from '@/assets/icons/icon-right-arrow.svg'
 import heartOn from '@/assets/icons/icon-heart-red.svg'
 import heartOff from '@/assets/icons/icon-heart-gray.svg'
 import heartBlue from '@/assets/icons/icon-heart-navy.svg'
+import MoneyIcon from '@/assets/icons/icon-money-recharge.svg?react'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
@@ -21,11 +22,11 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
-const fmt = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
-const safeSym = s => (s || '').trim().toUpperCase()
+const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
+const safeSym = (s) => (s || '').trim().toUpperCase()
 
 // ws → sockjs url 변환 (MyAssets와 동일)
-const toSockJsUrl = base => {
+const toSockJsUrl = (base) => {
   try {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) {
@@ -86,16 +87,22 @@ export default function HoldInterest() {
             const items = json.data?.items ?? []
             setHoldingStocks(
               items.map((it, i) => ({
-                id: it.marketId ?? i, market: it.market ?? '',          // 있으면 넣고 없으면 빈값
-                marketId: it.marketId, marketName: it.marketName ?? '',
-                name: it.name, symbol: safeSym(it.symbol),
-                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0, changeRate: it.pnlRate ?? it.changeRate ?? 0,
-                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                id: it.marketId ?? i,
+                market: it.market ?? '', // 있으면 넣고 없으면 빈값
+                marketId: it.marketId,
+                marketName: it.marketName ?? '',
+                name: it.name,
+                symbol: safeSym(it.symbol),
+                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
+                changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                prevClose: it.prevClose ?? 0,
+                accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
                 tradeTimestamp: it.tradeTimestamp ?? null,
-                interested: true, quantity: it.quantity ?? 0, imageUrl: it.imageUrl ?? null,
+                interested: true,
+                quantity: it.quantity ?? 0,
+                imageUrl: it.imageUrl ?? null,
               })),
-              
             )
           }
         }
@@ -108,14 +115,20 @@ export default function HoldInterest() {
             setInterestList(
               items.map((it, i) => ({
                 id: it.marketId ?? i,
-                market: it.market ?? '', marketId: it.marketId, marketName: it.marketName ?? '',
-                name: it.name, symbol: safeSym(it.symbol),
+                market: it.market ?? '',
+                marketId: it.marketId,
+                marketName: it.marketName ?? '',
+                name: it.name,
+                symbol: safeSym(it.symbol),
                 price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
                 changeRate: it.pnlRate ?? it.changeRate ?? 0,
-                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                prevClose: it.prevClose ?? 0,
+                accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
                 tradeTimestamp: it.tradeTimestamp ?? null,
-                interested: it.interested ?? true, imageUrl: it.imageUrl ?? null, isLiked: true,
+                interested: it.interested ?? true,
+                imageUrl: it.imageUrl ?? null,
+                isLiked: true,
               })),
             )
           }
@@ -134,8 +147,8 @@ export default function HoldInterest() {
   // 2) 실시간 심볼 리스트
   const symbols = useMemo(() => {
     const s = new Set()
-    holdingStocks.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
-    interestList.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
+    holdingStocks.forEach((v) => v.symbol && s.add(safeSym(v.symbol)))
+    interestList.forEach((v) => v.symbol && s.add(safeSym(v.symbol)))
     return Array.from(s)
   }, [holdingStocks, interestList])
 
@@ -153,8 +166,8 @@ export default function HoldInterest() {
     stompRef.current = client
 
     client.onConnect = () => {
-      symbols.forEach(sym => {
-        client.subscribe(`/topic/ticker/${sym}`, frame => {
+      symbols.forEach((sym) => {
+        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
           try {
             const msg = JSON.parse(frame.body || '{}')
             const ms = safeSym(msg?.symbol)
@@ -163,27 +176,25 @@ export default function HoldInterest() {
             const price = msg.currentPrice ?? msg.price ?? msg.tradePrice
             const rate = msg.pnlRate ?? msg.changeRate
 
-            setHoldingStocks(prev =>
-              prev.map(it =>
+            setHoldingStocks((prev) =>
+              prev.map((it) =>
                 safeSym(it.symbol) === ms
                   ? {
                       ...it,
                       price: typeof price === 'number' ? price : it.price,
-                      changeRate:
-                        typeof rate === 'number' ? rate : it.changeRate,
+                      changeRate: typeof rate === 'number' ? rate : it.changeRate,
                     }
                   : it,
               ),
             )
 
-            setInterestList(prev =>
-              prev.map(it =>
+            setInterestList((prev) =>
+              prev.map((it) =>
                 safeSym(it.symbol) === ms
                   ? {
                       ...it,
                       price: typeof price === 'number' ? price : it.price,
-                      changeRate:
-                        typeof rate === 'number' ? rate : it.changeRate,
+                      changeRate: typeof rate === 'number' ? rate : it.changeRate,
                     }
                   : it,
               ),
@@ -195,7 +206,7 @@ export default function HoldInterest() {
       })
     }
 
-    client.onStompError = f => {
+    client.onStompError = (f) => {
       console.error('STOMP error >>>', f)
     }
 
@@ -208,24 +219,22 @@ export default function HoldInterest() {
   }, [JSON.stringify(symbols)])
 
   // 4) 트레이딩 페이지로 이동
-  const handleGoTrading = stock => {
+  const handleGoTrading = (stock) => {
     if (!stock) return
     setStockData(stock)
     navigate('/invest/trading')
   }
 
   // 5) 관심 토글
-  const toggleLike = async marketId => {
+  const toggleLike = async (marketId) => {
     if (!API_BASE_URL) return
     try {
       await fetch(`${API_BASE_URL}/api/interests/markets/${marketId}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       })
-      setInterestList(cur =>
-        cur.map(s =>
-          s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s,
-        ),
+      setInterestList((cur) =>
+        cur.map((s) => (s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s)),
       )
     } catch (err) {
       console.error('관심 토글 실패 >>>', err)
@@ -235,27 +244,22 @@ export default function HoldInterest() {
   // 6) 렌더링
   const isHoldTab = selectedMenu === 'hold'
 
-  const list = isHoldTab
-    ? holdingStocks.filter(item => (item.quantity ?? 0) > 0)
-    : interestList
+  const list = isHoldTab ? holdingStocks.filter((item) => (item.quantity ?? 0) > 0) : interestList
 
   return (
     <S.Container>
-      <S.MoneyCharge
-        onClick={() => navigate('/mypage/charge')}
-        style={{ cursor: 'pointer' }}
-      >
+      <S.MoneyCharge onClick={() => navigate('/mypage/charge')} style={{ cursor: 'pointer' }}>
         <S.LeftBox>
-          <S.IconBox />
+          <MoneyIcon />
           <S.Label>머니 충전</S.Label>
         </S.LeftBox>
         <S.RightBox>
-          <S.Arrow src={rightArrow} alt="이동 아이콘" />
+          <S.Arrow src={rightArrow} alt='이동 아이콘' />
         </S.RightBox>
       </S.MoneyCharge>
 
       <S.TabRow>
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <S.TabButton
             key={tab.key}
             $active={selectedMenu === tab.key}
@@ -272,7 +276,7 @@ export default function HoldInterest() {
         <S.Message style={{ color: '#ff2e4e' }}>{error}</S.Message>
       ) : list.length ? (
         <S.CardList>
-          {list.map(stock =>
+          {list.map((stock) =>
             isHoldTab ? (
               <S.HoldCard
                 key={`${stock.id}-${stock.symbol}`}
@@ -307,23 +311,19 @@ export default function HoldInterest() {
                       <S.StockSub>{stock.symbol}</S.StockSub>
                       <S.InterestPriceRow>
                         <S.InterestPrice $positive={(stock.changeRate ?? 0) >= 0}>
-                          {fmt(stock.price)}원 (
-                          {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
+                          {fmt(stock.price)}원 ({((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                         </S.InterestPrice>
                       </S.InterestPriceRow>
                     </S.LeftBtnText>
                   </S.LeftText>
                 </S.Left>
                 <S.InterestRight
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation()
                   }}
                 >
                   <S.HeartButton onClick={() => toggleLike(stock.marketId)}>
-                    <S.HeartIcon
-                      src={stock.isLiked ? heartOn : heartOff}
-                      alt="하트"
-                    />
+                    <S.HeartIcon src={stock.isLiked ? heartOn : heartOff} alt='하트' />
                   </S.HeartButton>
                 </S.InterestRight>
               </S.InterestCard>
@@ -335,13 +335,11 @@ export default function HoldInterest() {
           {isHoldTab ? (
             <>
               <S.EmptyText>아직 보유한 자산이 없습니다</S.EmptyText>
-              <S.InvestButton onClick={() => navigate('/invest/search')}>
-                투자하기
-              </S.InvestButton>
+              <S.InvestButton onClick={() => navigate('/invest/search')}>투자하기</S.InvestButton>
             </>
           ) : (
             <>
-              <S.HeartEmpty src={heartBlue} alt="빈 하트" />
+              <S.HeartEmpty src={heartBlue} alt='빈 하트' />
               <S.EmptyText>관심 주식이 없어요</S.EmptyText>
             </>
           )}
