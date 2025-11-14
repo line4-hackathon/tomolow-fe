@@ -47,7 +47,7 @@ export default function Chart({
           {dateData[key]} {/* 사용자에게 보이는 메뉴 이름 */}
         </Term>
       ))}
-        {isCandle ? <LineChartIcon onClick={()=>setIsCandle(!isCandle)}/>:<CandleChartIcon onClick={()=>setIsCandle(!isCandle)}/>}
+        {isCandle ? <CandleChartIcon onClick={()=>setIsCandle(!isCandle)}/>:<LineChartIcon onClick={()=>setIsCandle(!isCandle)}/>}
       </DateBar>
     </ChartBox>
   )
