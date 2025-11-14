@@ -1,11 +1,14 @@
 import styled from 'styled-components'
 import NewsCard from './NewsCard'
 import RobotIcon from '@/assets/icons/icon-robot.svg?react'
+import LoadingIcon from "@/assets/images/image-loading-gray.svg?react"
 
 export default function EctAI({data}) {
   return (
     <Box>
       {data ? (
+        <>
+        {data && data.analysis.length>0 ? 
         <>
           <AIBox>
             <AIMessage>
@@ -18,15 +21,16 @@ export default function EctAI({data}) {
           </AIBox>
           <NewsCardBox>
             <a>출처 뉴스</a>
-            {data.sources.map((data)=><NewsCard data={data}/>) }
+            {data.sources && data.sources.length>0 ? <>{data.sources.map((data,index)=><NewsCard key={index} data={data}/>) }</>:<LoadingIcon/>}
             
           </NewsCardBox>
-        </>
-      ) : (
-        <NothingBox>
+          </>
+        :<NothingBox>
           <RobotIcon />
           관련 정보가 부족해 분석에 실패했어요
-        </NothingBox>
+        </NothingBox>}
+       </>): (
+        <LoadingIcon/>
       )}
     </Box>
   )
