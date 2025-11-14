@@ -281,34 +281,30 @@ export default function WaitingOrder() {
     )
 }
 
-// 스타일은 그대로
 
 const clickMotion = css`
-    position: relative;
-    overflow: hidden;
-    transition:
-        background-color 0.1s ease,
-        transform 0.1s ease,
-        font-size 0.1s ease;
+  position: relative;
+  overflow: hidden;
 
+  /* 배경색만 부드럽게 바꾸고, 크기(transform) 애니메이션은 제거 */
+  transition: background-color 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
+    pointer-events: none;
+    border-radius: inherit;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    /* 버튼 크기 변화 없음! */
     &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: rgba(0, 0, 0, 0); /* 기본: 투명 */
-        pointer-events: none;               /* 클릭 방해 X */
-        border-radius: inherit;             /* 버튼 모서리 따라감 */
-        transition: background-color 0.1s ease;
+      background-color: rgba(0, 0, 0, 0.15); /* 눌렀을 때 약간 어두워짐 */
     }
-
-    &:active {
-        font-size: 0.95em;     /* 살짝 줄어든 느낌 */
-        transform: scale(0.98); /* 꾹 눌린 느낌 */
-
-        &::before {
-        background-color: rgba(0, 0, 0, 0.2); /* 어두운 오버레이 */
-        }
-    }
+  }
 `
 const Section = styled.section`
     padding: 0px 16px 32px;

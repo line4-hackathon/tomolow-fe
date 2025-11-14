@@ -13,131 +13,61 @@ import { APIService } from './api'
 import LoadingImage from '@/assets/images/image-loading.svg?react'
 import { useType } from '@/contexts/TypeContext'
 
-import * as StompJs from '@stomp/stompjs'
-import { Client } from '@stomp/stompjs'
-
 export default function InvestSearchPage() {
   const { selectedMenu, handleSelect } = useSelect('TRADING_AMOUNT')
   const [stockData, setStockData] = useState()
   const [searchName, setSearchName] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState(searchName)
-  const type = useType()
+  const type=useType();
   //랭킹 데이터 얻기
- // 1) 웹소켓: 검색중이 아닐 때만 구독
   useEffect(() => {
-    // 검색 중이면 웹소켓 구독하지 않음
-    if (debouncedSearch) return;
-
-    let client;
-    let subscribeUrl;
-
+    let param = false
     switch (selectedMenu) {
       case 'TRADING_AMOUNT':
-        subscribeUrl = '/topic/rank/turnover';
-        break;
+        param = 'turnover'
+        break
       case 'TRADING_VOLUME':
-        subscribeUrl = '/topic/rank/volume';
-        break;
+        param = 'volume'
+        break
       case 'SOARING':
-        subscribeUrl = '/topic/rank/gainers';
-        break;
+        param = 'gainers'
+        break
       case 'PLUMMETING':
-        subscribeUrl = '/topic/rank/losers';
-        break;
-      case 'INTEREST':
-        subscribeUrl = '/topic/interest/markets';
-        break;
-      default:
-        subscribeUrl = null;
+        param = 'losers'
+        break
     }
-
-    if (!subscribeUrl) return;
-
-    client = new Client({
-      brokerURL: 'wss://api.tomolow.store/ws',
-      reconnectDelay: 5000,
-      debug: (str) => console.log('STOMP:', str),
-    });
-
-    client.onConnect = () => {
-      console.log('STOMP connected, subscribing to', subscribeUrl);
-      client.subscribe(subscribeUrl, (message) => {
+    if (searchName) {
+      const Search = async () => {
         try {
-          const parsed = JSON.parse(message.body);
-          // 서버가 배열을 바로 보내거나 { items: [...] }로 보낼 수 있으니 안전하게 처리
-          const list = Array.isArray(parsed) ? parsed : parsed.items ?? parsed.data ?? [];
-          // list가 배열인지 다시 확인
-          if (Array.isArray(list)) {
-            setStockData(list);
-          } else {
-            // 만약 단일 객체를 보내면 배열로 감싸서 처리할 수도 있음
-            setStockData([list]);
-          }
-        } catch (e) {
-          console.error('WS JSON parse error', e);
+          const res = await APIService.private.get(`/api/search`,{params:{query:debouncedSearch}})
+          setStockData(res.data)
+        } catch (error) {
+          console.log('검색어 조회 실패')
         }
-      });
-    };
-
-    client.onStompError = (frame) => {
-      console.error('STOMP ERROR', frame);
-    };
-
-    client.activate();
-
-    return () => {
-      client.deactivate();
-    };
-  }, [selectedMenu, debouncedSearch]);
-
-   // 2) 검색 API: debouncedSearch가 있을 때만 호출
-  useEffect(() => {
-    if (!debouncedSearch) return;
-
-    let isMounted = true;
-    const Search = async () => {
-      try {
-        const res = await APIService.private.get(`/api/search`, {
-          params: { query: debouncedSearch },
-        });
-        if (!isMounted) return;
-        // res.data가 배열인지 확인해서 넣기
-        setStockData(Array.isArray(res.data) ? res.data : res.data.items ?? res.data.results ?? []);
-      } catch (error) {
-        console.log('검색어 조회 실패', error);
       }
-    };
-
-    Search();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [debouncedSearch]);
-    // 3) 관심종목(Interests): selectedMenu === 'INTEREST'이고 검색 중이 아닐 때만 호출
-  useEffect(() => {
-    if (selectedMenu !== 'INTEREST') return;
-    if (debouncedSearch) return; // 검색 중이면 관심목록 조회 안 함
-
-    let isMounted = true;
-    const InteresSearch = async () => {
-      try {
-        const res = await APIService.private.get(`/api/interests/markets`);
-        if (!isMounted) return;
-        setStockData(res.data?.items ?? []);
-      } catch (error) {
-        console.log('관심 주식 조회 실패', error);
+      Search()
+    } else if (param) {
+      const DataCheck = async () => {
+        try {
+          const res = await APIService.private.get(`/api/rank/${param}?limit=50`)
+          setStockData(res.data)
+        } catch (error) {
+          console.log('주식 조회 실패')
+        }
       }
-    };
-
-    InteresSearch();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedMenu, debouncedSearch]);
-
-
+      DataCheck()
+    } else {
+      const InteresSearch = async () => {
+        try {
+          const res = await APIService.private.get(`/api/interests/markets`)
+          setStockData(res.data.items)
+        } catch (error) {
+          console.log('관심 주식 조회 실패')
+        }
+      }
+      InteresSearch()
+    }
+  }, [selectedMenu, debouncedSearch])
   useEffect(() => {
     //디바운싱 검색어 변환 및 적용
     const handler = setTimeout(() => {
@@ -148,41 +78,43 @@ export default function InvestSearchPage() {
       clearTimeout(handler) // 입력이 계속되면 이전 타이머 취소
     }
   }, [searchName])
-let stockUI;
-  if (!stockData) {
-    stockUI = <LoadingImage />;
-  } else if (Array.isArray(stockData) && stockData.length > 0) {
-    stockUI = (
-      <StockCardBox>
-        {stockData.map((data, index) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} key={data.name ?? index}>
-            <StockCard data={data} />
-            {index < stockData.length - 1 && <Line />}
-          </div>
-        ))}
-      </StockCardBox>
-    );
+  let stockUI
+  if (stockData) {
+    if (stockData.length) {
+      stockUI = (
+        <StockCardBox>
+          {stockData.map((data, index) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} key={index}>
+              <StockCard key={data.name} data={data} />
+              {index < stockData.length - 1 && <Line />}
+            </div>
+          ))}
+        </StockCardBox>
+      )
+    } else {
+      stockUI = (
+        <Nothing>
+          {selectedMenu === 'INTEREST' ? (
+            <>
+              <NothingHeart />
+              <p>관심 자산이 없어요</p>
+            </>
+          ) : (
+            <>
+              <NothingIcon />
+              <p>검색된 자산이 없어요</p>
+            </>
+          )}
+        </Nothing>
+      )
+    }
   } else {
-    stockUI = (
-      <Nothing>
-        {selectedMenu === 'INTEREST' ? (
-          <>
-            <NothingHeart />
-            <p>관심 자산이 없어요</p>
-          </>
-        ) : (
-          <>
-            <NothingIcon />
-            <p>검색된 자산이 없어요</p>
-          </>
-        )}
-      </Nothing>
-    );
+    stockUI = <LoadingImage />
   }
 
   return (
     <Page>
-      <Header title='투자' showIcon={type === 'group' ? true : false} path={-1} />
+      <Header title='투자' showIcon={type==="group"? true :false} path={-1}/>
       <Contents>
         <SearchBar
           explain='원하는 자산을 검색하세요'

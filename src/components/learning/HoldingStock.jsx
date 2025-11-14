@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled , {css} from 'styled-components'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -38,7 +38,7 @@ export default function HoldingStock({ stock }) {
 
   return (
     <Card onClick={handleCardClick}>
-      <Logo />
+      <Logo $src={stock.imageUrl} />
       <TextBox>
         <Name>{name}</Name>
         <Detail>
@@ -84,7 +84,16 @@ const Logo = styled.div`
   width: 48px;
   height: 48px;
   border-radius: 33px;
-  background: var(--Primary-900, #263c54);
+  background: var(--Primary-900, #263c54);  /* 기본 원형 색 */
+
+  ${({ $src }) =>
+    $src &&
+    css`
+      background-image: url(${$src});
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    `}
 `
 
 const TextBox = styled.div`
@@ -119,7 +128,7 @@ const Number = styled.div`
 `
 
 const Price = styled.div`
-  color: ${({ $up }) => ($up ? '#FF2E4E' : '#2B5276')};
+  color: ${({ $up }) => ($up ? '#FF2E4E' : '#0084FE')};
   font-family: Inter;
   font-size: 12px;
   font-style: normal;

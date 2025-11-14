@@ -22,7 +22,7 @@ export default function HoldingStockPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // 📌 보유 자산 불러오기
+  // 보유 자산 불러오기
   useEffect(() => {
     const fetchHolding = async () => {
       const token = getAccessToken()
