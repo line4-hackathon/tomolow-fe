@@ -68,7 +68,7 @@ const GroupHoldingsPage = () => {
                   }}
                 >
                   <Left>
-                    <Img src={item.marketImgUrl} />
+                    {item.marketImgUrl ? <Img src={item.marketImgUrl} /> : <TempImg />}{' '}
                     <LeftText>
                       <Name>{item.marketName}</Name>
                       <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
@@ -120,10 +120,16 @@ const Item = styled.div`
   cursor: pointer;
 `
 
+const TempImg = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 33px;
+  background: #263c54;
+`
 const Img = styled.img`
   width: 48px;
   height: 48px;
-  border-radius: 999;
+  border-radius: 33px;
   border: none;
 `
 const Left = styled.div`
