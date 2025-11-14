@@ -194,6 +194,7 @@ const Right = styled.div`
   display: flex;
   flex-direction: row;
   gap: 8px;
+  margin: 4px 0;
 `
 
 const CancelButton = styled.button`
