@@ -53,6 +53,7 @@ export default function SelectDatePage() {
   const [startDate, setStartDate] = useState(todayISO)
   const [endDate, setEndDate] = useState(todayISO)
   const [chartData, setChartData] = useState([])
+  const [isCandle,setIsCandle]=useState(true)
 
   useEffect(() => {
     if (stock && stock.symbol) {
@@ -110,9 +111,35 @@ export default function SelectDatePage() {
 
     const fetchChartData = async () => {
       try {
-        const res = await APIService.private.get(
+        let res
+        if(isCandle){
+          res = await APIService.private.get(
           `/api/candles/${symbol}?tf=${tf}`,
         )
+        }else{
+          let param;
+          switch (selectedMenu) {
+          case 'WEEK':
+            param = await 7
+            break
+          case 'MONTH':
+            param = await 30
+            break
+          case 'THREEMONTH':
+            param = await 90
+            break
+          case 'SIXMONTH':
+            param = await 180
+            console.log("180일")
+            break
+          case 'YEAR':
+            param = await 365
+            break
+        }
+          res = await APIService.private.get(
+          `/api/candles/${symbol}?tf=D1&limit=${param}`,
+        )
+        }
         setChartData(res.data)
       } catch (error) {
         console.error('차트 조회 실패', error)
@@ -135,6 +162,8 @@ export default function SelectDatePage() {
           chartData={chartData}
           setStartDate={setStartDate} // 이 안에서 ISO나 Date를 넣어줘도 됨
           setEndDate={setEndDate}
+          isCandle={isCandle}
+          setIsCandle={setIsCandle}
         />
 
         <DateCard>

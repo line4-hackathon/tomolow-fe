@@ -21,6 +21,7 @@ export const Messages = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 50px;
   margin-bottom: 32px;
 `
 
