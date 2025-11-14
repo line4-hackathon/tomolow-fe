@@ -44,16 +44,33 @@ const GroupWaitingOrdersPage = () => {
   }, [groupId])
 
   // 정정 버튼 클릭시
-  const handleEditClick = (item) => {
-    setStockData({
-      marketId: item.marketId,
-    })
+  const handleEditClick = async (item) => {
+    try {
+      const res = await axios.post(
+        `${apiUrl}/api/group/${groupId}/pending`,
+        { orderId: item.orderId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
 
-    navigate(`/group/invest/correction`, {
-      state: { orderId: item.orderId },
-    })
+      const price = res.data.data
+
+      setStockData({
+        marketId: item.marketId,
+        marketName: item.marketName,
+        name: item.marketName,
+        symbol: item.marketSymbol,
+        imageUrl: item.imageUrl,
+        price: price,
+      })
+
+      // 3) 정정 페이지 이동
+      navigate(`/group/invest/correction`, {
+        state: { orderId: item.orderId },
+      })
+    } catch (err) {
+      console.error('가격 조회 실패:', err)
+    }
   }
-
   // 취소 버튼 클릭시
   const handleCancelClick = (item) => {
     setCancelItem(item)
