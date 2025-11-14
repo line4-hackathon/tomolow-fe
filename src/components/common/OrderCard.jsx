@@ -12,7 +12,7 @@ export default function OrderCard({ data }) {
 
   return (
     <Card>
-      {data.imageUrl ? <img src={data.imageUrl}/>:  <Logo />}
+      <Logo src={data.imageUrl}/>
       <InfoBox>
         <Amount>{data.quantity}주 {data.tradeType==="BUY" ? "매수":"매도"}</Amount>
         <Price>주당 {data.price.toLocaleString()}원</Price>
@@ -38,7 +38,7 @@ const Card = styled.div`
   /* Bottom */
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 `
-const Logo = styled.div`
+const Logo = styled.img`
   display: flex;
   justify-content: center;
   align-items: center;

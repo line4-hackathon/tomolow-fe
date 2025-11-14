@@ -4,6 +4,8 @@ import { DateTypes, LineDateTypes } from '@/pages/invest/selectType'
 import CandleChart from './CandleCharts'
 import { useEffect, useState } from 'react'
 import StockLineChart from './LineChart'
+import LineChartIcon from "@/assets/icons/icon-lineChart.svg?react"
+import CandleChartIcon from "@/assets/icons/icon-candleChart.svg?react"
 
 export default function Chart({
   selectedDate,
@@ -16,8 +18,7 @@ export default function Chart({
   setIsCandle,
 }) {
   const [dateData,setDateData]=useState(DateTypes)
-  const handleChange=()=>{
-    setIsCandle(!isCandle)
+  useEffect(()=>{
     if(isCandle){
       if(selectedDate=='SIXMONTH') setSelectedDate('THREEMONTH')
       setDateData(DateTypes)
@@ -25,7 +26,8 @@ export default function Chart({
       if(selectedDate=='DAY') setSelectedDate('WEEK')
       setDateData(LineDateTypes)
     }
-  }
+  },[isCandle])
+
     
   return (
     <ChartBox>
@@ -35,18 +37,17 @@ export default function Chart({
         <StockLineChart chartData={chartData}/>
       )}
       <DateBar>
-
         {Object.keys(dateData).map((key) => (
-          <Term
-            key={key}
-            onClick={() => setSelectedDate(key)}
-            // 3. 현재 선택된 메뉴 감지 및 스타일 적용
-            $isSelected={selectedDate === key ? true : false}
-          >
-            {dateData[key]} {/* 사용자에게 보이는 메뉴 이름 */}
-          </Term>
-        ))}
-        <ChartChangeButton onClick={()=>handleChange()}>체인지</ChartChangeButton>
+        <Term
+          key={key}
+          onClick={() => setSelectedDate(key)}
+          // 3. 현재 선택된 메뉴 감지 및 스타일 적용
+          $isSelected={selectedDate === key ? true : false}
+        >
+          {dateData[key]} {/* 사용자에게 보이는 메뉴 이름 */}
+        </Term>
+      ))}
+        {isCandle ? <LineChartIcon onClick={()=>setIsCandle(!isCandle)}/>:<CandleChartIcon onClick={()=>setIsCandle(!isCandle)}/>}
       </DateBar>
     </ChartBox>
   )
