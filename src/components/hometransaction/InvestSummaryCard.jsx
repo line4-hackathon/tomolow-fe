@@ -11,7 +11,7 @@ const InvestSummaryCard = ({ summary }) => {
       <SummaryText>
         <Title>기간 내 손익</Title>
         <BigText>{`${profit?.toLocaleString()}원`}</BigText>
-        <Rate color={rateColor}>{`(${profitRate}%)`}</Rate>
+        <Rate color={rateColor}>{`(${(profitRate * 100).toFixed(2)}%)`}</Rate>
       </SummaryText>
       <Detail>
         <Row>

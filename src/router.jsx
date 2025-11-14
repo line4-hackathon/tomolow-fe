@@ -28,12 +28,13 @@ import LearningPage from './pages/learning/ChatbotPage'
 import InvestHoldingPage from './pages/learning/HoldingStockPage'
 import SelectDatePage from './pages/learning/SelectDatePage'
 import SaveChatPage from './pages/learning/SaveChatPage'
+import LandingPage from './pages/signup/LandingPage'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
-    children: [{ index: true, element: <LoginPage /> }],
+    children: [{ index: true, element: <LandingPage /> }],
   },
   {
     path: '/login',

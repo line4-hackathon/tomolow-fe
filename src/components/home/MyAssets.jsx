@@ -15,7 +15,7 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
-const parseJwt = token => {
+const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split('.')[1]))
   } catch {
@@ -23,9 +23,9 @@ const parseJwt = token => {
   }
 }
 
-const safeSym = s => (s || '').trim().toUpperCase()
+const safeSym = (s) => (s || '').trim().toUpperCase()
 
-const toSockJsUrl = base => {
+const toSockJsUrl = (base) => {
   try {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) u.pathname = u.pathname.replace(/\/ws$/, '/ws-sockjs')
@@ -36,11 +36,11 @@ const toSockJsUrl = base => {
     return 'https://api.tomolow.store/ws-sockjs'
   }
 }
-const fmt = n => {
+const fmt = (n) => {
   if (typeof n !== 'number' || Number.isNaN(n)) return '0'
   return Math.round(n).toLocaleString('ko-KR')
 }
-const pct = n => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
+const pct = (n) => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
 
 export default function MyAssets({ mode = 'personal', title = '내 자산 현황', assetData }) {
   const [loading, setLoading] = useState(mode !== 'group')
@@ -105,7 +105,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
   // 2) 실시간 구독
   const stompRef = useRef(null)
 
-  const symbols = useMemo(() => items.map(i => safeSym(i.symbol)).filter(Boolean), [items])
+  const symbols = useMemo(() => items.map((i) => safeSym(i.symbol)).filter(Boolean), [items])
 
   const userId = useMemo(() => {
     const t = getAccessToken()
@@ -131,15 +131,14 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
     client.onConnect = () => {
       // 심볼 별 가격 실시간
-      symbols.forEach(sym => {
+      symbols.forEach((sym) => {
         const upper = safeSym(sym)
 
-        client.subscribe(`/topic/ticker/${upper}`, frame => {
+        client.subscribe(`/topic/ticker/${upper}`, (frame) => {
           try {
             const msg = JSON.parse(frame.body || '{}')
 
-            const rawPrice =
-              msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
+            const rawPrice = msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
             const price = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
 
             const rawAmt = msg.pnlAmount
@@ -148,8 +147,8 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
             const rawRate = msg.pnlRate ?? msg.changeRate
             const pnlRate = typeof rawRate === 'number' ? rawRate : Number(rawRate)
 
-            setItems(prev =>
-              prev.map(it =>
+            setItems((prev) =>
+              prev.map((it) =>
                 safeSym(it.symbol) === upper
                   ? {
                       ...it,
@@ -188,7 +187,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
     let totalInvestment = 0
     let totalCurrentValue = 0
 
-    items.forEach(it => {
+    items.forEach((it) => {
       const qty = Number(it.quantity || 0)
       const avg = Number(it.avgPrice || 0)
       const cur = Number(it.currentPrice || avg)
@@ -200,7 +199,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
     const totalPnlAmount = totalCurrentValue - totalInvestment
     const totalPnlRate = totalInvestment ? totalPnlAmount / totalInvestment : 0
 
-    setPortfolio(prev => ({
+    setPortfolio((prev) => ({
       ...prev,
       totalInvestment,
       totalCurrentValue,
@@ -238,7 +237,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
           <LegendRow>
             <LegendTop>
               <LegendItem>
-                <LegendDot $color="#4880AF" />
+                <LegendDot $color='#4880AF' />
                 <LegendText>투자</LegendText>
               </LegendItem>
               <LegendValue>{fmt(investAmount)}원</LegendValue>
@@ -246,7 +245,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
             <LegendBottom>
               <LegendItem>
-                <LegendDot $color="#E8EEF6" />
+                <LegendDot $color='#E8EEF6' />
                 <LegendText>현금</LegendText>
               </LegendItem>
               <LegendValue>{fmt(cashAmount)}원</LegendValue>
@@ -273,15 +272,17 @@ const Container = styled.section`
   display: flex;
   flex-direction: column;
   background: #fff;
-  padding: ${({ mode }) =>
-    mode === 'group'
-      ? '16px 16px 16px 16px'
-      : '32px 16px 16px 16px'};
+  padding: ${({ mode }) => (mode === 'group' ? '16px 16px 16px 16px' : '32px 16px 16px 16px')};
   gap: 16px;
 `
-const SectionTitle = styled.h3`
-  color: #2b5276;
+const SectionTitle = styled.p`
+  color: var(--Neutral-900, #333);
+  /* Head-Medium */
+  font-family: Inter;
   font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 28px;
 `
 const LoadingText = styled.p`
   font-size: 14px;
