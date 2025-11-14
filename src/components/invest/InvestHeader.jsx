@@ -1,5 +1,3 @@
-// src/components/invest/InvestHeader.jsx (예시 경로)
-
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'

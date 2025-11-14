@@ -1,5 +1,3 @@
-// src/components/invest/StockInfo.jsx (예시 경로)
-
 import React, { useEffect, useRef, useState } from 'react'
 import useStockStore from '@/stores/stockStores'
 import styled from 'styled-components'

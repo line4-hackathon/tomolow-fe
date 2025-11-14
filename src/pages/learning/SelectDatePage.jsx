@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import Header from '@/components/common/FixedHeader'
+import Header from '@/components/common/Header'
 import StockInfo from '@/components/invest/stockInfo'
 import Chart from '@/components/invest/chart'
 import useSelect from '@/hooks/select'
@@ -103,6 +103,7 @@ export default function SelectDatePage() {
       WEEK: 'W1',
       MONTH: 'M1',
       THREEMONTH: 'M3',
+      SIXMONTH: 'M6',
       YEAR: 'Y1',
     }
 
@@ -150,7 +151,7 @@ export default function SelectDatePage() {
 
   return (
     <Page>
-      <Header title="학습"  showIcon={true}/>
+      <Header title="학습" showIcon={true} />
       <Contents>
         <StockInfo />
 
@@ -175,7 +176,6 @@ export default function SelectDatePage() {
             <DateValue>{formatKoreanDate(endDate)}</DateValue>
           </DateRow>
         </DateCard>
-
         <BottomBar>
           <LoadButton onClick={handleLoad}>불러오기</LoadButton>
         </BottomBar>
@@ -203,7 +203,6 @@ const Contents = styled.div`
 `
 
 const DateCard = styled.div`
-  margin-top: 16px;
   display: flex;
   width: 310px;
   padding: var(--Spacing-L, 16px) 16px;
