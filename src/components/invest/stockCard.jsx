@@ -46,7 +46,7 @@ export default function StockCard({ data }) {
 
   return (
     <Card>
-      {data.imgUrl ? <img src={data.imgUrl} /> : <Logo onClick={() => toTrading()} />}
+      <Logo onClick={() => toTrading()} src={data.imgUrl}/>
       <TextBox onClick={() => toTrading()}>
         <Name>{data.name}</Name>
         <Detail>
@@ -76,7 +76,7 @@ const Card = styled.div`
     cursor: pointer;
   }
 `
-const Logo = styled.div`
+const Logo = styled.img`
   display: flex;
   justify-content: center;
   align-items: center;
