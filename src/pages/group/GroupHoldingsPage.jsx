@@ -60,7 +60,6 @@ const GroupHoldingsPage = () => {
                   onClick={() => {
                     console.log('클릭한 종목:', item)
 
-                    resetForm()
                     setStockData({
                       marketId: item.marketId,
                       name: item.marketName,
