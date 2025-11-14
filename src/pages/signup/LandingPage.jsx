@@ -48,7 +48,6 @@ const Container = styled.div`
 `
 
 const BigText = styled.p`
-  font-family: Allimjang;
   color: #fff;
   font-family: Inter;
   font-size: 36px;
