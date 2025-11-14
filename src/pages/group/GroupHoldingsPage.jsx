@@ -14,7 +14,7 @@ const GroupHoldingsPage = () => {
   const { groupId } = useParams()
   const [loading, setLoading] = useState(false)
   const [holdingList, setHoldingList] = useState([])
-  const { setStockData } = useStockStore()
+  const { setStockData, resetForm } = useStockStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const token = localStorage.getItem('accessToken')
 
@@ -58,8 +58,12 @@ const GroupHoldingsPage = () => {
                 <Item
                   key={item.marketId}
                   onClick={() => {
+                    console.log('클릭한 종목:', item)
+
+                    resetForm()
                     setStockData({
                       marketId: item.marketId,
+                      name: item.marketName,
                       marketName: item.marketName,
                       symbol: item.marketSymbol,
                       imageUrl: item.marketImgUrl,
