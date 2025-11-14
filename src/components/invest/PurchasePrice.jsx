@@ -4,13 +4,16 @@ import useSelect from '@/hooks/select'
 import { useEffect } from 'react'
 import useStockStore from '@/stores/stockStores'
 
-export default function PurchasePrice({ onClick, price, setPrice,setIsFocus }) {
+export default function PurchasePrice({ onClick, price, setPrice,setIsFocus,isCorrection }) {
   const { selectedMenu, handleSelect } = useSelect('CUSTOM')
   const {stockData,setStockData}=useStockStore();
   useEffect(() => {
     if (selectedMenu === 'MARKET') {
       setPrice(stockData.price)
-      setIsFocus(false)
+      if(!isCorrection){
+        setIsFocus(false)
+      }
+      
     }
   }, [selectedMenu])
   return (

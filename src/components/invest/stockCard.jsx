@@ -9,7 +9,7 @@ import useStockStore from '@/stores/stockStores'
 import { useType } from '@/contexts/TypeContext'
 
 export default function StockCard({ data }) {
-  const [isInterest, setIsInterest] = useState(data.interested == '' ? data.interseted : true)
+  const [isInterest, setIsInterest] = useState(data.interested)
   const { stockData, setStockData } = useStockStore()
   const type=useType();
   let textColor = ''

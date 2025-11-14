@@ -46,7 +46,7 @@ export default function InvestCorrectionPage() {
     <Page>
       <InvestHeader />
       <PurchaseBox>
-        <PurchasePrice price={price} setPrice={setPrice} />
+        <PurchasePrice price={price} setPrice={setPrice} isCorrection={true}/>
         <a>보유 현금 : {myCash.toLocaleString()}원</a>
       </PurchaseBox>
       <Numpad isFocus={true} currentValue={price} setPrice={setPrice} price={price} />
