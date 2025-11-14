@@ -154,8 +154,8 @@ export default function HoldInterest() {
   // 2) 실시간 심볼 리스트
   const symbols = useMemo(() => {
     const s = new Set()
-    holdingStocks.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
-    interestList.forEach(v => v.symbol && s.add(safeSym(v.symbol)))
+    holdingStocks.forEach((v) => v.symbol && s.add(safeSym(v.symbol)))
+    interestList.forEach((v) => v.symbol && s.add(safeSym(v.symbol)))
     return Array.from(s)
   }, [holdingStocks, interestList])
 
@@ -236,7 +236,7 @@ export default function HoldInterest() {
       })
     }
 
-    client.onStompError = f => {
+    client.onStompError = (f) => {
       console.error('STOMP error >>>', f)
     }
 
@@ -250,24 +250,22 @@ export default function HoldInterest() {
   }, [JSON.stringify(symbols)])
 
   // 4) 트레이딩 페이지로 이동
-  const handleGoTrading = stock => {
+  const handleGoTrading = (stock) => {
     if (!stock) return
     setStockData(stock)
     navigate('/invest/trading')
   }
 
   // 5) 관심 토글
-  const toggleLike = async marketId => {
+  const toggleLike = async (marketId) => {
     if (!API_BASE_URL) return
     try {
       await fetch(`${API_BASE_URL}/api/interests/markets/${marketId}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       })
-      setInterestList(cur =>
-        cur.map(s =>
-          s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s,
-        ),
+      setInterestList((cur) =>
+        cur.map((s) => (s.marketId === marketId ? { ...s, isLiked: !s.isLiked } : s)),
       )
     } catch (err) {
       console.error('관심 토글 실패 >>>', err)
@@ -282,21 +280,18 @@ export default function HoldInterest() {
 
   return (
     <S.Container>
-      <S.MoneyCharge
-        onClick={() => navigate('/mypage/charge')}
-        style={{ cursor: 'pointer' }}
-      >
+      <S.MoneyCharge onClick={() => navigate('/mypage/charge')} style={{ cursor: 'pointer' }}>
         <S.LeftBox>
           <S.MoneyIcon src={moneycharge} alt="머니 충전 아이콘" />
           <S.Label>머니 충전</S.Label>
         </S.LeftBox>
         <S.RightBox>
-          <S.Arrow src={rightArrow} alt="이동 아이콘" />
+          <S.Arrow src={rightArrow} alt='이동 아이콘' />
         </S.RightBox>
       </S.MoneyCharge>
 
       <S.TabRow>
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <S.TabButton
             key={tab.key}
             $active={selectedMenu === tab.key}
@@ -313,7 +308,7 @@ export default function HoldInterest() {
         <S.Message style={{ color: '#ff2e4e' }}>{error}</S.Message>
       ) : list.length ? (
         <S.CardList>
-          {list.map(stock =>
+          {list.map((stock) =>
             isHoldTab ? (
               <S.HoldCard
                 key={`${stock.id}-${stock.symbol}`}
@@ -359,15 +354,12 @@ export default function HoldInterest() {
                   </S.LeftText>
                 </S.Left>
                 <S.InterestRight
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation()
                   }}
                 >
                   <S.HeartButton onClick={() => toggleLike(stock.marketId)}>
-                    <S.HeartIcon
-                      src={stock.isLiked ? heartOn : heartOff}
-                      alt="하트"
-                    />
+                    <S.HeartIcon src={stock.isLiked ? heartOn : heartOff} alt='하트' />
                   </S.HeartButton>
                 </S.InterestRight>
               </S.InterestCard>
@@ -379,9 +371,7 @@ export default function HoldInterest() {
           {isHoldTab ? (
             <>
               <S.EmptyText>아직 보유한 자산이 없습니다</S.EmptyText>
-              <S.InvestButton onClick={() => navigate('/invest/search')}>
-                투자하기
-              </S.InvestButton>
+              <S.InvestButton onClick={() => navigate('/invest/search')}>투자하기</S.InvestButton>
             </>
           ) : (
             <>

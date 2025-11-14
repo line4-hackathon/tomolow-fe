@@ -1,23 +1,24 @@
-import useStockStore from "@/stores/stockStores";
-import styled from "styled-components";
+import useStockStore from '@/stores/stockStores'
+import styled from 'styled-components'
 
 export default function StockInfo() {
-  const {stockData,setStockData}=useStockStore();
+  const { stockData, setStockData } = useStockStore()
+
   return (
     <Box>
-      <Stock $fontSize="20px">{stockData.name}</Stock>
-      <Stock $fontSize="24px">{stockData.price ?  stockData.price.toLocaleString():"0"}원</Stock>
+      <Stock $fontSize='20px'>{stockData.name}</Stock>
+      <Stock $fontSize='24px'>{stockData.price ? stockData.price.toLocaleString() : '0'}원</Stock>
       <Yesterday>
-        어제보다 <a style={{ color: "#FF2E4E" }}>+{stockData.changePrice.toLocaleString()}원</a>
+        어제보다 <a style={{ color: '#FF2E4E' }}>+{stockData.changePrice.toLocaleString()}원</a>
       </Yesterday>
       <MoveAverage>
-        이동평균선 <a style={{ color: "#57B789" }}>5 </a>
-        <a style={{ color: "#FF2E4E" }}>20 </a>
-        <a style={{ color: "#FB9F4D" }}>60 </a>
+        이동평균선 <a style={{ color: '#57B789' }}>5 </a>
+        <a style={{ color: '#FF2E4E' }}>20 </a>
+        <a style={{ color: '#FB9F4D' }}>60 </a>
         120
       </MoveAverage>
     </Box>
-  );
+  )
 }
 
 const Box = styled.div`
@@ -26,7 +27,7 @@ const Box = styled.div`
   text-align: left;
   padding-left: 16px;
   width: 359px;
-`;
+`
 const Stock = styled.div`
   color: var(--Neutral-900, #333);
   /* Head-Medium */
@@ -35,7 +36,7 @@ const Stock = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: 28px; /* 140% */
-`;
+`
 const Yesterday = styled.div`
   color: ${({ $fontColor }) => $fontColor};
 
@@ -45,11 +46,11 @@ const Yesterday = styled.div`
   font-style: normal;
   font-weight: 400;
   line-height: 16px; /* 133.333% */
-`;
+`
 const MoveAverage = styled.div`
   font-family: Inter;
   font-size: 8px;
   font-style: normal;
   font-weight: 400;
   line-height: 16px; /* 200% */
-`;
+`

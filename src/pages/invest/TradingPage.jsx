@@ -36,8 +36,6 @@ export default function InvestTradingPage() {
   const [toastMessage, setToastMessage] = useState('')
   const [isHold, setIsHold] = useState(false)
   const [isCandle, setIsCandle] = useState(true)
-  
-  
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
@@ -150,7 +148,7 @@ export default function InvestTradingPage() {
     const chartDataGet = async () => {
       let param
       let apiUrl
-      if(isCandle){
+      if (isCandle) {
         switch (selectedDate) {
           case 'DAY':
             param = await 'D1'
@@ -168,8 +166,8 @@ export default function InvestTradingPage() {
             param = await 'Y1'
             break
         }
-        apiUrl=`/api/candles/${stockData.symbol}?tf=${param}`
-      } else{
+        apiUrl = `/api/candles/${stockData.symbol}?tf=${param}`
+      } else {
         switch (selectedDate) {
           case 'WEEK':
             param = await 7
@@ -187,9 +185,9 @@ export default function InvestTradingPage() {
             param = await 365
             break
         }
-        apiUrl=`/api/candles/${stockData.symbol}?tf=D1&limit=${param}`
+        apiUrl = `/api/candles/${stockData.symbol}?tf=D1&limit=${param}`
       }
-      
+
       try {
         const res = await APIService.private.get(apiUrl)
         setChartData(res.data)
@@ -198,21 +196,39 @@ export default function InvestTradingPage() {
       }
     }
     chartDataGet()
-  }, [selectedDate,stockData.symbol,isCandle])
+  }, [selectedDate, stockData.symbol, isCandle])
+
   //스톡 인포 얻기
-  useEffect(()=>{
-    const stockInfoGet=async ()=>{
-      try{
-        const res=await APIService.private.get(`store/api/ticker/${stockData.symbol}`)
-        setStockData(res.data)
-      }catch(error){
-        console.log("스톡 인포 얻기 실패")
+  useEffect(() => {
+    if (!stockData.symbol) {
+      console.log('symbol 없음 → ticker API 호출 안 함')
+      return
+    }
+
+    const stockInfoGet = async () => {
+      try {
+        const res = await APIService.private.get(`/api/ticker/${stockData.symbol}`)
+
+        setStockData((prev) => ({
+          ...prev,
+          tradePrice: res.data.tradePrice,
+          changeRate: res.data.changeRate,
+          changePrice: res.data.changePrice,
+          prevClose: res.data.prevClose,
+          accVolume: res.data.accVolume,
+          accTradePrice24h: res.data.accTradePrice24h,
+          tradeTimestamp: res.data.tradeTimestamp,
+        }))
+      } catch (error) {
+        console.log('스톡 인포 얻기 실패')
       }
     }
+
     stockInfoGet()
-  },[stockData.symbol])
+  }, [stockData.symbol])
   //주식 보유 여부 조회
-  useEffect(()=>{
+  useEffect(() => {
+    if (!stockData.marketId) return
     const holdingDataGet = async () => {
       try {
         const res = await APIService.private.get(`/api/market/${stockData.marketId}/holding`)
@@ -222,10 +238,11 @@ export default function InvestTradingPage() {
       }
     }
     holdingDataGet()
-  },[stockData.marketId])
+  }, [stockData.marketId])
 
   //기타 데이터 얻기
   useEffect(() => {
+    if (!stockData.marketId) return
     const etcGet = async () => {
       try {
         let res
@@ -244,7 +261,8 @@ export default function InvestTradingPage() {
             break
           case 'AI':
             res = await APIService.private.post(`/api/market/${stockData.marketId}/analysis`, {
-             currentPrice: stockData.price, previousClosePrice: stockData.changePrice
+              currentPrice: stockData.price,
+              previousClosePrice: stockData.changePrice,
             })
             break
         }

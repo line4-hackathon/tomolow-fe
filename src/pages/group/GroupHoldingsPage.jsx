@@ -14,7 +14,7 @@ const GroupHoldingsPage = () => {
   const { groupId } = useParams()
   const [loading, setLoading] = useState(false)
   const [holdingList, setHoldingList] = useState([])
-  const { setStockData } = useStockStore()
+  const { setStockData, resetForm } = useStockStore()
   const apiUrl = import.meta.env.VITE_API_BASE_URL
   const token = localStorage.getItem('accessToken')
 
@@ -58,8 +58,11 @@ const GroupHoldingsPage = () => {
                 <Item
                   key={item.marketId}
                   onClick={() => {
+                    console.log('클릭한 종목:', item)
+
                     setStockData({
                       marketId: item.marketId,
+                      name: item.marketName,
                       marketName: item.marketName,
                       symbol: item.marketSymbol,
                       imageUrl: item.marketImgUrl,
@@ -68,7 +71,7 @@ const GroupHoldingsPage = () => {
                   }}
                 >
                   <Left>
-                    <Img src={item.marketImgUrl} />
+                    {item.marketImgUrl ? <Img src={item.marketImgUrl} /> : <TempImg />}{' '}
                     <LeftText>
                       <Name>{item.marketName}</Name>
                       <Quantity>{`${item.quantity.toLocaleString()}주`}</Quantity>
@@ -120,10 +123,16 @@ const Item = styled.div`
   cursor: pointer;
 `
 
+const TempImg = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 33px;
+  background: #263c54;
+`
 const Img = styled.img`
   width: 48px;
   height: 48px;
-  border-radius: 999;
+  border-radius: 33px;
   border: none;
 `
 const Left = styled.div`
