@@ -45,7 +45,7 @@ export default function InvestSearchPage() {
         subscribeUrl = '/topic/rank/losers';
         break;
       case 'INTEREST':
-        subscribeUrl = '/topic/interests/markets';
+        subscribeUrl = '/topic/interest/markets';
         break;
       default:
         subscribeUrl = null;

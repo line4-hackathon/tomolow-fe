@@ -113,7 +113,7 @@ export default function InvestPurchasePage() {
     <Page>
       <InvestHeader />
       <PurchaseBox>
-        <PurchasePrice onClick={() => setIsFocus(true)} price={price} setPrice={setPrice} />
+        <PurchasePrice onClick={() => setIsFocus(true)} price={price} setPrice={setPrice} setIsFocus={setIsFocus}/>
         <PurchasCount
           onClick={() => setIsFocus(false)}
           count={count}

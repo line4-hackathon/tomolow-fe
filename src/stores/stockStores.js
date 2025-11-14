@@ -41,6 +41,7 @@ const useStockStore = create(
             accTradePrice24h: '',
             tradeTimestamp: '',
             interested: '',
+            imgUrl:''
           },
         }),
     }),
