@@ -43,10 +43,16 @@ export default function StockCard({ data }) {
       navigate('/invest/trading')
     }
   }
+  let src
+  if(data.imgUrl){
+     src=data.imgUrl
+  } else if(data.imageUrl){
+    src=data.imageUrl
+  }
 
   return (
     <Card>
-      {data.imgUrl ? <Logo onClick={() => toTrading()} src={data.imgUrl}/>:<LogoCircle onClick={() => toTrading()}/>}
+      {src ? <Logo onClick={() => toTrading()} src={src}/>:<LogoCircle onClick={() => toTrading()}/>}
       
       <TextBox onClick={() => toTrading()}>
         <Name>{data.name}</Name>

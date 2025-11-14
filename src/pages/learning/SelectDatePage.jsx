@@ -107,7 +107,6 @@ export default function SelectDatePage() {
     }
 
     const tf = tfMap[selectedMenu]
-    if (!tf) return
 
     const fetchChartData = async () => {
       try {
@@ -147,7 +146,7 @@ export default function SelectDatePage() {
     }
 
     fetchChartData()
-  }, [selectedMenu, symbol])
+  }, [selectedMenu, symbol,isCandle])
 
   return (
     <Page>

@@ -209,7 +209,7 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
             opacity={0.5}
             shape={(props) => {
               const { x, width, payload } = props
-              const color = payload.close > payload.open ? '#2f6ef8' : '#e74c3c'
+              const color = payload.close > payload.open ? '#e74c3c' : '#2f6ef8'
 
               const baseY = 380 // 거래량 바의 기준선 (아래쪽)
               const maxBarHeight = 60 // 거래량 막대 최대 높이
