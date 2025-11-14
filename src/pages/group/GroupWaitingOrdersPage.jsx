@@ -44,16 +44,33 @@ const GroupWaitingOrdersPage = () => {
   }, [groupId])
 
   // 정정 버튼 클릭시
-  const handleEditClick = (item) => {
-    setStockData({
-      marketId: item.marketId,
-    })
+  const handleEditClick = async (item) => {
+    try {
+      const res = await axios.post(
+        `${apiUrl}/api/group/${groupId}/pending`,
+        { orderId: item.orderId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
 
-    navigate(`/group/invest/correction`, {
-      state: { orderId: item.orderId },
-    })
+      const price = res.data.data
+
+      setStockData({
+        marketId: item.marketId,
+        marketName: item.marketName,
+        name: item.marketName,
+        symbol: item.marketSymbol,
+        imageUrl: item.imageUrl,
+        price: price,
+      })
+
+      // 3) 정정 페이지 이동
+      navigate(`/group/invest/correction`, {
+        state: { orderId: item.orderId },
+      })
+    } catch (err) {
+      console.error('가격 조회 실패:', err)
+    }
   }
-
   // 취소 버튼 클릭시
   const handleCancelClick = (item) => {
     setCancelItem(item)
@@ -159,7 +176,7 @@ const Img = styled.img`
   width: 48px;
   height: 48px;
   border: none;
-  border-radius: 100;
+  border-radius: 33px;
 `
 const Left = styled.div`
   display: flex;
@@ -194,6 +211,7 @@ const Right = styled.div`
   display: flex;
   flex-direction: row;
   gap: 8px;
+  margin: 4px 0;
 `
 
 const CancelButton = styled.button`
@@ -207,6 +225,32 @@ const CancelButton = styled.button`
   border-radius: var(--Radius-S, 8px);
   background: var(--Neutral-100, #e7e7e7);
   cursor: pointer;
+
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;
+    transform: scale(0.98);
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 `
 
 const EditButton = styled.button`
@@ -220,4 +264,30 @@ const EditButton = styled.button`
   border-radius: var(--Radius-S, 8px);
   background: var(--Primary-500, #4880af);
   cursor: pointer;
+
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;
+    transform: scale(0.98);
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 `

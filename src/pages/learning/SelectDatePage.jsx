@@ -103,11 +103,11 @@ export default function SelectDatePage() {
       WEEK: 'W1',
       MONTH: 'M1',
       THREEMONTH: 'M3',
+      SIXMONTH: 'M6',
       YEAR: 'Y1',
     }
 
     const tf = tfMap[selectedMenu]
-    if (!tf) return
 
     const fetchChartData = async () => {
       try {
@@ -147,11 +147,11 @@ export default function SelectDatePage() {
     }
 
     fetchChartData()
-  }, [selectedMenu, symbol])
+  }, [selectedMenu, symbol,isCandle])
 
   return (
     <Page>
-      <Header title='학습' showIcon={true} path={-1}/>
+      <Header title="학습" showIcon={true} />
       <Contents>
         <StockInfo />
 
@@ -176,7 +176,6 @@ export default function SelectDatePage() {
             <DateValue>{formatKoreanDate(endDate)}</DateValue>
           </DateRow>
         </DateCard>
-
         <BottomBar>
           <LoadButton onClick={handleLoad}>불러오기</LoadButton>
         </BottomBar>
@@ -204,7 +203,6 @@ const Contents = styled.div`
 `
 
 const DateCard = styled.div`
-  margin-top: 16px;
   display: flex;
   width: 310px;
   padding: var(--Spacing-L, 16px) 16px;

@@ -46,6 +46,46 @@ const GroupHoldingsPage = () => {
     getHoldingLists()
   }, [groupId])
 
+  const handleItemClick = async (item) => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/ticker/${item.marketSymbol}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.data.success) {
+        const d = res.data.data
+        resetForm()
+        setStockData({
+          marketId: item.marketId,
+          name: item.marketName,
+          marketName: item.marketName,
+          symbol: item.marketSymbol,
+          imageUrl: item.marketImgUrl,
+          price: d.tradePrice,
+          changeRate: d.changeRate,
+          changePrice: d.changePrice,
+          prevClose: d.prevClose,
+          accVolume: d.accVolume,
+        })
+
+        // 3) 페이지 이동
+        navigate('/group/invest/trading', {
+          state: {
+            stock: {
+              marketId: item.marketId,
+              symbol: item.marketSymbol,
+              name: item.marketName,
+              imageUrl: item.marketImgUrl,
+              isHold: true,
+            },
+          },
+        })
+      }
+    } catch (err) {
+      console.error('Error loading stock info:', err)
+    }
+  }
+
   if (loading) return <Loading />
   return (
     <>
@@ -55,21 +95,7 @@ const GroupHoldingsPage = () => {
           {holdingList.length > 0 ? (
             <List>
               {holdingList.map((item) => (
-                <Item
-                  key={item.marketId}
-                  onClick={() => {
-                    console.log('클릭한 종목:', item)
-
-                    setStockData({
-                      marketId: item.marketId,
-                      name: item.marketName,
-                      marketName: item.marketName,
-                      symbol: item.marketSymbol,
-                      imageUrl: item.marketImgUrl,
-                    })
-                    navigate('/group/invest/trading')
-                  }}
-                >
+                <Item key={item.marketId} onClick={() => handleItemClick(item)}>
                   <Left>
                     {item.marketImgUrl ? <Img src={item.marketImgUrl} /> : <TempImg />}{' '}
                     <LeftText>
@@ -81,7 +107,7 @@ const GroupHoldingsPage = () => {
                     <Price>{`${item.totalPrice.toLocaleString()}원`}</Price>
                     <ColoredText color={getTextColor(item.pnL)}>
                       {`${item.pnL.toLocaleString()}원`}
-                      {`(${item.pnLRate}%)`}
+                      {`(${item.pnLRate > 0 ? `+${item.pnLRate}` : item.pnLRate}%)`}{' '}
                     </ColoredText>
                   </Right>
                 </Item>

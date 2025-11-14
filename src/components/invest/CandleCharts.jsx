@@ -31,7 +31,7 @@ const ChartContainer = styled.div`
 const CandleShape = ({ x, width, yScale, payload }) => {
   const { open, close, high, low } = payload
   const isUp = close > open
-  const color = isUp ? '#2f6ef8' : '#e74c3c'
+  const color = isUp ? '#e74c3c' : '#2f6ef8'
 
   const highY = yScale(high)
   const lowY = yScale(low)
@@ -55,7 +55,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   const d = payload[0].payload
 
   const isUp = d.close > d.open
-  const color = isUp ? '#2f6ef8' : '#e74c3c'
+  const color = isUp ? '#e74c3c' : '#2f6ef8'
   const date = new Date(d.startTime)
 
   // 'ko-KR' 포맷을 사용하여 배열로 각 구성 요소를 추출
@@ -209,7 +209,7 @@ export default function CandleChart({ chartData, setStartDate = '', setEndDate =
             opacity={0.5}
             shape={(props) => {
               const { x, width, payload } = props
-              const color = payload.close > payload.open ? '#2f6ef8' : '#e74c3c'
+              const color = payload.close > payload.open ? '#e74c3c' : '#2f6ef8'
 
               const baseY = 380 // 거래량 바의 기준선 (아래쪽)
               const maxBarHeight = 60 // 거래량 막대 최대 높이

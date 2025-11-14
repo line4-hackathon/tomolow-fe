@@ -43,10 +43,17 @@ export default function StockCard({ data }) {
       navigate('/invest/trading')
     }
   }
+  let src
+  if(data.imgUrl){
+     src=data.imgUrl
+  } else if(data.imageUrl){
+    src=data.imageUrl
+  }
 
   return (
     <Card>
-      <Logo onClick={() => toTrading()} src={data.imgUrl}/>
+      {src ? <Logo onClick={() => toTrading()} src={src}/>:<LogoCircle onClick={() => toTrading()}/>}
+      
       <TextBox onClick={() => toTrading()}>
         <Name>{data.name}</Name>
         <Detail>
@@ -77,6 +84,15 @@ const Card = styled.div`
   }
 `
 const Logo = styled.img`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 33px;
+  background: var(--Primary-900, #263c54);
+`
+const LogoCircle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
