@@ -22,10 +22,15 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
-const fmt = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
+
+const fmt = n => {
+  if (typeof n !== 'number' || Number.isNaN(n)) return '0'
+  return Math.round(n).toLocaleString('ko-KR')
+}
+
 const safeSym = s => (s || '').trim().toUpperCase()
 
-// ws → sockjs url 변환 (MyAssets와 동일)
+// ws → sockjs url 변환
 const toSockJsUrl = base => {
   try {
     const u = new URL(base)
@@ -56,7 +61,7 @@ export default function HoldInterest() {
   const [error, setError] = useState('')
   const stompRef = useRef(null)
 
-  // 1) 초기 데이터 로드
+  // 1) 초기 데이터 로드 (백엔드 값 그대로 매핑)
   useEffect(() => {
     const load = async () => {
       if (!API_BASE_URL) {
@@ -87,16 +92,23 @@ export default function HoldInterest() {
             const items = json.data?.items ?? []
             setHoldingStocks(
               items.map((it, i) => ({
-                id: it.marketId ?? i, market: it.market ?? '',          // 있으면 넣고 없으면 빈값
-                marketId: it.marketId, marketName: it.marketName ?? '',
-                name: it.name, symbol: safeSym(it.symbol),
-                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0, changeRate: it.pnlRate ?? it.changeRate ?? 0,
-                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                id: it.marketId ?? i,
+                market: it.market ?? '',
+                marketId: it.marketId,
+                marketName: it.marketName ?? '',
+                name: it.name,
+                symbol: safeSym(it.symbol),
+                price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
+                changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                pnlAmount: typeof it.pnlAmount === 'number' ? it.pnlAmount : 0,
+                prevClose: it.prevClose ?? 0,
+                accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
                 tradeTimestamp: it.tradeTimestamp ?? null,
-                interested: true, quantity: it.quantity ?? 0, imageUrl: it.imageUrl ?? null,
+                interested: true,
+                quantity: it.quantity ?? 0,
+                imageUrl: it.imageUrl ?? null,
               })),
-              
             )
           }
         }
@@ -109,14 +121,21 @@ export default function HoldInterest() {
             setInterestList(
               items.map((it, i) => ({
                 id: it.marketId ?? i,
-                market: it.market ?? '', marketId: it.marketId, marketName: it.marketName ?? '',
-                name: it.name, symbol: safeSym(it.symbol),
+                market: it.market ?? '',
+                marketId: it.marketId,
+                marketName: it.marketName ?? '',
+                name: it.name,
+                symbol: safeSym(it.symbol),
                 price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
                 changeRate: it.pnlRate ?? it.changeRate ?? 0,
-                prevClose: it.prevClose ?? 0, accVolume: it.accVolume ?? 0,
+                pnlAmount: typeof it.pnlAmount === 'number' ? it.pnlAmount : 0,
+                prevClose: it.prevClose ?? 0,
+                accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
                 tradeTimestamp: it.tradeTimestamp ?? null,
-                interested: it.interested ?? true, imageUrl: it.imageUrl ?? null, isLiked: true,
+                interested: it.interested ?? true,
+                imageUrl: it.imageUrl ?? null,
+                isLiked: true,
               })),
             )
           }
@@ -140,7 +159,7 @@ export default function HoldInterest() {
     return Array.from(s)
   }, [holdingStocks, interestList])
 
-  // 3) WebSocket (시세만 업데이트)
+  // 3) WebSocket
   useEffect(() => {
     if (symbols.length === 0) return
 
@@ -155,36 +174,57 @@ export default function HoldInterest() {
 
     client.onConnect = () => {
       symbols.forEach(sym => {
-        client.subscribe(`/topic/ticker/${sym}`, frame => {
+        const upperSym = safeSym(sym)
+        const topic = `/topic/ticker/${upperSym}`
+
+        client.subscribe(topic, frame => {
           try {
             const msg = JSON.parse(frame.body || '{}')
-            const ms = safeSym(msg?.symbol)
-            if (!ms) return
 
-            const price = msg.currentPrice ?? msg.price ?? msg.tradePrice
-            const rate = msg.pnlRate ?? msg.changeRate
+            const rawPrice =
+              msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
+            const price =
+              typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
 
+            const rawRate = msg.pnlRate ?? msg.changeRate
+            const rate =
+              typeof rawRate === 'number' ? rawRate : Number(rawRate)
+
+            const rawPnl = msg.pnlAmount
+            const pnlAmount =
+              typeof rawPnl === 'number' ? rawPnl : Number(rawPnl)
+
+            // 보유
             setHoldingStocks(prev =>
               prev.map(it =>
-                safeSym(it.symbol) === ms
+                safeSym(it.symbol) === upperSym
                   ? {
                       ...it,
-                      price: typeof price === 'number' ? price : it.price,
-                      changeRate:
-                        typeof rate === 'number' ? rate : it.changeRate,
+                      price: Number.isFinite(price) ? price : it.price,
+                      changeRate: Number.isFinite(rate)
+                        ? rate
+                        : it.changeRate,
+                      pnlAmount: Number.isFinite(pnlAmount)
+                        ? pnlAmount
+                        : it.pnlAmount,
                     }
                   : it,
               ),
             )
 
+            // 관심
             setInterestList(prev =>
               prev.map(it =>
-                safeSym(it.symbol) === ms
+                safeSym(it.symbol) === upperSym
                   ? {
                       ...it,
-                      price: typeof price === 'number' ? price : it.price,
-                      changeRate:
-                        typeof rate === 'number' ? rate : it.changeRate,
+                      price: Number.isFinite(price) ? price : it.price,
+                      changeRate: Number.isFinite(rate)
+                        ? rate
+                        : it.changeRate,
+                      pnlAmount: Number.isFinite(pnlAmount)
+                        ? pnlAmount
+                        : it.pnlAmount,
                     }
                   : it,
               ),
@@ -201,6 +241,7 @@ export default function HoldInterest() {
     }
 
     client.activate()
+
     return () => {
       try {
         client.deactivate()
@@ -235,7 +276,6 @@ export default function HoldInterest() {
 
   // 6) 렌더링
   const isHoldTab = selectedMenu === 'hold'
-
   const list = isHoldTab
     ? holdingStocks.filter(item => (item.quantity ?? 0) > 0)
     : interestList
@@ -280,7 +320,7 @@ export default function HoldInterest() {
                 onClick={() => handleGoTrading(stock)}
               >
                 <S.Left>
-                  <S.Thumbnail />
+                  <S.Thumbnail $src={stock.imageUrl} />
                   <S.LeftText>
                     <S.StockName>{stock.name}</S.StockName>
                     <S.StockSub>{stock.quantity ?? 0}주</S.StockSub>
@@ -290,7 +330,8 @@ export default function HoldInterest() {
                   <S.Price>
                     {fmt(stock.price)}원
                     <S.Diff $positive={(stock.changeRate ?? 0) >= 0}>
-                      {((stock.changeRate ?? 0) * 100).toFixed(2)}%
+                      {fmt(stock.pnlAmount)}원(
+                      {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                     </S.Diff>
                   </S.Price>
                 </S.HoldRight>
@@ -301,13 +342,15 @@ export default function HoldInterest() {
                 onClick={() => handleGoTrading(stock)}
               >
                 <S.Left>
-                  <S.Thumbnail />
+                  <S.Thumbnail $src={stock.imageUrl} />
                   <S.LeftText>
                     <S.StockName>{stock.name}</S.StockName>
                     <S.LeftBtnText>
                       <S.StockSub>{stock.symbol}</S.StockSub>
                       <S.InterestPriceRow>
-                        <S.InterestPrice $positive={(stock.changeRate ?? 0) >= 0}>
+                        <S.InterestPrice
+                          $positive={(stock.changeRate ?? 0) >= 0}
+                        >
                           {fmt(stock.price)}원 (
                           {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                         </S.InterestPrice>

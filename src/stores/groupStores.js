@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createJSONStorage,persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 const useGroupStore = create(
   persist(
@@ -22,7 +22,7 @@ const useGroupStore = create(
     }),
     {
       // ⭐ 필수: 로컬 스토리지에 저장될 때 사용될 키
-      name: 'stock-data-storage',
+      name: 'group-data-storage',
       // ⭐ 선택: stockData 객체만 저장하도록 필터링 (다른 액션 함수는 제외)
       // 🔑 핵심: storage 옵션에 Session Storage를 지정합니다.
       storage: createJSONStorage(() => sessionStorage),

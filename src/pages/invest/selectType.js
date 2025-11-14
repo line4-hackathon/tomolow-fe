@@ -21,3 +21,10 @@ export const PriceTypes={
   CUSTOM:"지정가",
   MARKET:"시장가",
 }
+export const LineDateTypes = {
+  WEEK: "1W",
+  MONTH: "1M",
+  THREEMONTH: "3M",
+  SIXMONTH:"6M",
+  YEAR: "1Y",
+};

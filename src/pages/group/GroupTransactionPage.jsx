@@ -22,8 +22,12 @@ const GroupTransactionPage = () => {
     end: getTodayDate(),
   })
   // 요약 정보
-  const [summary, setSummary] = useState({})
-  // 거래내역 리스트
+  const [summary, setSummary] = useState({
+    profit: 0,
+    profitRate: 0,
+    totalBuy: 0,
+    totalSell: 0,
+  })
   const [transactions, setTransactions] = useState([])
   const { groupId } = useParams()
 
@@ -34,7 +38,8 @@ const GroupTransactionPage = () => {
   const getTransactions = async () => {
     try {
       let url = ''
-      if (range.start === '2025-01-01' && range.end === getTodayDate()) {
+      const isDefaultRange = range.start === '2025-01-01' && range.end === getTodayDate()
+      if (isDefaultRange) {
         url = `${apiUrl}/api/group/${groupId}/transactions/history/default`
       } else {
         url = `${apiUrl}/api/group/${groupId}/transactions/history?startDate=${range.start}&endDate=${range.end}`
@@ -47,6 +52,23 @@ const GroupTransactionPage = () => {
       if (!res.data.success) return
 
       const data = res.data.data
+
+      // 첫 거래일을 시작일로 자동 세팅
+      if (isDefaultRange) {
+        const allDays = data.days
+
+        if (allDays.length > 0) {
+          const firstTradeDate = allDays[allDays.length - 1].date
+
+          if (firstTradeDate !== range.start) {
+            setRange({
+              start: firstTradeDate,
+              end: getTodayDate(),
+            })
+            return
+          }
+        }
+      }
 
       // 받은 데이터 포맷팅
       const formattedTransactions = data.days.flatMap((day) =>

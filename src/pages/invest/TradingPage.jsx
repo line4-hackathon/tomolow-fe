@@ -22,25 +22,28 @@ export default function InvestTradingPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { state } = location
-  const [toastVisible, setToastVisible] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
+  const { stockData, setStockData } = useStockStore()
+  const { groupData } = useGroupStore()
+  const type = useType()
   const clientRef = useRef(null)
   const subscriptionRef = useRef(null)
   const { selectedMenu: selectedDate, handleSelect: setSelectedDate } = useSelect('DAY')
-  const [chartData, setChartData] = useState([])
   const { selectedMenu: selectedEtc, handleSelect: setSelectedEtc } = useSelect('ORDER')
+  const [chartData, setChartData] = useState([])
   const [etcData, setEtcData] = useState([])
   const [orderData, setOrderData] = useState([])
-  const { stockData, setStockData } = useStockStore()
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const [isHold, setIsHold] = useState(false)
-  const type = useType()
-  const { groupData } = useGroupStore()
+  const [isCandle, setIsCandle] = useState(true)
+  
+  
 
   // 토스트 닫기 핸들러: 토스트를 숨기도록 상태 변경
   const handleCloseToast = () => {
     setToastVisible(false)
   }
- //토스트 값 확인
+  //토스트 값 확인
   useEffect(() => {
     // 라우팅 state를 통해 메시지가 전달되었는지 확인
     if (state && state.toastMessage) {
@@ -138,12 +141,66 @@ export default function InvestTradingPage() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []) // 의존성 배열이 빈 배열이므로 마운트 시 한 번만 실행
 
-  //주식 데이터 얻기
+  //차트 데이터 얻기
   useEffect(() => {
     if (!stockData.symbol) {
       console.log('심볼 없음')
       return
     }
+    const chartDataGet = async () => {
+      let param
+      let apiUrl
+      if(isCandle){
+        switch (selectedDate) {
+          case 'DAY':
+            param = await 'D1'
+            break
+          case 'WEEK':
+            param = await 'W1'
+            break
+          case 'MONTH':
+            param = await 'M1'
+            break
+          case 'THREEMONTH':
+            param = await 'M3'
+            break
+          case 'YEAR':
+            param = await 'Y1'
+            break
+        }
+        apiUrl=`/api/candles/${stockData.symbol}?tf=${param}`
+      } else{
+        switch (selectedDate) {
+          case 'WEEK':
+            param = await 7
+            break
+          case 'MONTH':
+            param = await 30
+            break
+          case 'THREEMONTH':
+            param = await 90
+            break
+          case 'SIXMONTH':
+            param = await 180
+            break
+          case 'YEAR':
+            param = await 365
+            break
+        }
+        apiUrl=`/api/candles/${stockData.symbol}?tf=D1&limit=${param}`
+      }
+      
+      try {
+        const res = await APIService.private.get(apiUrl)
+        setChartData(res.data)
+      } catch (error) {
+        console.log('차트 조회 실패')
+      }
+    }
+    chartDataGet()
+  }, [selectedDate,stockData.symbol,isCandle])
+  //스톡 인포 얻기
+  useEffect(()=>{
     const stockInfoGet=async ()=>{
       try{
         const res=await APIService.private.get(`store/api/ticker/${stockData.symbol}`)
@@ -152,32 +209,10 @@ export default function InvestTradingPage() {
         console.log("스톡 인포 얻기 실패")
       }
     }
-    const chartDataGet = async () => {
-      let param
-      switch (selectedDate) {
-        case 'DAY':
-          param = await 'D1'
-          break
-        case 'WEEK':
-          param = await 'W1'
-          break
-        case 'MONTH':
-          param = await 'M1'
-          break
-        case 'THREEMONTH':
-          param = await 'M3'
-          break
-        case 'YEAR':
-          param = await 'Y1'
-          break
-      }
-      try {
-        const res = await APIService.private.get(`/api/candles/${stockData.symbol}?tf=${param}`)
-        setChartData(res.data)
-      } catch (error) {
-        console.log('차트 조회 실패')
-      }
-    }
+    stockInfoGet()
+  },[stockData.symbol])
+  //주식 보유 여부 조회
+  useEffect(()=>{
     const holdingDataGet = async () => {
       try {
         const res = await APIService.private.get(`/api/market/${stockData.marketId}/holding`)
@@ -186,10 +221,8 @@ export default function InvestTradingPage() {
         console.log('보유 여부 조회 실패')
       }
     }
-    stockInfoGet()
-    chartDataGet()
     holdingDataGet()
-  }, [selectedDate, stockData.symbol, stockData.marketId])
+  },[stockData.marketId])
 
   //기타 데이터 얻기
   useEffect(() => {
@@ -211,7 +244,7 @@ export default function InvestTradingPage() {
             break
           case 'AI':
             res = await APIService.private.post(`/api/market/${stockData.marketId}/analysis`, {
-              data: { currentPrice: stockData.price, previousClosePrice: stockData.prevClose },
+             currentPrice: stockData.price, previousClosePrice: stockData.changePrice
             })
             break
         }
@@ -228,24 +261,26 @@ export default function InvestTradingPage() {
   }, [selectedEtc])
 
   const isPurchase = (p) => {
-        if(type=='group'){
+    if (type == 'group') {
       navigate('/group/invest/purchase', {
-      state: {
-        purchase: p,
-      },
-    })
-    } else{
+        state: {
+          purchase: p,
+        },
+      })
+    } else {
       navigate('/invest/purchase', {
-      state: {
-        purchase: p,
-      },
-    })
+        state: {
+          purchase: p,
+        },
+      })
     }
   }
 
   return (
     <Page>
-      <InvestHeader path='/invest/search' />
+      <InvestHeader
+        path={type === 'group' ? `/group/home/${groupData.groupId}` : `/invest/search`}
+      />
       <Contents>
         <StockInfo />
         <Chart
@@ -253,6 +288,8 @@ export default function InvestTradingPage() {
           setSelectedDate={setSelectedDate}
           symbol={stockData.symbol}
           chartData={chartData}
+          isCandle={isCandle}
+          setIsCandle={setIsCandle}
         />
         <Etc
           selectedMenu={selectedEtc}
