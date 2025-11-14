@@ -1,19 +1,38 @@
+// src/components/~~/CashLackModal.jsx
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
 import GrayButton from '../common/GrayButton'
 import NavyButton from '../common/NavyButton'
 
-export default function CashLackModal({setIsModal}) {
+export default function CashLackModal({ setIsModal }) {
+  const navigate = useNavigate()
+
+  const handleChargeClick = () => {
+    setIsModal(false)        
+    navigate('/mypage/charge') // 충전 페이지로 이동
+  }
 
   return (
-  <BackGround>
-    <Modal>
+    <BackGround>
+      <Modal>
         <a>현금이 부족해요</a>
         <ButtonBox>
-            <GrayButton name="닫기" width="120px" height="40px" onClick={()=>setIsModal(false)}/>
-            <NavyButton name="충전하기" width="120px" height="40px"/>
+          <GrayButton
+            name="닫기"
+            width="120px"
+            height="40px"
+            onClick={() => setIsModal(false)}
+          />
+          <NavyButton
+            name="충전하기"
+            width="120px"
+            height="40px"
+            onClick={handleChargeClick}
+          />
         </ButtonBox>
-    </Modal>
-  </BackGround>)
+      </Modal>
+    </BackGround>
+  )
 }
 
 const BackGround = styled.div`
@@ -28,6 +47,7 @@ const BackGround = styled.div`
   left: 0;
   z-index: 1000;
 `
+
 const Modal = styled.div`
   display: flex;
   flex-direction: column;
@@ -37,21 +57,17 @@ const Modal = styled.div`
   height: 136px;
   gap: var(--Spacing-XL, 24px);
   border-radius: var(--Radius-M, 12px);
-background: var(--Neutral-0, #FFF);
-
-/* Bottom */
-box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  background: var(--Neutral-0, #fff);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 
   color: var(--Neutral-900, #333);
   text-align: center;
-
-  /* Body-Medium */
   font-family: Inter;
   font-size: 16px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
 `
+
 const ButtonBox = styled.div`
   display: flex;
   gap: 12px;
