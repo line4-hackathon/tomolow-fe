@@ -246,7 +246,7 @@ const StockCardBox = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-bottom: 15px;
+  padding-bottom: 35px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
