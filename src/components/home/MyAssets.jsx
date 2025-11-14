@@ -356,6 +356,6 @@ const ProfitLabel = styled.span`
   color: #5d5d5d;
 `
 const ProfitValue = styled.span`
-  color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
+  color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#0084FE')};
   font-size: 16px;
 `
