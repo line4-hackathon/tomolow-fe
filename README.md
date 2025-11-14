@@ -98,7 +98,7 @@ src
  ┃ ┣ font
  ┃ ┣ icons
  ┃ ┗ images
- ┣ components
+ ┣ components       // 버튼, 카드 등 재사용 가능한 UI 조각 모음
  ┃ ┣ common
  ┃ ┣ group
  ┃ ┣ home
@@ -107,13 +107,13 @@ src
  ┃ ┣ learning
  ┃ ┣ my
  ┃ ┗ signup
- ┣ contexts
+ ┣ contexts        // 전역 상태 관리를 위한 API Context 폴더
  ┃ ┣ AuthContext.jsx
  ┃ ┗ TypeContext.jsx
- ┣ hooks
+ ┣ hooks          // 커스텀 훅들을 담아 놓은 폴더
  ┃ ┣ select.js
  ┃ ┗ useModal.jsx
- ┣ pages
+ ┣ pages          // 전체 페이지 단위의 컴포넌트
  ┃ ┣ group
  ┃ ┃ ┣ GroupCreatePage.jsx
  ┃ ┃ ┣ GroupHoldingsPage.jsx
@@ -145,10 +145,10 @@ src
  ┃ ┃ ┣ LoginPage.jsx
  ┃ ┃ ┣ SignupPage1.jsx
  ┃ ┃ ┗ SignupPage2.jsx
- ┣ stores
+ ┣ stores          // Zustand 상태 관리 폴더 
  ┃ ┣ groupStores.js
  ┃ ┗ stockStores.js
- ┣ styles
+ ┣ styles          // 전역 스타일 파일
  ┣ App.css
  ┣ App.jsx
  ┣ index.css
