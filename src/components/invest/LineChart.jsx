@@ -151,7 +151,7 @@ const StockLineChart = ({ chartData }) => {
           <Line
             type='monotone'
             dataKey='close'
-            stroke='#007aff'
+            stroke='#4880AF'
             strokeWidth={3}
             dot={<CustomDot maxClose={maxClose} minClose={minClose} />}
             activeDot={{ r: 6 }}
