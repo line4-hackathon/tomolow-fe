@@ -15,7 +15,7 @@ import { APIService } from '@/pages/invest/api'
 // 환경값
 const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
 
-const toSockJsUrl = base => {
+const toSockJsUrl = (base) => {
   try {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) {
@@ -29,7 +29,7 @@ const toSockJsUrl = base => {
   }
 }
 
-const safeSym = s => (s || '').trim().toUpperCase()
+const safeSym = (s) => (s || '').trim().toUpperCase()
 
 export default function InvestHeader({ path = -1 }) {
   const { stockData } = useStockStore()
@@ -63,18 +63,15 @@ export default function InvestHeader({ path = -1 }) {
     client.onConnect = () => {
       const topic = `/topic/ticker/${symbol}`
 
-      client.subscribe(topic, frame => {
+      client.subscribe(topic, (frame) => {
         try {
           const msg = JSON.parse(frame.body || '{}')
 
-          const rawPrice =
-            msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
-          const price =
-            typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
+          const rawPrice = msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
+          const price = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
 
           const rawRate = msg.changeRate ?? msg.pnlRate
-          const rate =
-            typeof rawRate === 'number' ? rawRate : Number(rawRate)
+          const rate = typeof rawRate === 'number' ? rawRate : Number(rawRate)
 
           if (Number.isFinite(price)) setLivePrice(price)
           if (Number.isFinite(rate)) setLiveRate(rate)
@@ -84,7 +81,7 @@ export default function InvestHeader({ path = -1 }) {
       })
     }
 
-    client.onStompError = f => {
+    client.onStompError = (f) => {
       console.error('STOMP error (InvestHeader) >>>', f)
     }
 
@@ -99,18 +96,15 @@ export default function InvestHeader({ path = -1 }) {
 
   const interest = async () => {
     try {
-      await APIService.private.post(
-        `/api/interests/markets/${stockData.marketId}/toggle`,
-      )
-      setIsInterest(prev => !prev)
+      await APIService.private.post(`/api/interests/markets/${stockData.marketId}/toggle`)
+      setIsInterest((prev) => !prev)
     } catch (error) {
       console.log('관심 등록/취소 실패', error)
     }
   }
 
   const priceToShow = livePrice ?? 0
-  const rateToShow =
-    typeof liveRate === 'number' && !Number.isNaN(liveRate) ? liveRate : 0
+  const rateToShow = typeof liveRate === 'number' && !Number.isNaN(liveRate) ? liveRate : 0
   const rateText = (rateToShow * 100).toFixed(2)
 
   return (
@@ -118,15 +112,11 @@ export default function InvestHeader({ path = -1 }) {
       <BackButton onClick={() => navigate(path)} />
       <HeaderInfo>
         <HeadName>{stockData.name}</HeadName>
-        <HeadPrice>
+        <HeadPrice isNegative={rateToShow < 0}>
           {priceToShow.toLocaleString('ko-KR')}원({rateText}%)
         </HeadPrice>
       </HeaderInfo>
-      {isInterest ? (
-        <RedHeart onClick={interest} />
-      ) : (
-        <GrayHeart onClick={interest} />
-      )}
+      {isInterest ? <RedHeart onClick={interest} /> : <GrayHeart onClick={interest} />}
     </HeaderBar>
   )
 }
@@ -156,7 +146,7 @@ const HeadName = styled.div`
   line-height: 24px;
 `
 const HeadPrice = styled.div`
-  color: var(--Alert-Red, #ff2e4e);
+  color: ${({ isNegative }) => (isNegative ? '#0084FE' : 'var(--Alert-Red, #ff2e4e)')};
   font-family: Inter;
   font-size: 12px;
   font-weight: 400;

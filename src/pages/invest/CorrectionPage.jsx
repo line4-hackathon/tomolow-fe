@@ -16,12 +16,11 @@ export default function InvestCorrectionPage() {
   const { stockData } = useStockStore()
   const { groupData } = useGroupStore()
   const [price, setPrice] = useState(stockData.price)
-  const [myCash,setMyCash]=useState(0);
-  const location=useLocation();
-  const {state}=location
-  const orderId=sessionStorage.getItem('orderId')
-  const type=useType();
-
+  const [myCash, setMyCash] = useState(0)
+  const location = useLocation()
+  const { state } = location
+  const orderId = sessionStorage.getItem('orderId')
+  const type = useType()
 
   useEffect(() => {
     let purchaseUrl
@@ -34,7 +33,7 @@ export default function InvestCorrectionPage() {
       try {
         const res = await APIService.private.get(purchaseUrl)
 
-        setMyCash(res.data.userCashBalance)
+        setMyCash(type === 'group' ? res.data.userGroupCashBalance : res.data.userCashBalance)
       } catch (error) {
         console.log('현금 조회 실패')
       }
@@ -54,7 +53,7 @@ export default function InvestCorrectionPage() {
       <Bar>
         <BlackButton name='정정하기' width='343px' height='56px' onClick={() => setIsModal(true)} />
       </Bar>
-      {isModal && <CorrectionModal setIsModal={setIsModal} price={price} orderId={orderId}/>}
+      {isModal && <CorrectionModal setIsModal={setIsModal} price={price} orderId={orderId} />}
     </Page>
   )
 }

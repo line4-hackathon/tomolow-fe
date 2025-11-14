@@ -4,32 +4,42 @@ import BlackButton from './BlackButton'
 import { useNavigate } from 'react-router-dom'
 import { APIService } from '@/pages/invest/api'
 import { useType } from '@/contexts/TypeContext'
+import useGroupStore from '@/stores/groupStores'
 
 export default function CorrectionModal({ setIsModal, price, orderId }) {
   const navigate = useNavigate()
-  const type=useType();
+  const type = useType()
+  const { groupData } = useGroupStore()
 
   const correction = async () => {
     try {
-      const res = await APIService.private.put(`/api/orders/pending`, {
-        orderId: orderId,
+      let url
+
+      if (type === 'group') {
+        // 그룹 API 경로
+        url = `/api/group/${groupData.groupId}/pending`
+      } else {
+        // 개인 API 경로
+        url = `/api/orders/pending`
+      }
+
+      const res = await APIService.private.put(url, {
+        orderId,
         price: parseInt(price),
       })
-      if (type == 'group') {
+
+      // 성공 후 이동
+      if (type === 'group') {
         navigate('/group/invest/trading', {
-        state: {
-          toastMessage: '주문 정정이 완료됐어요',
-        },
-      })
+          state: { toastMessage: '주문 정정이 완료됐어요' },
+        })
       } else {
         navigate('/invest/trading', {
-        state: {
-          toastMessage: '주문 정정이 완료됐어요',
-        },
-      })
+          state: { toastMessage: '주문 정정이 완료됐어요' },
+        })
       }
     } catch (error) {
-      console.log('주문 정정 실패')
+      console.log('주문 정정 실패:', error)
     }
   }
 
