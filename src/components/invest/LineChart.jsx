@@ -27,7 +27,7 @@ const CustomDot = ({ cx, cy, payload, maxClose, minClose }) => {
         cx={cx}
         cy={cy}
         r={5}
-        fill="#007aff" // 🔴 최고가 - 빨간 점
+        fill="#ff3b30" // 🔴 최고가 - 빨간 점
         stroke="#fff"
         strokeWidth={1.5}
       />
@@ -39,7 +39,7 @@ const CustomDot = ({ cx, cy, payload, maxClose, minClose }) => {
         cx={cx}
         cy={cy}
         r={5}
-        fill="#ff3b30" // 🔵 최저가 - 파란 점
+        fill="#007aff" //007aff 🔵 최저가 - 파란 점
         stroke="#fff"
         strokeWidth={1.5}
       />

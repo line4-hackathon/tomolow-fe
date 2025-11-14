@@ -19,6 +19,7 @@ export default function InvestSearchPage() {
   const [searchName, setSearchName] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState(searchName)
   const type=useType();
+  //랭킹 데이터 얻기
   useEffect(() => {
     let param = false
     switch (selectedMenu) {
@@ -67,7 +68,6 @@ export default function InvestSearchPage() {
       InteresSearch()
     }
   }, [selectedMenu, debouncedSearch])
-
   useEffect(() => {
     //디바운싱 검색어 변환 및 적용
     const handler = setTimeout(() => {
@@ -78,7 +78,6 @@ export default function InvestSearchPage() {
       clearTimeout(handler) // 입력이 계속되면 이전 타이머 취소
     }
   }, [searchName])
-
   let stockUI
   if (stockData) {
     if (stockData.length) {
