@@ -208,6 +208,32 @@ const CancelButton = styled.button`
   border-radius: var(--Radius-S, 8px);
   background: var(--Neutral-100, #e7e7e7);
   cursor: pointer;
+
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;
+    transform: scale(0.98);
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 `
 
 const EditButton = styled.button`
@@ -221,4 +247,30 @@ const EditButton = styled.button`
   border-radius: var(--Radius-S, 8px);
   background: var(--Primary-500, #4880af);
   cursor: pointer;
+
+  transition:
+    background-color 0.1s ease,
+    transform 0.1s ease,
+    font-size 0.1s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    border-radius: 12px;
+    transition: background-color 0.1s ease;
+  }
+
+  &:active {
+    font-size: 0.95em;
+    transform: scale(0.98);
+    &::before {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 `
