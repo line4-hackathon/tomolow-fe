@@ -159,7 +159,7 @@ const Img = styled.img`
   width: 48px;
   height: 48px;
   border: none;
-  border-radius: 100;
+  border-radius: 33px;
 `
 const Left = styled.div`
   display: flex;
