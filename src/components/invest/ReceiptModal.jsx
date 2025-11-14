@@ -40,16 +40,16 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price, mar
           })
           if (type == 'group') {
             navigate('/group/invest/trading', {
-            state: {
-              toastMessage: '매수 주문이 완료됐어요',
-            },
-          })
+              state: {
+                toastMessage: '매수 주문이 완료됐어요',
+              },
+            })
           } else {
             navigate('/invest/trading', {
-            state: {
-              toastMessage: '매수 주문이 완료됐어요',
-            },
-          })
+              state: {
+                toastMessage: '매수 주문이 완료됐어요',
+              },
+            })
           }
         } catch (error) {
           console.log('매수 실패')
@@ -64,11 +64,20 @@ export default function ReceiptModal({ setIsModal, isPurchase, count, price, mar
             quantity: parseInt(count),
             price: parseInt(price),
           })
-          navigate('/invest/trading', {
-            state: {
-              toastMessage: '매도 주문이 완료됐어요',
-            },
-          })
+
+          if (type === 'group') {
+            navigate('/group/invest/trading', {
+              state: {
+                toastMessage: '매도 주문이 완료됐어요',
+              },
+            })
+          } else {
+            navigate('/invest/trading', {
+              state: {
+                toastMessage: '매도 주문이 완료됐어요',
+              },
+            })
+          }
         } catch (error) {
           console.log('매도 실패')
           return

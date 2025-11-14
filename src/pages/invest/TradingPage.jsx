@@ -199,6 +199,19 @@ export default function InvestTradingPage() {
     chartDataGet()
   }, [selectedDate, stockData.symbol, isCandle])
 
+  useEffect(() => {
+    if (state?.stock?.isHold === true) {
+      setIsHold(true)
+      return
+    }
+
+    // 그 외 경우에만 API 실행
+    if (stockData.marketId) {
+      APIService.private
+        .get(`/api/market/${stockData.marketId}/holding`)
+        .then((res) => setIsHold(res.data.holding))
+    }
+  }, [state, stockData.marketId])
   //스톡 인포 얻기
   useEffect(() => {
     if (!stockData.symbol) {
@@ -212,7 +225,7 @@ export default function InvestTradingPage() {
 
         setStockData((prev) => ({
           ...prev,
-          tradePrice: res.data.tradePrice,
+          price: res.data.tradePrice,
           changeRate: res.data.changeRate,
           changePrice: res.data.changePrice,
           prevClose: res.data.prevClose,
@@ -227,19 +240,6 @@ export default function InvestTradingPage() {
 
     stockInfoGet()
   }, [stockData.symbol])
-  //주식 보유 여부 조회
-  useEffect(() => {
-    if (!stockData.marketId) return
-    const holdingDataGet = async () => {
-      try {
-        const res = await APIService.private.get(`/api/market/${stockData.marketId}/holding`)
-        setIsHold(res.data.holding)
-      } catch (error) {
-        console.log('보유 여부 조회 실패')
-      }
-    }
-    holdingDataGet()
-  }, [stockData.marketId])
 
   //기타 데이터 얻기
   useEffect(() => {

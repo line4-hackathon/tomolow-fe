@@ -33,7 +33,7 @@ const useStockStore = create(
             marketId: '',
             marketName: '',
             name: '',
-            tradePrice: '',
+            price: '',
             changeRate: '',
             changePrice: '',
             prevClose: '',
