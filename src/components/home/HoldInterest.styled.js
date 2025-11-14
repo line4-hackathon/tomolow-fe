@@ -25,12 +25,9 @@ S.LeftBox = styled.div`
   align-items: center;
   gap: 8px;
 `
-
-S.IconBox = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: #263c54;
+S.MoneyIcon = styled.img`
+    width: 28px;
+    height: 28px;
 `
 
 S.Label = styled.div`
