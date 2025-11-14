@@ -28,6 +28,7 @@ import LearningPage from './pages/learning/ChatbotPage'
 import InvestHoldingPage from './pages/learning/HoldingStockPage'
 import SelectDatePage from './pages/learning/SelectDatePage'
 import SaveChatPage from './pages/learning/SaveChatPage'
+import RealtimeRanking from './pages/invest/liverank'
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
       { path: 'trading/:market', element: <InvestTradingPage /> },
       { path: 'purchase', element: <InvestPurchasePage /> },
       { path: 'correction', element: <InvestCorrectionPage /> },
+            { path: 'live', element: <RealtimeRanking /> },
     ],
   },
   {
