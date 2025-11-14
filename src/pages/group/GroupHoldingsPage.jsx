@@ -107,7 +107,7 @@ const GroupHoldingsPage = () => {
                     <Price>{`${item.totalPrice.toLocaleString()}원`}</Price>
                     <ColoredText color={getTextColor(item.pnL)}>
                       {`${item.pnL.toLocaleString()}원`}
-                      {`(${item.pnLRate}%)`}
+                      {`(${item.pnLRate > 0 ? `+${item.pnLRate}` : item.pnLRate}%)`}{' '}
                     </ColoredText>
                   </Right>
                 </Item>
