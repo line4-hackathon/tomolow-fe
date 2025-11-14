@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import Header from '@/components/common/Header'
+import Header from '@/components/common/FixedHeader'
 import StockInfo from '@/components/invest/stockInfo'
 import Chart from '@/components/invest/chart'
 import useSelect from '@/hooks/select'
@@ -151,7 +151,7 @@ export default function SelectDatePage() {
 
   return (
     <Page>
-      <Header title="학습" />
+      <Header title="학습"  showIcon={true}/>
       <Contents>
         <StockInfo />
 

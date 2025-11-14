@@ -14,7 +14,6 @@ import heartOff from '@/assets/icons/icon-heart-gray.svg'
 import heartBlue from '@/assets/icons/icon-heart-navy.svg'
 import moneycharge from '@/assets/icons/icon-money-recharge.svg'
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const WS_BASE_URL = import.meta.env.VITE_PRICES_WS || 'wss://api.tomolow.store/ws'
 
@@ -23,11 +22,16 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
-const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '0')
-const safeSym = (s) => (s || '').trim().toUpperCase()
 
-// ws → sockjs url 변환 (MyAssets와 동일)
-const toSockJsUrl = (base) => {
+const fmt = n => {
+  if (typeof n !== 'number' || Number.isNaN(n)) return '0'
+  return Math.round(n).toLocaleString('ko-KR')
+}
+
+const safeSym = s => (s || '').trim().toUpperCase()
+
+// ws → sockjs url 변환
+const toSockJsUrl = base => {
   try {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) {
@@ -57,7 +61,7 @@ export default function HoldInterest() {
   const [error, setError] = useState('')
   const stompRef = useRef(null)
 
-  // 1) 초기 데이터 로드
+  // 1) 초기 데이터 로드 (백엔드 값 그대로 매핑)
   useEffect(() => {
     const load = async () => {
       if (!API_BASE_URL) {
@@ -89,13 +93,14 @@ export default function HoldInterest() {
             setHoldingStocks(
               items.map((it, i) => ({
                 id: it.marketId ?? i,
-                market: it.market ?? '', // 있으면 넣고 없으면 빈값
+                market: it.market ?? '',
                 marketId: it.marketId,
                 marketName: it.marketName ?? '',
                 name: it.name,
                 symbol: safeSym(it.symbol),
                 price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
                 changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                pnlAmount: typeof it.pnlAmount === 'number' ? it.pnlAmount : 0,
                 prevClose: it.prevClose ?? 0,
                 accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
@@ -123,6 +128,7 @@ export default function HoldInterest() {
                 symbol: safeSym(it.symbol),
                 price: it.currentPrice ?? it.price ?? it.tradePrice ?? 0,
                 changeRate: it.pnlRate ?? it.changeRate ?? 0,
+                pnlAmount: typeof it.pnlAmount === 'number' ? it.pnlAmount : 0,
                 prevClose: it.prevClose ?? 0,
                 accVolume: it.accVolume ?? 0,
                 accTradePrice24h: it.accTradePrice24h ?? 0,
@@ -153,7 +159,7 @@ export default function HoldInterest() {
     return Array.from(s)
   }, [holdingStocks, interestList])
 
-  // 3) WebSocket (시세만 업데이트)
+  // 3) WebSocket
   useEffect(() => {
     if (symbols.length === 0) return
 
@@ -167,35 +173,58 @@ export default function HoldInterest() {
     stompRef.current = client
 
     client.onConnect = () => {
-      symbols.forEach((sym) => {
-        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
+      symbols.forEach(sym => {
+        const upperSym = safeSym(sym)
+        const topic = `/topic/ticker/${upperSym}`
+
+        client.subscribe(topic, frame => {
           try {
             const msg = JSON.parse(frame.body || '{}')
-            const ms = safeSym(msg?.symbol)
-            if (!ms) return
 
-            const price = msg.currentPrice ?? msg.price ?? msg.tradePrice
-            const rate = msg.pnlRate ?? msg.changeRate
+            const rawPrice =
+              msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
+            const price =
+              typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
 
-            setHoldingStocks((prev) =>
-              prev.map((it) =>
-                safeSym(it.symbol) === ms
+            const rawRate = msg.pnlRate ?? msg.changeRate
+            const rate =
+              typeof rawRate === 'number' ? rawRate : Number(rawRate)
+
+            const rawPnl = msg.pnlAmount
+            const pnlAmount =
+              typeof rawPnl === 'number' ? rawPnl : Number(rawPnl)
+
+            // 보유
+            setHoldingStocks(prev =>
+              prev.map(it =>
+                safeSym(it.symbol) === upperSym
                   ? {
                       ...it,
-                      price: typeof price === 'number' ? price : it.price,
-                      changeRate: typeof rate === 'number' ? rate : it.changeRate,
+                      price: Number.isFinite(price) ? price : it.price,
+                      changeRate: Number.isFinite(rate)
+                        ? rate
+                        : it.changeRate,
+                      pnlAmount: Number.isFinite(pnlAmount)
+                        ? pnlAmount
+                        : it.pnlAmount,
                     }
                   : it,
               ),
             )
 
-            setInterestList((prev) =>
-              prev.map((it) =>
-                safeSym(it.symbol) === ms
+            // 관심
+            setInterestList(prev =>
+              prev.map(it =>
+                safeSym(it.symbol) === upperSym
                   ? {
                       ...it,
-                      price: typeof price === 'number' ? price : it.price,
-                      changeRate: typeof rate === 'number' ? rate : it.changeRate,
+                      price: Number.isFinite(price) ? price : it.price,
+                      changeRate: Number.isFinite(rate)
+                        ? rate
+                        : it.changeRate,
+                      pnlAmount: Number.isFinite(pnlAmount)
+                        ? pnlAmount
+                        : it.pnlAmount,
                     }
                   : it,
               ),
@@ -212,6 +241,7 @@ export default function HoldInterest() {
     }
 
     client.activate()
+
     return () => {
       try {
         client.deactivate()
@@ -244,8 +274,9 @@ export default function HoldInterest() {
 
   // 6) 렌더링
   const isHoldTab = selectedMenu === 'hold'
-
-  const list = isHoldTab ? holdingStocks.filter((item) => (item.quantity ?? 0) > 0) : interestList
+  const list = isHoldTab
+    ? holdingStocks.filter(item => (item.quantity ?? 0) > 0)
+    : interestList
 
   return (
     <S.Container>
@@ -284,7 +315,7 @@ export default function HoldInterest() {
                 onClick={() => handleGoTrading(stock)}
               >
                 <S.Left>
-                  <S.Thumbnail />
+                  <S.Thumbnail $src={stock.imageUrl} />
                   <S.LeftText>
                     <S.StockName>{stock.name}</S.StockName>
                     <S.StockSub>{stock.quantity ?? 0}주</S.StockSub>
@@ -294,7 +325,8 @@ export default function HoldInterest() {
                   <S.Price>
                     {fmt(stock.price)}원
                     <S.Diff $positive={(stock.changeRate ?? 0) >= 0}>
-                      {((stock.changeRate ?? 0) * 100).toFixed(2)}%
+                      {fmt(stock.pnlAmount)}원(
+                      {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                     </S.Diff>
                   </S.Price>
                 </S.HoldRight>
@@ -305,14 +337,17 @@ export default function HoldInterest() {
                 onClick={() => handleGoTrading(stock)}
               >
                 <S.Left>
-                  <S.Thumbnail />
+                  <S.Thumbnail $src={stock.imageUrl} />
                   <S.LeftText>
                     <S.StockName>{stock.name}</S.StockName>
                     <S.LeftBtnText>
                       <S.StockSub>{stock.symbol}</S.StockSub>
                       <S.InterestPriceRow>
-                        <S.InterestPrice $positive={(stock.changeRate ?? 0) >= 0}>
-                          {fmt(stock.price)}원 ({((stock.changeRate ?? 0) * 100).toFixed(2)}%)
+                        <S.InterestPrice
+                          $positive={(stock.changeRate ?? 0) >= 0}
+                        >
+                          {fmt(stock.price)}원 (
+                          {((stock.changeRate ?? 0) * 100).toFixed(2)}%)
                         </S.InterestPrice>
                       </S.InterestPriceRow>
                     </S.LeftBtnText>

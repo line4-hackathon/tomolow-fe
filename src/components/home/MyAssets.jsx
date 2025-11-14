@@ -15,7 +15,7 @@ const getAuthHeader = () => {
   const t = getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
-const parseJwt = (token) => {
+const parseJwt = token => {
   try {
     return JSON.parse(atob(token.split('.')[1]))
   } catch {
@@ -23,7 +23,9 @@ const parseJwt = (token) => {
   }
 }
 
-function toSockJsUrl(base) {
+const safeSym = s => (s || '').trim().toUpperCase()
+
+const toSockJsUrl = base => {
   try {
     const u = new URL(base)
     if (u.pathname.endsWith('/ws')) u.pathname = u.pathname.replace(/\/ws$/, '/ws-sockjs')
@@ -34,19 +36,11 @@ function toSockJsUrl(base) {
     return 'https://api.tomolow.store/ws-sockjs'
   }
 }
-
 const fmt = n => {
   if (typeof n !== 'number' || Number.isNaN(n)) return '0'
-  return n.toLocaleString('ko-KR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
+  return Math.round(n).toLocaleString('ko-KR')
 }
-
-const pct = n => {
-  if (typeof n !== 'number' || Number.isNaN(n)) return '0.00'
-  return (n * 100).toFixed(2)
-}
+const pct = n => (typeof n === 'number' ? (n * 100).toFixed(2) : '0.00')
 
 export default function MyAssets({ mode = 'personal', title = '내 자산 현황', assetData }) {
   const [loading, setLoading] = useState(mode !== 'group')
@@ -59,8 +53,10 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
     totalPnlAmount: 0,
     totalPnlRate: 0,
   })
+
   const [items, setItems] = useState([])
 
+  // 1) 초기 로딩
   useEffect(() => {
     if (mode === 'group') {
       setPortfolio({
@@ -73,33 +69,21 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
       setLoading(false)
       return
     }
-    const load = async () => {
-      if (!API_BASE_URL) {
-        setError('서버 주소가 설정되어 있지 않습니다.')
-        setLoading(false)
-        return
-      }
-      if (!getAccessToken()) {
-        setError('로그인 후 이용 가능한 서비스입니다.')
-        setLoading(false)
-        return
-      }
 
+    const load = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/home/assets/my`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+          headers: { ...getAuthHeader() },
         })
-        const text = await res.text()
-        const json = text ? JSON.parse(text) : null
-        console.log('/api/home/assets/my response >>>', json)
+        const json = await res.json()
 
-        if (!res.ok || !json?.success) {
-          setError(json?.message || '자산 정보를 불러오지 못했습니다.')
+        if (!res.ok || !json.success) {
+          setError(json.message || '자산 정보를 불러오지 못했습니다.')
           return
         }
-        const data = json.data || {}
-        setItems(Array.isArray(data.items) ? data.items : [])
+
+        const data = json.data
+        setItems(data.items || [])
         setPortfolio({
           totalInvestment: data.portfolio?.totalInvestment ?? 0,
           cashBalance: data.portfolio?.cashBalance ?? 0,
@@ -108,18 +92,21 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
           totalPnlRate: data.portfolio?.totalPnlRate ?? 0,
         })
       } catch (e) {
-        console.error('/api/home/assets/my error >>>', e)
-        setError('서버 통신 중 오류가 발생했습니다.')
+        console.error('load error >>>', e)
+        setError('서버 통신 오류가 발생했습니다.')
       } finally {
         setLoading(false)
       }
     }
+
     load()
   }, [])
 
-  // 2) 실시간 구독 (STOMP over SockJS)
-  const stompRef = useRef(/** @type {React.MutableRefObject<Client|null>} */ null)
-  const symbols = useMemo(() => items.map((i) => i.symbol).filter(Boolean), [items])
+  // 2) 실시간 구독
+  const stompRef = useRef(null)
+
+  const symbols = useMemo(() => items.map(i => safeSym(i.symbol)).filter(Boolean), [items])
+
   const userId = useMemo(() => {
     const t = getAccessToken()
     const jwt = t ? parseJwt(t) : null
@@ -133,76 +120,102 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
     const client = new Client({
       webSocketFactory: () => new SockJS(sockUrl),
       reconnectDelay: 3000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
       debug: () => {},
     })
     stompRef.current = client
 
+    const registerOnline = () => {
+      if (!client.active || !userId) return
+      client.publish({ destination: '/app/portfolio/online', body: String(userId) })
+    }
+
     client.onConnect = () => {
-      // 각 심볼 시세
-      symbols.forEach((sym) => {
-        client.subscribe(`/topic/ticker/${sym}`, (frame) => {
+      // 심볼 별 가격 실시간
+      symbols.forEach(sym => {
+        const upper = safeSym(sym)
+
+        client.subscribe(`/topic/ticker/${upper}`, frame => {
           try {
             const msg = JSON.parse(frame.body || '{}')
-            setItems((prev) =>
-              prev.map((it) =>
-                it.symbol === msg.symbol
+
+            const rawPrice =
+              msg.tradePrice ?? msg.currentPrice ?? msg.price ?? msg.lastPrice
+            const price = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice)
+
+            const rawAmt = msg.pnlAmount
+            const pnlAmount = typeof rawAmt === 'number' ? rawAmt : Number(rawAmt)
+
+            const rawRate = msg.pnlRate ?? msg.changeRate
+            const pnlRate = typeof rawRate === 'number' ? rawRate : Number(rawRate)
+
+            setItems(prev =>
+              prev.map(it =>
+                safeSym(it.symbol) === upper
                   ? {
                       ...it,
-                      currentPrice:
-                        typeof msg.currentPrice === 'number' ? msg.currentPrice : it.currentPrice,
-                      pnlAmount: typeof msg.pnlAmount === 'number' ? msg.pnlAmount : it.pnlAmount,
-                      pnlRate: typeof msg.pnlRate === 'number' ? msg.pnlRate : it.pnlRate,
-                      imageUrl: msg.imageUrl ?? it.imageUrl,
+                      currentPrice: !isNaN(price) ? price : it.currentPrice,
+                      pnlAmount: !isNaN(pnlAmount) ? pnlAmount : it.pnlAmount,
+                      pnlRate: !isNaN(pnlRate) ? pnlRate : it.pnlRate,
                     }
                   : it,
               ),
             )
-          } catch {}
+          } catch (e) {
+            console.error('ticker parse error >>>', e)
+          }
         })
       })
 
-      if (userId) {
-        client.subscribe(`/topic/portfolio/${userId}`, (frame) => {
-          try {
-            const msg = JSON.parse(frame.body || '{}')
-            setPortfolio((prev) => ({
-              ...prev,
-              totalPnlAmount:
-                typeof msg.totalPnlAmount === 'number' ? msg.totalPnlAmount : prev.totalPnlAmount,
-              totalPnlRate:
-                typeof msg.totalPnlRate === 'number' ? msg.totalPnlRate : prev.totalPnlRate,
-              totalCurrentValue:
-                typeof msg.totalCurrentValue === 'number'
-                  ? msg.totalCurrentValue
-                  : prev.totalCurrentValue,
-            }))
-          } catch {}
-        })
-      }
+      // 온라인 등록
+      registerOnline()
     }
 
-    client.onStompError = () => {}
-    client.onWebSocketError = () => {}
     client.activate()
 
     return () => {
       try {
-        client.deactivate()
+        client.publish({ destination: '/app/portfolio/offline', body: String(userId) })
       } catch {}
+      client.deactivate()
     }
   }, [symbols.join('|'), userId])
 
-  // 파생값
+  // 3) items 가격 변동에 따라 portfolio 자동 재계산 (보유/관심과 동일한 방식)
+  useEffect(() => {
+    if (mode === 'group') return
+    if (!items || items.length === 0) return
+
+    let totalInvestment = 0
+    let totalCurrentValue = 0
+
+    items.forEach(it => {
+      const qty = Number(it.quantity || 0)
+      const avg = Number(it.avgPrice || 0)
+      const cur = Number(it.currentPrice || avg)
+
+      totalInvestment += avg * qty
+      totalCurrentValue += cur * qty
+    })
+
+    const totalPnlAmount = totalCurrentValue - totalInvestment
+    const totalPnlRate = totalInvestment ? totalPnlAmount / totalInvestment : 0
+
+    setPortfolio(prev => ({
+      ...prev,
+      totalInvestment,
+      totalCurrentValue,
+      totalPnlAmount,
+      totalPnlRate,
+    }))
+  }, [items, mode])
+
+  // 4) 화면 표시용 파생 값
   const investAmount = portfolio.totalInvestment
   const cashAmount = portfolio.cashBalance
   const totalAmount = investAmount + cashAmount
-
-  const profitAmount = portfolio.totalPnlAmount
+  const profit = portfolio.totalPnlAmount
   const profitRate = portfolio.totalPnlRate
-  const profitPositive = profitAmount >= 0
-  const profitText = `${profitPositive ? '+' : ''}${fmt(profitAmount)}원(${profitPositive ? '+' : ''}${pct(profitRate)}%)`
+  const profitPositive = profit >= 0
 
   return (
     <Container mode={mode}>
@@ -225,7 +238,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
           <LegendRow>
             <LegendTop>
               <LegendItem>
-                <LegendDot $color='#4880AF' />
+                <LegendDot $color="#4880AF" />
                 <LegendText>투자</LegendText>
               </LegendItem>
               <LegendValue>{fmt(investAmount)}원</LegendValue>
@@ -233,7 +246,7 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
             <LegendBottom>
               <LegendItem>
-                <LegendDot $color='#E8EEF6' />
+                <LegendDot $color="#E8EEF6" />
                 <LegendText>현금</LegendText>
               </LegendItem>
               <LegendValue>{fmt(cashAmount)}원</LegendValue>
@@ -244,7 +257,11 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 
           <ProfitRow>
             <ProfitLabel>투자 손익</ProfitLabel>
-            <ProfitValue $positive={profitPositive}>{profitText}</ProfitValue>
+            <ProfitValue $positive={profitPositive}>
+              {profitPositive ? '+' : ''}
+              {fmt(profit)}원({profitPositive ? '+' : ''}
+              {pct(profitRate)}%)
+            </ProfitValue>
           </ProfitRow>
         </>
       )}
@@ -255,37 +272,29 @@ export default function MyAssets({ mode = 'personal', title = '내 자산 현황
 const Container = styled.section`
   display: flex;
   flex-direction: column;
-  background: var(--Neutral-0, #fff);
-  align-items: flex-start;
+  background: #fff;
   padding: ${({ mode }) =>
     mode === 'group'
-      ? '16px var(--Grid-Margin, 16px) var(--Spacing-L, 16px) var(--Grid-Margin, 16px)'
-      : '32px var(--Grid-Margin, 16px) var(--Spacing-L, 16px) var(--Grid-Margin, 16px)'};
-  gap: var(--Spacing-L, 16px);
-  align-self: stretch;
+      ? '16px 16px 16px 16px'
+      : '32px 16px 16px 16px'};
+  gap: 16px;
 `
 const SectionTitle = styled.h3`
-  color: var(--Neutral-900, #2b5276);
+  color: #2b5276;
   font-size: 20px;
-  line-height: 28px;
-  font-weight: 400;
-  align-self: stretch;
 `
 const LoadingText = styled.p`
   font-size: 14px;
   color: #999;
-  margin-top: 16px;
 `
 const ErrorText = styled.p`
   font-size: 14px;
   color: #ff2e4e;
-  margin-top: 16px;
 `
 const DonutBox = styled.div`
   position: relative;
   display: flex;
   justify-content: center;
-  margin: 8px 0 16px;
   width: 343px;
   height: 172px;
 `
@@ -297,82 +306,56 @@ const CenterLabel = styled.div`
   text-align: center;
 `
 const CenterAsset = styled.div`
-  color: var(--Neutral-900, #333);
-  text-align: center;
+  color: #333;
   font-size: 20px;
-  font-weight: 400;
-  line-height: 28px;
 `
 const CenterValue = styled.div`
-  color: var(--Neutral-900, #333);
+  color: #333;
   font-size: 21px;
   font-weight: 600;
-  line-height: 32px;
 `
 const LegendRow = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--Spacing-S, 8px);
-  align-self: stretch;
+  gap: 8px;
 `
 const LegendTop = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  align-self: stretch;
 `
+const LegendBottom = LegendTop
 const LegendItem = styled.div`
   display: flex;
-  align-items: center;
-  gap: var(--Spacing-S, 8px);
+  gap: 8px;
 `
 const LegendDot = styled.span`
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-right: 8px;
-  background-color: ${({ $color }) => $color};
+  background: ${({ $color }) => $color};
 `
 const LegendText = styled.span`
   font-size: 14px;
-  color: #555555;
-`
-const LegendBottom = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  align-self: stretch;
+  color: #555;
 `
 const LegendValue = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: #333333;
+  color: #333;
 `
 const Divider = styled.div`
-  display: flex;
   width: 343px;
   height: 1px;
-  padding: 0 0.4px;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--Neutral-200, #d1d1d1);
+  background: #d1d1d1;
 `
 const ProfitRow = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  align-self: stretch;
 `
 const ProfitLabel = styled.span`
-  color: var(--Neutral-600, #5d5d5d);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
+  color: #5d5d5d;
 `
 const ProfitValue = styled.span`
   color: ${({ $positive }) => ($positive ? '#ff2e4e' : '#2B5276')};
   font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
 `
